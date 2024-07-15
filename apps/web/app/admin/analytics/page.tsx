@@ -8,6 +8,9 @@ import { Chip, DateRangePicker, Select } from "@nextui-org/react";
 import { SelectItem } from "@nextui-org/react";
 import { useUser } from '@clerk/nextjs';
 import ChartThree from "./ChartThree";
+import WorkloadDistribution from "./workkload";
+import Statusbar from "./statusBar";
+import PriorityBar from "./prioritybar";
 
 export default function Analytics() {
   const { user, isLoaded } = useUser()
@@ -41,7 +44,7 @@ export default function Analytics() {
 
   return (
     <div>
-      <div className="">
+      <div className="pl-8 pr-8">
         <div className="flex flex-row items-end justify-center gap-2 pb-4">
           <div className="flex items-center">
             <DateRangePicker
@@ -95,7 +98,7 @@ export default function Analytics() {
             </Select>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 pt-4">
           <Answered start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} />
           <UnAnswered start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} />
           <TimeSaved start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} />
@@ -107,15 +110,11 @@ export default function Analytics() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 pt-8">
           <ChartThree start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} users={users} />
+          <WorkloadDistribution start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} users={users} />
+          <Statusbar start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} users={users} />
+          <PriorityBar start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} users={users} />
         </div>
       </div>
-      {/* {!loading && (
-         <ChartTwo
-           data={conversationsOverTime}
-           startTime={startDate.toISOString()}
-           endTime={endDate.toISOString()}
-         />
-       )} */}
     </div>
   )
 };

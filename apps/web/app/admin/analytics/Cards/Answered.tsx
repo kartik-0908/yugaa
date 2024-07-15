@@ -268,6 +268,7 @@ export function AverageSession({ start, end }: { start: string, end: string }) {
 }
 export function TransferRate({ start, end, users }: { start: string, end: string, users: React.Key[] }) {
     const payload = {
+        type: 'transfer-rate',
         start,
         end,
         users
@@ -343,6 +344,7 @@ export function TransferRate({ start, end, users }: { start: string, end: string
 
 export function FcrPercentage({ start, end, users }: { start: string, end: string, users: React.Key[] }) {
     const payload = {
+        type: 'fcr-percentage',
         start: start,
         end: end,
         users: users
@@ -411,6 +413,7 @@ export function FcrPercentage({ start, end, users }: { start: string, end: strin
 
 export function MissedConv({ start, end, users }: { start: string, end: string, users: React.Key[] }) {
     const payload = {
+        type:'missed-conv',
         start: start,
         end: end,
         users: users
