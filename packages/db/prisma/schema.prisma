@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AIConversationTicket {
+  id                String              @id
+  shopDomain        String              @default("default")
+  status            String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime
+  AIEscalatedTicket AIEscalatedTicket[]
+  Message           Message[]
+}
+
+model AIEscalatedTicket {
+  id                     String                   @id
+  shopDomain             String
+  customerEmail          String
+  aiConversationTicketId String
+  status                 String                   @default("unassigned")
+  priority               String?
+  category               String?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime
+  subject                String                   @default("Subject")
+  fcr                    Boolean                  @default(false)
+  fcrBy                  String?
+  assignedTo             String?
+  AIConversationTicket   AIConversationTicket     @relation(fields: [aiConversationTicketId], references: [id])
+  AIEscalatedTicketEvent AIEscalatedTicketEvent[]
+}
+
+model AIEscalatedTicketEvent {
+  id                  String            @id
+  aiEscalatedTicketId String
+  changedBy           String?
+  oldStatus           String?
+  newStatus           String?
+  assignedTo          String?
+  assignedBy          String?
+  newPriority         String?
+  newCategory         String?
+  emailId             String?
+  createdAt           DateTime          @default(now())
+  type                EventType
+  AIEscalatedTicket   AIEscalatedTicket @relation(fields: [aiEscalatedTicketId], references: [id])
+  Email               Email?            @relation(fields: [emailId], references: [id])
+}
+
+model ChatbotCustomization {
+  selectedColor          String
+  botName                String
+  greetingMessage        String
+  fontFamily             String
+  fontColor              String
+  widgetPosition         String
+  toneAndStyle           String
+  userGuidance           String
+  positiveReinforcement  String
+  errorHandling          String
+  politeness             String
+  clarityAndSimplicity   String
+  personalization        String
+  responseLength         String
+  clarificationPrompt    String
+  apologyAndRetryAttempt String
+  errorMessageStyle      String
+  logo                   String?
+  created_at             DateTime @default(now())
+  updated_at             DateTime
+  logo_filename          String   @default("default")
+  shopDomain             String   @id
+}
+
+model Customer {
+  id         String  @id
+  shopDomain String
+  firstName  String
+  lastName   String
+  email      String
+  deleted    Boolean @default(false)
+
+  @@unique([shopDomain, email])
+}
+
+model Email {
+  id                     String                   @id
+  createdAt              DateTime                 @default(now())
+  from                   String
+  subject                String
+  text                   String
+  to                     String
+  AIEscalatedTicketEvent AIEscalatedTicketEvent[]
+}
+
+model FeatureRequest {
+  id          String @id
+  shop        String
+  description String
+  details     String
+  category    String
+}
+
+model InvitedUser {
+  id                String   @id
+  email             String   @unique
+  role              String
+  shopDomain        String
+  invitationToken   String   @unique
+  invitationSentAt  DateTime @default(now())
+  invitationExpires DateTime
+  verified          Boolean  @default(false)
+
+  @@unique([shopDomain, email])
+}
+
+model KnowledgeBase {
+  documents             Json[]
+  faqUrl                String?
+  helpUrl               String?
+  shopDomain            String   @id
+  termsAndConditionsUrl String?
+  videoLinkUrls         String[]
+}
+
+model Message {
+  id                   String               @id
+  createdAt            DateTime             @default(now())
+  message              String
+  sender               String
+  ticketId             String
+  unanswered           Boolean              @default(false)
+  AIConversationTicket AIConversationTicket @relation(fields: [ticketId], references: [id])
+}
+
+model Notification {
+  id                   String    @id
+  title                String
+  role                 String
+  content              String
+  eventType            String
+  recipientId          String
+  isRead               Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  ticketId             String?
+  operatorName         String?
+  newAssignee          String?
+  changedBy            String?
+  newPriority          String?
+  newStatus            String?
+  maintenanceDate      DateTime?
+  maintenanceStartTime DateTime?
+  maintenanceEndTime   DateTime?
+  newTicketsCount      Int?
+  resolvedTicketsCount Int?
+
+  @@index([createdAt])
+  @@index([isRead])
+  @@index([recipientId])
+}
+
+model PlanDetails {
+  planId         Int
+  planStartDate  DateTime
+  convleft       Int
+  shopifyid      String   @default("nothing")
+  eventTimestamp String   @default("default")
+  shopifyDomain  String   @id
+}
+
+model RegisteredWebhooks {
+  id          String   @id
+  address     String
+  topic       String
+  created_at  DateTime
+  updated_at  DateTime
+  shop_domain String
+}
+
+model ShopifyInstalledShop {
+  id               String   @id
+  shop             String   @unique
+  accessToken      String?
+  adminInviteCode  String
+  memberInviteCode String
+  email            String[]
+  autoAssignment   Boolean  @default(true)
+}
+
+model User {
+  id                   String    @id
+  email                String    @unique
+  firstName            String?
+  lastName             String?
+  lastLoginAt          DateTime?
+  shopDomain           String?
+  image                String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime?
+  role                 String?
+  emailVerified        DateTime?
+  currentActiveTickets Int       @default(0)
+}
+
+enum EventType {
+  EMAIL_RECEIVED
+  EMAIL_SENT
+  STATUS_CHANGED
+  PRIORITY_CHANGED
+  CATEGORY_CHANGED
+  ASSIGNED
+  REOPENED
+  CREATED
+}

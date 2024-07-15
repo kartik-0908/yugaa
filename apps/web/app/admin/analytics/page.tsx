@@ -1,60 +1,122 @@
-import React from "react";
-import dynamic from "next/dynamic";
-import { Answered, UnAnswered } from "./Cards/Answered";
-import { TimeSaved } from "./Cards/TimeSaved";
-import { AverageSession } from "./Cards/AvgSession";
-import { TransferRate } from "./Cards/TransferRate";
-import { Fcrr } from "./Cards/FCR";
-import { AvgResponseTime } from "./Cards/AvgResponseTime";
-import { MissedConv } from "./Cards/MissedConv";
+"use client"
+import React, { useState, useEffect } from "react";
+import { Answered, AverageSession, AvgResponseTime, FcrPercentage, MissedConv, TimeSaved, TransferRate, UnAnswered } from "./Cards/Answered";
+import useSWR from "swr";
+import { getUsers } from "../../../actions/shopify";
+import { today, getLocalTimeZone, parseDate, CalendarDate } from '@internationalized/date';
+import { Chip, DateRangePicker, Select } from "@nextui-org/react";
+import { SelectItem } from "@nextui-org/react";
+import { useUser } from '@clerk/nextjs';
+import ChartThree from "./ChartThree";
 
-export default function Analytics(props: { searchParams: { [key: string]: string } }) {
-  // const searchParams = useSearchParams()
+export default function Analytics() {
+  const { user, isLoaded } = useUser()
+  if (!isLoaded) return <div>Loading clerk data...</div>
+  useEffect(() => {
+    console.log(user)
+  }, [user])
+  const [value, setValue] = useState({
+    start: today(getLocalTimeZone()).subtract({ weeks: 1 }),
+    end: today(getLocalTimeZone()),
+  });
+  const [users, setUsers] = useState<React.Key[]>([]);
 
-  const { startYear } = props.searchParams
-  const { startMonth } = props.searchParams
-  const { startDay } = props.searchParams
-  const { endYear } = props.searchParams
-  const { endMonth } = props.searchParams
-  const { endDay } = props.searchParams
-  const {users} = props.searchParams
-  if (startYear && startMonth && startDay && endYear && endMonth && endDay && users) {
-    const syear = parseInt(startYear, 10);
-    const smon = parseInt(startMonth, 10) - 1; // Month is 0-based in JS Date
-    const sday = parseInt(startDay, 10);
-    const eyear = parseInt(endYear, 10);
-    const emon = parseInt(endMonth, 10) - 1; // Month is 0-based in JS Date
-    const eday = parseInt(endDay, 10);
-    const startDate = new Date(syear, smon, sday);
-    const endDate = new Date(eyear, emon, eday);
-    return (
+  const { data, isLoading, error } = useSWR(
+    `${user?.publicMetadata.shopDomain}`,
+    getUsers, {
+    refreshInterval: 1000 * 60 * 5,
+    keepPreviousData: true
+  })
 
-      <div>
-        <div className="grid gap-2 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-          <Answered start={startDate} end={endDate} />
-          <UnAnswered start={startDate} end={endDate} />
-          <TimeSaved start={startDate} end={endDate} />
-          <AverageSession start={startDate} end={endDate} />
-          <TransferRate start={startDate} end={endDate} />
+  if (isLoading) return <div>Loading swr data...</div>
 
 
-          <Fcrr start={startDate} end={endDate} />
-          <AvgResponseTime start={startDate} end={endDate} />
-          <MissedConv start={startDate} end={endDate} />
+  function handlechange(value: any) {
+    setValue(value);
+    const { start } = value
+    const { end } = value
+    console.log(value)
+    console.log(getLocalTimeZone())
+  }
 
+  return (
+    <div>
+      <div className="">
+        <div className="flex flex-row items-end justify-center gap-2 pb-4">
+          <div className="flex items-center">
+            <DateRangePicker
+              label="Choose Date"
+              defaultValue={value}
+              labelPlacement="outside"
+              maxValue={today(getLocalTimeZone())}
+              onChange={handlechange}
+              className='min-w-[450px]'
+              classNames={{
+                calendarContent: "w-[250px]"
+              }}
+            />
+          </div>
+          <div className=' flex items-center'>
+            <Select
+              label="Choose Member"
+              defaultSelectedKeys={"all"}
+              labelPlacement='outside'
+              placeholder="Choose Member"
+              selectionMode="multiple"
+              className='min-w-[250px]'
+              onSelectionChange={(keys) => {
+                console.log(keys)
+                const selectedKeys = Array.from(keys);
+                setUsers(selectedKeys)
 
+              }}
+              renderValue={(items) => {
+                return (
+                  <div className="flex flex-wrap gap-2">
+                    {items.map((item) => (
+                      <Chip key={item.key}>{item.textValue}</Chip>
+                    ))}
+                  </div>
+                );
+              }}
+            >
+              {
+                data ?
+                  data.map((user) => (
+                    <SelectItem key={user.id} textValue={user.firstName || ""}>
+                      {user.firstName}  {user.lastName}
+                    </SelectItem>
+                  ))
+                  :
+                  (<SelectItem key={"cat"}>
+                    cat
+                  </SelectItem>)
+              }
+            </Select>
+          </div>
         </div>
-        {/* <ChartThree/> */}
-
-        {/* {!loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <Answered start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} />
+          <UnAnswered start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} />
+          <TimeSaved start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} />
+          <AverageSession start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} />
+          <TransferRate start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} users={users} />
+          <AvgResponseTime start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} users={users} />
+          <FcrPercentage start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} users={users} />
+          <MissedConv start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} users={users} />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 pt-8">
+          <ChartThree start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} users={users} />
+        </div>
+      </div>
+      {/* {!loading && (
          <ChartTwo
            data={conversationsOverTime}
            startTime={startDate.toISOString()}
            endTime={endDate.toISOString()}
          />
        )} */}
-      </div>
-    )
-  }
+    </div>
+  )
 };
 
