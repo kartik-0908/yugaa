@@ -37,3 +37,8 @@ a {
     color-scheme: dark;
   }
 }
+
+ul li:before {
+  content: none !important;
+  display: none !important;
+}
