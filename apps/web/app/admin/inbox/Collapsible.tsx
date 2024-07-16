@@ -6,10 +6,10 @@ import UserCard from './unassigned/[id]/UserCard';
 import MessageForm from './MessageForm';
 import axios from 'axios';
 import { useUser } from '@clerk/nextjs';
-import { formatDate } from '../chat-history/[id]/page';
 import { generate, generateSum, generatelatestSum, suggestResp } from '../../../actions/ai';
 import { readStreamableValue } from 'ai/rsc';
 import TextMessage from '../../../components/copy';
+import { formatDate } from '../../../common/function';
 
 const RightPanelToggle = ({ ticket, messages, emails }: any) => {
     const { user, isLoaded } = useUser();
