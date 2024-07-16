@@ -41,7 +41,7 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
             // console.log(adminLink)
             // console.log(users)
 
-            console.log(user?.emailAddresses[0].emailAddress)
+            console.log(user?.emailAddresses[0]?.emailAddress)
 
 
             if (memberLink) {
@@ -54,11 +54,11 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                 let allMembers = [];
                 const len = users?.length;
                 for (let i = 0; i < len; i++) {
-                    const name = users[i].firstName + " " + users[i].lastName;
+                    const name = users[i]?.firstName + " " + users[i]?.lastName || "";
                     allMembers.push({
                         name: name,
-                        role: users[i].role,
-                        email: users[i].email,
+                        role: users[i]?.role || "",
+                        email: users[i]?.email || "",
                     });
                 }
                 // console.log(allMembers)
@@ -70,8 +70,10 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
 
     const handleRoleChange = (index: number, newRole: string) => {
         const updatedMembers = [...members];
+        //@ts-ignore
         updatedMembers[index].role = newRole;
         setMembers(updatedMembers);
+
     };
 
     const handleRemoveMember = (index: number) => {
@@ -124,7 +126,7 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                                 <td className="px-6 py-4">{member.name}</td>
                                 <td className="px-6 py-4">
                                     <Select
-                                        isDisabled={member.email === user?.emailAddresses[0].emailAddress}
+                                        isDisabled={member.email === user?.emailAddresses[0]?.emailAddress}
                                         defaultSelectedKeys={[member.role]}
                                         className="max-w-xs pl-4 pr-4"
                                         onChange={(e) => handleRoleChange(index, e.target.value)}

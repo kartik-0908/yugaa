@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Dropdown, DropdownMenu, DropdownTrigger, DropdownItem, Button, Textarea, Select, SelectItem, Popover, PopoverTrigger, PopoverContent, ListboxItem, Listbox } from "@nextui-org/react";
 import axios from 'axios';
-import { on } from 'events';
 
 interface MessageFormProps {
     emails: string[];
@@ -18,7 +17,7 @@ interface MessageFormProps {
 
 const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticketId, subject, onMessageSend, aiChatassistance, latestSum, suggest, completeSum }) => {
     const [currentSendButton, setSendButton] = useState<number>(0);
-    const [currentSendEmail, setSendEmail] = useState<string>(emails[0]);
+    const [currentSendEmail, setSendEmail] = useState<string>(emails[0] || "ugu");
     const [message, setMessage] = useState<string>("");
     const [isSending, setIsSending] = useState<boolean>(false);
     const buttons = [
@@ -105,7 +104,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
 
                                     <Button
                                         size='sm'
-                                        onClick={buttons[currentSendButton].sendFunction}
+                                        onClick={buttons[currentSendButton]?.sendFunction}
                                         isLoading={isSending}
                                         endContent={
                                             <Dropdown
@@ -138,7 +137,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                                             </Dropdown>
                                         }
                                         className="">
-                                        {buttons[currentSendButton].text}
+                                        {buttons[currentSendButton]?.text}
                                     </Button>
                                 </div>
                                 <div className='flex-grow'>
