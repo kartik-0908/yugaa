@@ -1,6 +1,9 @@
-import Chart from "./peakInteraction";
-import RecentChat from "./recentChats";
-import TotalInteraction from "./totalInteraction";
+import dynamic from "next/dynamic";
+
+const Chart = dynamic(() => import("./peakInteraction"), { ssr: false })
+const RecentChat = dynamic(() => import("./recentChats"), { ssr: false })
+const TotalInteraction = dynamic(() => import("./totalInteraction"), { ssr: false })
+
 
 export default async function Home() {
   return (

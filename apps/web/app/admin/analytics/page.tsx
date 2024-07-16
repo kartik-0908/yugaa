@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Answered, AverageSession, AvgResponseTime, FcrPercentage, MissedConv, TimeSaved, TransferRate, UnAnswered } from "./Cards/Answered";
 import useSWR from "swr";
 import { getUsers } from "../../../actions/analytics";
-import { today, getLocalTimeZone, parseDate, CalendarDate } from '@internationalized/date';
+import { today, getLocalTimeZone } from '@internationalized/date';
 import { Chip, DateRangePicker, Select } from "@nextui-org/react";
 import { SelectItem } from "@nextui-org/react";
 import { useUser } from '@clerk/nextjs';
