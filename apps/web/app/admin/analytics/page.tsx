@@ -1,16 +1,25 @@
 "use client"
 import React, { useState, useEffect } from "react";
-import { Answered, AverageSession, AvgResponseTime, FcrPercentage, MissedConv, TimeSaved, TransferRate, UnAnswered } from "./Cards/Answered";
 import useSWR from "swr";
 import { getUsers } from "../../../actions/analytics";
 import { today, getLocalTimeZone } from '@internationalized/date';
 import { Chip, DateRangePicker, Select } from "@nextui-org/react";
 import { SelectItem } from "@nextui-org/react";
 import { useUser } from '@clerk/nextjs';
-import ChartThree from "./ChartThree";
-import WorkloadDistribution from "./workkload";
-import Statusbar from "./statusBar";
-import PriorityBar from "./prioritybar";
+import dynamic from "next/dynamic";
+const Answered = dynamic(() => import("./Cards/Answered").then(mod => mod.Answered), { ssr: false });
+const UnAnswered = dynamic(() => import("./Cards/Answered").then(mod => mod.UnAnswered), { ssr: false });
+const TimeSaved = dynamic(() => import("./Cards/Answered").then(mod => mod.TimeSaved), { ssr: false });
+const AverageSession = dynamic(() => import("./Cards/Answered").then(mod => mod.AverageSession), { ssr: false });
+const TransferRate = dynamic(() => import("./Cards/Answered").then(mod => mod.TransferRate), { ssr: false });
+const AvgResponseTime = dynamic(() => import("./Cards/Answered").then(mod => mod.AvgResponseTime), { ssr: false });
+const FcrPercentage = dynamic(() => import("./Cards/Answered").then(mod => mod.FcrPercentage), { ssr: false });
+const MissedConv = dynamic(() => import("./Cards/Answered").then(mod => mod.MissedConv), { ssr: false });
+const ChartThree = dynamic(() => import("./ChartThree"), { ssr: false });
+const WorkloadDistribution = dynamic(() => import("./workkload"), { ssr: false });
+const Statusbar = dynamic(() => import("./statusBar"), { ssr: false });
+const PriorityBar = dynamic(() => import("./prioritybar"), { ssr: false });
+
 
 export default function Analytics() {
   const { user, isLoaded } = useUser()
