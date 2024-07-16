@@ -17,10 +17,8 @@ const ChatCard = ({ data }: any) => {
           })
           messages.sort((a: any, b: any) => a.createdAt - b.createdAt);
           console.log(messages)
-
-
           return (
-            <Link href={`/chat-history/${id}`} className="flex items-center gap-5 px-7.5 py-3 " key={index}>
+            <Link href={`/chat-history/${id}`} className="flex items-center gap-5 px-7.5 py-3 text-black" key={index}>
               <div className="relative h-14 w-14 rounded-full">
                 <Image src='/images/user/user-01.png' alt="User" layout="fill" />
               </div>
