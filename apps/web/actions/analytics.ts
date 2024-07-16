@@ -264,11 +264,7 @@ export async function getQueriesbyStatus(data: string): Promise<number[]> {
         if (item.status) {
             if (categories.includes(item.status)) {
                 result[item.status] = item._count.id;
-            } else {
-                result['Others'] += item._count.id;
             }
-        } else {
-            result['Others'] += item._count.id;
         }
     });
 
@@ -321,11 +317,7 @@ export async function getQueriesbyPriority(data: string): Promise<number[]> {
         if (item.priority) {
             if (categories.includes(item.priority)) {
                 result[item.priority] = item._count.id;
-            } else {
-                result['Others'] += item._count.id;
             }
-        } else {
-            result['Others'] += item._count.id;
         }
     });
 
