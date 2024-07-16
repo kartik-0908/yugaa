@@ -154,11 +154,7 @@ export async function getQueriesbyCategory(data: string): Promise<number[]> {
         if (item.category) {
             if (categories.includes(item.category)) {
                 result[item.category] = item._count.id;
-            } else {
-                result['Others'] += item._count.id;
             }
-        } else {
-            result['Others'] += item._count.id;
         }
     });
 
@@ -373,7 +369,7 @@ export async function handleSubmit(state: any, formdata: FormData) {
     console.log(email)
     console.log(role)
     console.log("before resposne")
-  
+
     const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/v1/user/invite`, {
         shop,
         email,
@@ -381,14 +377,14 @@ export async function handleSubmit(state: any, formdata: FormData) {
     })
     revalidatePath("/verify")
     console.log("after validating")
-  
+
     // console.log(res)
-  
-    if(res.data.message === "ok"){
-        return {status:"success"}
+
+    if (res.data.message === "ok") {
+        return { status: "success" }
     }
-    if(res.data.message === "error"){
-        return {status:"error"}
+    if (res.data.message === "error") {
+        return { status: "error" }
     }
-    return {status:"hey"}
-  }
+    return { status: "hey" }
+}
