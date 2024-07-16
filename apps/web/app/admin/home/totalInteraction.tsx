@@ -1,9 +1,5 @@
 "use client"
-import { auth } from "@clerk/nextjs/server";
-import axios from "axios";
 import { format, toZonedTime } from 'date-fns-tz'
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
 
 function getWeekTimestamps(): [string, string] {
     const now = new Date(new Date().toLocaleString("en-US"));
@@ -57,7 +53,7 @@ function getDayOfWeekIndex(dateString: string) {
 
 
 
-export default async function TotalInteraction() {
+export default function TotalInteraction() {
     const { user, isLoaded } = useUser()
     if (!isLoaded) {
         return (
