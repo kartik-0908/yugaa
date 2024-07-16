@@ -21,7 +21,7 @@ const DropdownNotification = () => {
   if (!isLoaded) return null;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { data, isLoading, error } = useSWR(`${user?.id}`, fetchNotifications, {
-    refreshInterval: 1000,
+    refreshInterval: 1000 * 60 * 60,
     keepPreviousData: true,
   });
   if (isLoading) {

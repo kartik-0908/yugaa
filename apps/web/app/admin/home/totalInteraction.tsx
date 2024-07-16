@@ -1,10 +1,14 @@
 "use client"
 import { format, toZonedTime } from 'date-fns-tz'
+import { ApexOptions } from "apexcharts";
+import React, { useEffect, useState } from "react";
+import ReactApexChart from "react-apexcharts";
+import { useUser } from "@clerk/nextjs";
+import { SkeletonComp, fetcher } from "./peakInteraction";
+import useSWR from "swr";
 
 function getWeekTimestamps(): [string, string] {
     const now = new Date(new Date().toLocaleString("en-US"));
-    // console.log(now)
-
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1));
     startOfWeek.setHours(0, 0, 0, 0);
@@ -54,19 +58,18 @@ function getDayOfWeekIndex(dateString: string) {
 
 
 export default function TotalInteraction() {
+    console.log("Total Interaction rendering")
     const { user, isLoaded } = useUser()
     if (!isLoaded) {
         return (
             <SkeletonComp />
         )
     }
-    useEffect(() => {
-    }, [])
     const [start, end] = getWeekTimestamps();
     const { data, isLoading, error } = useSWR(
         `${process.env.NEXT_PUBLIC_API_URL}/v1/admin/total-interaction?shop=${user?.publicMetadata.shopDomain}&start=${start}&end=${end}`,
         fetcher, {
-        refreshInterval: 1000,
+        refreshInterval: 1000 * 60 * 60,
         keepPreviousData: true
 
     }
@@ -78,7 +81,9 @@ export default function TotalInteraction() {
     }
     console.log(data)
     if (error) {
-        return <div>Error from SWR...</div>
+        return (
+            <SkeletonComp />
+        )
     }
 
     const formattedTickets = convertTicketsToLocalTime(data.tickets, getLocalTimezone())
@@ -99,14 +104,9 @@ export default function TotalInteraction() {
     )
 }
 
-import { ApexOptions } from "apexcharts";
-import React, { useEffect, useState } from "react";
-import ReactApexChart from "react-apexcharts";
-import { useUser } from "@clerk/nextjs";
-import { SkeletonComp, fetcher } from "./peakInteraction";
-import useSWR from "swr";
 
-let options: ApexOptions = {
+
+let initialOptions: ApexOptions = {
     colors: ["#3C50E0", "#80CAEE"],
     tooltip: {
         enabled: false
@@ -185,15 +185,24 @@ let options: ApexOptions = {
 
 
 function ChartTwo({ data }: any) {
+    console.log("Chart two rendering")
 
-    if (data.total === 0) {
-        options.yaxis = {
-            min: 0,
-            decimalsInFloat: 0,
-            stepSize: 10,
-            forceNiceScale: true
+    const [chartOptions, setChartOptions] = useState<ApexOptions>(initialOptions);
+
+    useEffect(() => {
+        if (data.total === 0) {
+          setChartOptions(prevOptions => ({
+            ...prevOptions,
+            yaxis: {
+              ...prevOptions.yaxis,
+              min: 0,
+              decimalsInFloat: 0,
+              stepSize: 10,
+              forceNiceScale: true
+            }
+          }));
         }
-    }
+      }, [data.total]);
 
     return (
         <div className="text-lg bg-white rounded-sm border p-4 font-semibold rounded-sm border border-stroke">
@@ -211,7 +220,7 @@ function ChartTwo({ data }: any) {
             <div>
                 <div id="chartTwo" className="-ml-5">
                     <ReactApexChart
-                        options={options}
+                        options={chartOptions}
                         series={data.data}
                         type="bar"
                         height={350}
