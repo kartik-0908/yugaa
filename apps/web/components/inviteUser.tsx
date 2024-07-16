@@ -1,8 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button, Input, Select, SelectItem } from "@nextui-org/react";
-import { showToast } from "./Toast";
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { Snippet } from "@nextui-org/react";
 import { useUser } from "@clerk/nextjs";
 
 interface Member {
@@ -33,6 +32,8 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
     const [memberToRemove, setMemberToRemove] = useState<number | null>(null);
     const [adminInviteLink, setAdminInviteLink] = useState<string>("");
     const [memberInviteLink, setMemberInviteLink] = useState<string>("");
+
+    if (!user) return null;
 
     useEffect(() => {
         const fetchMembers = async () => {
@@ -93,15 +94,10 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                 <h2 className="text-lg font-medium mb-2">Invite Links</h2>
                 <div className="flex items-center mb-2">
                     <Input readOnly value={adminInviteLink} className="mr-2 flex-1" />
-                    <CopyToClipboard text={adminInviteLink} onCopy={() => showToast("success", "Admin invite link copied!")}>
-                        <Button color="primary">Copy</Button>
-                    </CopyToClipboard>
+                    <Snippet>{adminInviteLink}</Snippet>
                 </div>
                 <div className="flex items-center">
-                    <Input readOnly value={memberInviteLink} className="mr-2 flex-1" />
-                    <CopyToClipboard text={memberInviteLink} onCopy={() => showToast("success", "Member invite link copied!")}>
-                        <Button color="primary">Copy</Button>
-                    </CopyToClipboard>
+                    <Snippet>{memberInviteLink}</Snippet>
                 </div>
             </div>
             <div className="overflow-x-auto mt-10">
@@ -128,7 +124,7 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                                 <td className="px-6 py-4">{member.name}</td>
                                 <td className="px-6 py-4">
                                     <Select
-                                    isDisabled={member.email === user?.emailAddresses[0].emailAddress}
+                                        isDisabled={member.email === user?.emailAddresses[0].emailAddress}
                                         defaultSelectedKeys={[member.role]}
                                         className="max-w-xs pl-4 pr-4"
                                         onChange={(e) => handleRoleChange(index, e.target.value)}
@@ -144,7 +140,7 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                                 <td className="px-6 py-4">{member.email}</td>
                                 <td className="px-6 py-4">
                                     <Button
-                                        isDisabled={(member.role === "admin" )}
+                                        isDisabled={(member.role === "admin")}
                                         color={member.role === "admin" ? "default" : "danger"}
                                         className={`px-4 py-2 ${member.role === "admin" ? "text-black" : "text-white hover:bg-red-700"}`}
                                         disabled={member.role === "Admin"}
