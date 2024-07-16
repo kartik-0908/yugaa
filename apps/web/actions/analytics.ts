@@ -1,13 +1,21 @@
 "use server"
 import { PrismaClient } from '@repo/db';
 
-const db = new PrismaClient();
+export const db = new PrismaClient();
 
 export async function getUsers(shopDomain: string) {
     console.log(shopDomain)
     const users = await db.user.findMany({
         where: {
             shopDomain: shopDomain
+        },
+        select: {
+            availableForDist: true,
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true
         }
     })
     return users
@@ -199,7 +207,7 @@ export async function getUserWorkload(data: string) {
     const userMap = new Map(userDetails.map(user => [user.id, user]));
 
     const result = workloadData.map(item => {
-        if(item.assignedTo === null) return null; 
+        if (item.assignedTo === null) return null;
         const user = userMap.get(item.assignedTo);
         return {
             name: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',

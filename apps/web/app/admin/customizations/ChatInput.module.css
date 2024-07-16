@@ -1,0 +1,66 @@
+.branding {
+    margin-top: 0px;
+    font-size: small;
+    /* color: black; */
+    text-align: center;
+  }
+  
+  .branding p {
+    margin-top: 0px;
+    color: black;
+    margin-bottom: 2px;
+  }
+  
+  .chatInput {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 8px;
+  }
+  
+  .chatInput input {
+    flex-grow: 1;
+    border: none;
+    background: transparent;
+    color: black;
+    margin-right: 8px;
+    padding: 10px;
+    border-radius: 22px;
+  }
+  
+  .chatInput input::placeholder {
+    color: #aaa;
+  }
+  
+  .chatInput input:focus {
+    outline: none;
+  }
+  
+  .sendButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: #1C2434;
+    border: none;
+    border-radius: 35%;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+  }
+  
+  .sendButton::before {
+    display: block;
+    font-size: 24px;
+  }
+  
+  .sendButton:hover {
+    background: #666;
+  }
+  
+  .sendButton:focus {
+    outline: none;
+  }
+  

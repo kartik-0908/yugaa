@@ -19,7 +19,7 @@ type ChatsType = {
 
 export default function ChatList() {
     const { user, isLoaded } = useUser();
-    const totalInSingle = 2;
+    const totalInSingle = 10;
     if (!isLoaded) {
         return (
             <div>
@@ -53,9 +53,9 @@ export default function ChatList() {
     return (
         <div className="h-[600px] rounded-sm border border-stroke bg-white py-6 dark:border-strokedark dark:bg-boxdark xl:col-span-4">
             <div className="header flex justify-between items-center px-7.5 mb-6">
-                <h4 className="text-xl font-semibold text-black dark:text-white">
+                <div className="text-4xl font-semibold ml-8 ">
                     Tickets
-                </h4>
+                </div>
                 <select
                     className="border border-gray-300 rounded px-2 py-1"
                 >
@@ -68,12 +68,14 @@ export default function ChatList() {
                 <div className="overflow-y-auto">
                     {
                         chats.map((chat, ind) => {
-                            return (
-                                <Link href={`/admin/chat-history/${chat.id}`}>
-                                    <Card id={chat.id} messages={chat.messages} />
+                            if (chat && chat.messages && chat.messages.length > 0) {
+                                return (
+                                    <Link className='text-black' href={`/admin/chat-history/${chat.id}`}>
+                                        <Card id={chat.id} messages={chat.messages} />
 
-                                </Link>
-                            )
+                                    </Link>
+                                )
+                            }
                         })
                     }
                 </div>

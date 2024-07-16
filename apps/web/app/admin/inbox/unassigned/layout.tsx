@@ -2,17 +2,17 @@ import ChatList from "./Sidebar";
 
 export default function home({ children }: any) {
     return (
-        <div className="w-full bg-white h-full">
-            <div className="flex">
-                <div className="max-w-[380px] w-full">
-                    <div className="h-20 text-2xl pl-3 font-bold text-black text-ellipsis border border-stroke flex flex-col justify-center items-center">
-                        <h2>Unassigned</h2>
-                    </div>
+        <div className="w-full h-full flex flex-row ">
+            <div className="w-2/7 h-full border-r-1 border-stroke">
+                <div className="h-[9%] text-lg flex flex-col justify-center items-center border-b-1 border-stroke ">
+                    Unassigned
+                </div>
+                <div className="h-[91%] ">
                     <ChatList />
                 </div>
-                <div className="flex-1 w-full">
-                    {children}
-                </div>
+            </div>
+            <div className="flex-1 w-5/7 h-full">
+                {children}
             </div>
         </div>
     );

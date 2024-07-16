@@ -1,5 +1,4 @@
 "use client"
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import React, { useEffect, useState } from "react";
 import { Select, SelectItem } from "@nextui-org/react";
 import { Tabs, Tab, Input, Link, Button, Card, CardBody, CardHeader } from "@nextui-org/react";
@@ -8,10 +7,10 @@ import ColorPicker from "./ColorPicker";
 import { Textarea } from "@nextui-org/react";
 import axios from "axios";
 import Image from "next/image";
-import styles from '../../../css/ChatInput.module.css';
+import styles from './ChatInput.module.css';
 import { useUser } from "@clerk/nextjs";
-import { uploadLogo } from "../../../../lib/services/gcpservices";
-import { showToast } from "@/components/Toast";
+import { uploadLogo } from "../../../actions/gcpservices";
+import { useToasts } from "@geist-ui/core";
 
 const fonts = [
     { label: 'Arial', value: 'Arial, sans-serif' },
@@ -46,6 +45,8 @@ const TablesPage = () => {
             </div>
         );
     }
+    const { setToast } = useToasts()
+
     const [selected, setSelected] = React.useState("appearance");
     const colors = ['#4F46E5', '#EC4899', '#22C55E', '#F59E0B', '#EF4444', '#6366F1'];
     const [selectedColor, setSelectedColor] = useState('')
@@ -124,9 +125,9 @@ const TablesPage = () => {
                     logourl,
                     filename: selectedLogo.name
                 })
-                showToast("success", <p>Changes Saved</p>)
+                setToast({ text: 'Changes Saved', delay: 2000 })
             } catch (error) {
-                showToast("error", <p>Try after some time</p>)
+                setToast({ text: 'Try after some time', delay: 2000 })
                 console.log(error)
             }
         }
@@ -139,9 +140,9 @@ const TablesPage = () => {
                 fontColor,
                 widgetPosition
             })
-            showToast("success", <p>Changes Saved</p>)
+            setToast({ text: 'Changes Saved', delay: 2000 })
         } catch (error) {
-            showToast("error", <p>Try after some time</p>)
+            setToast({ text: 'Try after some time', delay: 2000 })
             console.log(error)
             // Handle error (e.g., show error message)
         }
@@ -161,9 +162,9 @@ const TablesPage = () => {
                 clarityAndSimplicity,
                 personalization
             })
-            showToast("success", <p>Changes Saved</p>)
+            setToast({ text: 'Changes Saved', delay: 2000 })
         } catch (error) {
-            showToast("error", <p>Try after some time</p>)
+            setToast({ text: 'Try after some time', delay: 2000 })
             console.log(error)
         }
         setbuttonloading(false)
@@ -182,9 +183,9 @@ const TablesPage = () => {
                 errorMessageStyle,
                 greetingmessage
             })
-            showToast("success", <p>Changes Saved</p>)
+            setToast({ text: 'Changes Saved', delay: 2000 })
         } catch (error) {
-            showToast("error", <p>Try after some time</p>)
+            setToast({ text: 'Try after some time', delay: 2000 })
             console.log(error)
         }
         setbuttonloading(false)
@@ -203,8 +204,6 @@ const TablesPage = () => {
 
     return (
         <div>
-
-            <Breadcrumb pageName="Customizations" />
             <div className="grid grid-cols-12 gap-4">
                 <div className="flex flex-col w-full col-span-7">
                     <Card className="max-w-full ">
@@ -276,17 +275,17 @@ const TablesPage = () => {
                                                     ))}
                                                 </Select>
                                             </div>
-                                            <h3 className="font-medium text-black dark:text-white">
+                                            <h3 className="font-medium ">
                                                 Upload Logo
                                             </h3>
                                             <div className="flex flex-col gap-5.5 p-2">
                                                 <div>
-                                                    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                                                    <label className="mb-3 block text-sm font-medium">
                                                         Attach file
                                                     </label>
                                                     <input
                                                         type="file"
-                                                        className="w-full cursor-pointer rounded-lg border-[1.5px] border-stroke bg-transparent outline-none transition file:mr-5 file:border-collapse file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-stroke file:bg-whiter file:px-5 file:py-3 file:hover:bg-primary file:hover:bg-opacity-10 focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:file:border-form-strokedark dark:file:bg-white/30 dark:file:text-white dark:focus:border-primary"
+                                                        className="w-full cursor-pointer rounded-lg border-[1.5px] border-stroke bg-transparent outline-none transition file:mr-5 file:border-collapse file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-stroke file:px-5 file:py-3  file:hover:bg-opacity-10 focus:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark"
                                                         onChange={handleLogoChange}
                                                         accept="image/*"
                                                     />
@@ -335,7 +334,7 @@ const TablesPage = () => {
                                                             />
                                                         </svg>
 
-                                                        <h1>   Saving Changes</h1>
+                                                        <div>   Saving Changes</div>
                                                     </div>
                                                 }
 
@@ -443,7 +442,7 @@ const TablesPage = () => {
                                 <Tab key="behavioral" title="Behavioral Theme">
                                     <form className="flex flex-col gap-4 ">
                                         <div>
-                                            <h1>Response Length</h1>
+                                            <div className="text-2xl font-bold">Response Length</div>
                                         </div>
                                         <Tabs
                                             selectedKey={responseLength}
@@ -483,7 +482,7 @@ const TablesPage = () => {
 
                                         />
                                         <div>
-                                            <h1>Error Message Style</h1>
+                                            <div className="text-2xl font-bold">Error Message Style</div>
                                         </div>
                                         <Tabs
                                             selectedKey={errorMessageStyle}
@@ -567,7 +566,7 @@ const TablesPage = () => {
                                 </div>
                             </div>
                             <div
-                                className="h-[400px]  flex flex-col bg-white p-3 overflow-auto scrollbar-custom">
+                                className="h-[360px]  flex flex-col bg-white p-3 overflow-auto scrollbar-custom">
                                 {demo_mssgs.map((message, index) => (
                                     <div
                                         key={index}
@@ -575,8 +574,8 @@ const TablesPage = () => {
                                             }`}
                                     >
                                         <Card className="max-w-[230px]">
-                                            <CardBody>
-                                                <p>{message}</p>
+                                            <CardBody className="">
+                                                {message}
                                             </CardBody>
                                         </Card>
                                     </div>

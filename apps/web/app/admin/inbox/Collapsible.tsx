@@ -6,19 +6,23 @@ import UserCard from './unassigned/[id]/UserCard';
 import MessageForm from './MessageForm';
 import axios from 'axios';
 import { useUser } from '@clerk/nextjs';
-import { formatDate } from '@/utils/common';
+import { formatDate } from '../chat-history/[id]/page';
+import { generate, generateSum, generatelatestSum, suggestResp } from '../../../actions/ai';
+import { readStreamableValue } from 'ai/rsc';
+import TextMessage from '../../../components/copy';
 
 const RightPanelToggle = ({ ticket, messages, emails }: any) => {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return (<div>Loading...</div>);
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(true);
     const [activeTab, setActiveTab] = useState('Tab1'); // Initialize with the first tab
-    const [summary, setSummary] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [currentAiMessage, setCurrentAiMessage] = useState('');
+    const [currentAiHeading, setCurrentAiHeading] = useState('');
     const [events, setEvents] = useState<any[]>([]);
     const [category, setCategory] = useState(ticket.category);
     const [priority, setPriority] = useState(ticket.priority);
     const [status, setStatus] = useState(ticket.status);
+
 
     const handleChange = async (field: string, value: string) => {
         try {
@@ -45,8 +49,6 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
         }
     };
 
-
-
     useEffect(() => {
         async function fetchEvents() {
             const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/v1/admin/getEscTicketEvents`, {
@@ -60,27 +62,6 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
     }, [ticket]);
 
     const renderContent = () => {
-
-
-        const generateCompleteSummary = async () => {
-            setIsLoading(true);
-            // Here you would typically make an API call to generate the complete summary
-            // For now, we'll just simulate it with a timeout
-            setTimeout(() => {
-                setSummary('This is a complete summary of the ticket...');
-                setIsLoading(false);
-            }, 2000);
-        };
-
-        const generateLatestSummary = async () => {
-            setIsLoading(true);
-            // Here you would typically make an API call to generate the latest summary
-            // For now, we'll just simulate it with a timeout
-            setTimeout(() => {
-                setSummary('This is the latest summary of the ticket...');
-                setIsLoading(false);
-            }, 2000);
-        };
         switch (activeTab) {
             case 'Tab1':
                 return (
@@ -162,48 +143,8 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
                 );
             case 'Tab2':
                 return (
-                    <div className='flex flex-col h-[550px] bg-gray-100'>
-                        <div className='h-1/2 bg-white rounded-lg mb-1 overflow-y-auto'>
-                            <h3 className='text-xl font-bold mb-4'>Summary Generation</h3>
-                            <div className='flex flex-row w-full gap-2 mb-4'>
-                                <button
-                                    className='bg-red text-black p-2 rounded-3xl hover:bg-red-600'
-                                    onClick={generateCompleteSummary}
-                                >
-                                    Complete Summary
-                                </button>
-                                <button
-                                    className='bg-red text-black p-2 rounded-3xl hover:bg-red-600'
-                                    onClick={generateLatestSummary}
-                                    disabled={isLoading}
-                                >
-                                    Latest Summary
-                                </button>
-                            </div>
-                            {isLoading ? (
-                                <p className='text-gray-600'>Generating summary...</p>
-                            ) : (
-                                <div>
-                                    <h3 className='text-lg font-semibold mb-2'>Generated Summary:</h3>
-                                    <p className='text-gray-700'>
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio. Proin quis tortor orci. Etiam at risus et justo dignissim congue.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                        <div className='h-1/2 bg-white rounded-lg shadow-md  overflow-y-auto'>
-                            <h3 className='text-xl font-bold mb-4'>Suggested Response</h3>
-                            <ul className='space-y-4'>
-                                <li className='border-b pb-2'>
-                                    <p className='text-gray-700'>Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.</p>
-                                    <p className='text-gray-700'>Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.</p>
-                                    <p className='text-gray-700'>Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.</p>
-                                    <p className='text-gray-700'>Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.</p>
-                                    <p className='text-gray-700'>Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.</p>
-                                </li>
-
-                            </ul>
-                        </div>
+                    <div className='flex flex-col h-full'>
+                        <TextMessage heading={currentAiHeading} message={currentAiMessage} />
                     </div>
                 );
             default:
@@ -211,14 +152,75 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
         }
     };
 
+    async function handleMessageSend(message: string) {
+        console.log(message)
+    }
+    async function aiChatassistance(message: string) {
+        setIsRightPanelVisible(true)
+        setActiveTab('Tab2')
+        setCurrentAiHeading('Enhanced Response')
+        setCurrentAiMessage('')
+        console.log(message)
+        if (message) {
+            const { output } = await generate(message)
+            for await (const delta of readStreamableValue(output)) {
+                console.log(delta)
+                setCurrentAiMessage(curr => `${curr}${delta}`);
+            }
+        }
+    }
+
+    async function latestSum(ticketId: string) {
+        setIsRightPanelVisible(true)
+        setActiveTab('Tab2')
+        setCurrentAiHeading('Latest Summary')
+        setCurrentAiMessage('')
+        if (ticketId) {
+            const { output } = await generatelatestSum(ticketId)
+            for await (const delta of readStreamableValue(output)) {
+                console.log(delta)
+                setCurrentAiMessage(curr => `${curr}${delta}`);
+            }
+        }
+    }
+
+    async function suggest(message: string) {
+        setIsRightPanelVisible(true)
+        setActiveTab('Tab2')
+        setCurrentAiHeading('Suggested Response')
+        setCurrentAiMessage('')
+        if (message) {
+            const { output } = await suggestResp(message)
+            for await (const delta of readStreamableValue(output)) {
+                console.log(delta)
+                setCurrentAiMessage(curr => `${curr}${delta}`);
+            }
+        }
+    }
+
+    async function completeSum(ticketId: string) {
+        // console.log(key)
+        setIsRightPanelVisible(true)
+        setActiveTab('Tab2')
+        setCurrentAiHeading('Complete Summary')
+        setCurrentAiMessage('')
+        if (ticketId) {
+            const { output } = await generateSum(ticketId)
+            for await (const delta of readStreamableValue(output)) {
+                console.log(delta)
+                setCurrentAiMessage(curr => `${curr}${delta}`);
+            }
+        }
+    }
+
     return (
         <div className="flex h-full w-full">
-            <div className={`h-[600px] transition-all duration-1500 ease-in-out ${isRightPanelVisible ? 'w-2/3' : 'w-full'}`}>
-                <div className="h-20 text-2xl pl-3 font-bold border-b-[1px] border-b-[#D3D3D3] text-ellipsis">
+            <div className={`h-full transition-all duration-1500 ease-in-out ${isRightPanelVisible ? 'w-2/3' : 'w-full'}`}>
+                <div className="text-2xl pt-1 pl-1 font-bold border-b-1 border-stroke text-ellipsis">
                     <h2>{ticket.subject}</h2>
                     <p className="text-sm">{ticket.id}</p>
                 </div>
-                <div className="p-4 h-[60%] overflow-y-auto overflow-x-hidden">
+                <div className="p-4 h-3/5 overflow-y-auto overflow-x-hidden">
                     {messages.map((msg: any) => {
                         if (msg.message) {
                             if (msg.sender === 'ai') {
@@ -233,12 +235,12 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
                         }
                     })}
                     {events.map((event: any) => {
-                        if (event.eventType === 'EMAIL_SENT') {
+                        if (event.type === 'EMAIL_SENT') {
                             return (
                                 <AiCard message={event.email.text} time={formatDate(event.email.createdAt)} key={event.id} />
                             );
                         }
-                        else if (event.eventType === 'EMAIL_RECEIVED') {
+                        else if (event.type === 'EMAIL_RECEIVED') {
                             return (
                                 <UserCard message={event.email.text} time={formatDate(event.email.createdAt)} key={event.id} />
                             );
@@ -291,19 +293,27 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
 
                     })}
                 </div>
-                <MessageForm
-                    emails={emails}
-                    customerEmail={ticket.customerEmail}
-                    ticketId={ticket.id}
-                    subject={ticket.subject}
-                // onMessageSend={ }
-                />
+                <div className='h-1/5'>
+                    <MessageForm
+                        emails={emails}
+                        customerEmail={ticket.customerEmail}
+                        ticketId={ticket.id}
+                        subject={ticket.subject}
+                        onMessageSend={handleMessageSend}
+                        aiChatassistance={aiChatassistance}
+                        latestSum={latestSum}
+                        suggest={suggest}
+                        completeSum={completeSum}
+                    />
+
+                </div>
+
             </div>
             {isRightPanelVisible && (
-                <div id="rightPanel" className={`h-[600px] bg-gray-100 transition-all duration-1500 ease-in-out ${isRightPanelVisible ? 'w-1/3' : 'w-0 overflow-hidden'}`}>
+                <div id="rightPanel" className={` bg-white border-r-1 border-l-1 border-stroke transition-all duration-1500 ease-in-out ${isRightPanelVisible ? 'w-1/3' : 'w-0 overflow-hidden'}`}>
                     {isRightPanelVisible &&
                         <div className="h-full">
-                            <div className="flex justify-between items-center bg-gray-200 p-4 pb-0 border-b border-gray-300 space-x-4">
+                            <div className="flex justify-between items-center p-4 pb-0 border-b border-stroke space-x-4">
                                 <div className={`cursor-pointer p-2 flex-1 text-center ${activeTab === 'Tab1' ? 'font-bold' : ''}`} onClick={() => setActiveTab('Tab1')}>MetaData</div>
                                 <div className={`cursor-pointer p-2 flex-1 text-center border-l border-gray-400 ${activeTab === 'Tab2' ? 'font-bold' : ''}`} onClick={() => setActiveTab('Tab2')}>AI</div>
                             </div>
@@ -330,7 +340,7 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
 const EventCard = ({ event }: any) => {
     return (
         <div className="flex justify-center my-4 rounded-2xl">
-            <div className="bg-gray-200 rounded-full bg-[#9CA3AF] px-4 py-2 text-sm text-white">
+            <div className="bg-gray-300 rounded-full px-4 py-2 text-sm text-white">
                 {event}
             </div>
         </div>

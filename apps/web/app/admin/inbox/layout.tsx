@@ -1,20 +1,12 @@
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import InboxSidebar from "@/components/Sidebar/InboxLayout/InboxSideBar";
-import { auth } from "@clerk/nextjs/server";
-import axios from "axios";
-
+import InboxSidebar from "../../../components/Sidebar/InboxLayout/InboxSideBar";
 export default async function LayoutAdmin({ children }: { children: React.ReactNode }) {
-    
     return (
-        <div className="">
-            <Breadcrumb pageName="Inbox"></Breadcrumb>
-            <div className="grid grid-cols-8 bg-transparent ">
-                <div className="col-span-1 border-r-[#D3D3D3] border-r-[1px]">
-                    <InboxSidebar />
-                </div>
-                <div className="col-span-7 h-full">
-                    {children}
-                </div>
+        <div className="w-full h-full flex flex-row bg-white">
+            <div className="w-1/7 h-full border-r-2 border-stroke">
+                <InboxSidebar />
+            </div>
+            <div className=" h-full w-6/7">
+                {children}
             </div>
         </div>
     )

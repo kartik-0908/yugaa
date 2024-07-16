@@ -1,10 +1,9 @@
 "use client"
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import React, { useState } from "react";
 import { Button, Select, SelectItem, Textarea } from "@nextui-org/react";
 import axios from "axios";
-import { showToast } from "@/components/Toast";
 import { useUser } from "@clerk/nextjs";
+import { useToasts } from "@geist-ui/core";
 
 const items = [
     {
@@ -28,6 +27,7 @@ const items = [
 
 const feature = () => {
     const { user, isLoaded } = useUser();
+    const { setToast } = useToasts()
 
     const [shortdesc, setShortdesc] = useState("")
     const [message, setMessage] = useState("")
@@ -44,31 +44,29 @@ const feature = () => {
                 message,
                 category
             });
-            showToast("success", <p>Request Successsfully Received</p>)
+            setToast({ text: 'Request Successsfully Received', delay: 2000 })
             setShortdesc("")
             setMessage("")
             setCategory("")
         } catch (error) {
             console.log(error)
-            showToast("error", <p>Some Technical Issue . Try after some time</p>)
+            setToast({ text: 'Some Technical Issue . Try after some time', delay: 2000 })
         }
         setbuttonloading(false)
 
     };
     return (
         <>
-            <Breadcrumb pageName="Feature request" />
-
             <div className="pl-32 pr-32 gird-cols-12">
                 <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                     <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
-                        <h3 className="font-medium text-black dark:text-white">
+                        <div className="text-3xl font-bold text-center text-black">
                             Request a feature
-                        </h3>
+                        </div>
 
                     </div>
                     <form action="#">
-                        <div className="p-6.5 ">
+                        <div className="p-16 pt-2">
                             <div className="mb-4.5 grid-cols-5">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                                     What would you like to see in the next version of our bot?
@@ -111,6 +109,7 @@ const feature = () => {
 
                             </div>
                             <Button
+                            className="mt-8"
                                 onClick={handleSave}
                                 isLoading={buttonloading}
                                 spinner={
@@ -135,7 +134,7 @@ const feature = () => {
                                                 fill="currentColor"
                                             />
                                         </svg>
-                                        <h1>   Saving Changes</h1>
+                                        <div>   Saving Changes</div>
                                     </div>
                                 }
                                 fullWidth color="primary">

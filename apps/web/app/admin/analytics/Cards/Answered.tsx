@@ -1,9 +1,8 @@
 import { useUser } from "@clerk/nextjs";
-import CardDataStats from "../../../../components/CardDataStats";
 import axios from "axios";
 import useSWR from "swr";
 import { Card, CardHeader, CardBody, CardFooter, Divider, Link, Image, Skeleton } from "@nextui-org/react";
-import { getFcrPercentage, getMissed, getTransferRate } from "../../../../actions/shopify";
+import { getFcrPercentage, getMissed, getTransferRate } from "../../../../actions/analytics";
 import React from "react";
 
 function SkeletonComp() {

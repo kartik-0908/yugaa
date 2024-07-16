@@ -5,8 +5,8 @@ export default function ({ message, time }: any) {
                 <span className="font-medium text-gray-600 dark:text-gray-300">U</span>
             </div>
             <div className="w-[80%] ml-3 ml-0 w-fit">
-                <div className="rounded-tl-lg rounded-b-lg bg-black cursor-pointer p-4">
-                    <p className="color-[#ADBAC7]">
+                <div className="rounded-tl-lg rounded-b-lg bg-blue-400 cursor-pointer p-2">
+                    <p className="color-[#ADBAC7] m-0">
                         {message}
                     </p>
 

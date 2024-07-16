@@ -8,7 +8,7 @@ const Sidebar = () => {
     <>
       <nav className="flex-grow mt-5  align-items-center flex flex-col">
         <div>
-          <ul className="mb-6 flex flex-col gap-1.5 text-center">
+          <ul className="mb-6 ml-1 flex flex-col gap-1.5 text-center">
             {menuItems.map((item, index) => (
               <li key={index} className="pb-8">
                 <Element link={item.link} content={item.content}>

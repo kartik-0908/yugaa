@@ -15,7 +15,7 @@ type ChatsType = {
 
 export default function ChatList() {
     const { user, isLoaded } = useUser();
-    const totalInSingle = 2;
+    const totalInSingle = 10;
     if (!isLoaded) {
         return (
             <div>
@@ -47,21 +47,22 @@ export default function ChatList() {
     }
 
     return (
-        <div className="rounded-sm border border-stroke bg-white py-6 pt-0 dark:border-strokedark dark:bg-boxdark xl:col-span-4">
-            <div className="content  mb-6 h-[440px] overflow-y-auto">
-                <div className="overflow-y-auto">
+        <div className='h-full w-full flex flex-col'>
+            <div className="w-full h-[90%] rounded-sm  pt-0 flex flex-col">
+                <div className=" overflow-y-auto">
                     {
                         chats.map((chat, ind) => {
                             return (
-                                <Link href={`/admin/inbox/unassigned/${chat.id}`}>
-                                    <Card id={chat.id} messages={chat.aiConversationTicketId} time={chat.createdAt} email={chat.customerEmail}  />
+                                <Link className='text-black' href={`/admin/inbox/unassigned/${chat.id}`}>
+                                    <Card id={chat.id} messages={chat.aiConversationTicketId} time={chat.createdAt} email={chat.customerEmail} />
                                 </Link>
                             )
                         })
                     }
                 </div>
+
             </div>
-            <div className=" px-7.5 flex justify-center items-center">
+            <div className="flex justify-center items-center">
                 <Pagination
                     total={Math.ceil(total / totalInSingle)}
                     initialPage={1}
@@ -71,6 +72,7 @@ export default function ChatList() {
                 />
             </div>
         </div>
+
 
     );
 }

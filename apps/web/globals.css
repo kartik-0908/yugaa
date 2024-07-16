@@ -3,6 +3,8 @@
 @tailwind utilities;
 
 ul li:before {
-    content: none !important;
-    display: none !important;
-  }
+  content: none !important;
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+}

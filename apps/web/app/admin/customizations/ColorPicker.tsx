@@ -3,12 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { HexColorPicker } from "react-colorful";
 
 interface ColorPickerProps {
-  colors: string[]; // Predefined colors
+  colors: string[];
   onSelect: (color: string) => void;
   defaultColor?: string;
 }
 
-const ColorPicker: React.FC<ColorPickerProps> = ({ colors, onSelect, defaultColor }) => {
+const ColorPicker: React.FC<ColorPickerProps> = ({ colors, onSelect, defaultColor }: any) => {
   const [displayColorPicker, setDisplayColorPicker] = useState<boolean>(false);
   const [currentColor, setCurrentColor] = useState<string>(defaultColor || colors[0]);
   const [selectedColor, setSelectedColor] = useState<string>(defaultColor || colors[0]);

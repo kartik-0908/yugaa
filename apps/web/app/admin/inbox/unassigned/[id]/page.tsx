@@ -14,10 +14,6 @@ export default async function ticket({ params }: any) {
     const ticket = res.data.escalatedTicket;
     const { messages } = ticket.aiConversationTicket;
     return (
-        <>
-           <RightPanelToggle ticket={ticket} messages={messages} emails={emails} />
-        </>
-
-
+        <RightPanelToggle ticket={ticket} messages={messages} emails={emails} />
     )
 }

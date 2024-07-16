@@ -45,6 +45,7 @@ function truncateString(str: string, numWords: number = 5): string {
 
 
 export default function Card({ id, messages }: any) {
+   console.log(messages)
     return (
         <div className="flex flex-col p-4 border-b-[1px] border-b-[#D3D3D3]">
             <div className="flex justify-between">

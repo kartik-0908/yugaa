@@ -5,7 +5,7 @@ import { ApexOptions } from "apexcharts";
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import useSWR from "swr";
-import { getQueriesbyCategory } from "../../../actions/shopify";
+import { getQueriesbyCategory } from "../../../actions/analytics";
 import { SkeletonComp } from "../home/peakInteraction";
 
 interface ChartThreeState {

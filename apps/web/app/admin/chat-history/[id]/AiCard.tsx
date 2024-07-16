@@ -18,17 +18,17 @@ export default function ({ message, time }: any) {
     console.log(formattedMessages)
     return (
         <div className="flex w-full mb-4 flex-row-reverse">
-            <div className="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-red rounded-full dark:bg-gray-600">
+            <div className="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden rounded-full dark:bg-gray-600">
                 <span className="font-medium text-gray-600 dark:text-gray-300">Y</span>
             </div>
             <div className="max-w-[55%] ml-0 mr-3 w-fit">
                 {
                     formattedMessages.map((msg) => {
                         return (
-                            <div className="rounded-tl-lg rounded-b-lg bg-black cursor-pointer p-4 mt-1">
-                                <p className="color-[#ADBAC7] text-pretty">
+                            <div className="rounded-tl-lg rounded-b-lg bg-blue-200 cursor-pointer p-2 mt-1">
+                                <div className="color-[#ADBAC7] text-pretty">
                                     {formatMessage(msg)}
-                                </p>
+                                </div>
                             </div>
                         )
                     })
