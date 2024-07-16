@@ -1,7 +1,7 @@
 "use server"
 import { PrismaClient } from '@repo/db';
 
-export const db = new PrismaClient();
+const db = new PrismaClient();
 
 export async function getUsers(shopDomain: string) {
     console.log(shopDomain)
@@ -340,4 +340,23 @@ export async function getQueriesbyPriority(data: string): Promise<number[]> {
     ];
 
     return resultArray;
+}
+
+export async function fetchNotifications(userId: string) {
+    const notifications = await db.notification.findMany({
+        where: {
+            userId: userId,
+            isRead: false
+        },
+        orderBy: {
+            createdAt: 'desc'
+        },
+        take: 5,
+        select: {
+            id: true,
+            createdAt: true,
+            content: true
+        }
+    });
+    return notifications
 }

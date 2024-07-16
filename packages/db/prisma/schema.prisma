@@ -158,6 +158,7 @@ model Notification {
   maintenanceEndTime   DateTime?
   newTicketsCount      Int?
   resolvedTicketsCount Int?
+  userId               String?
 
   @@index([createdAt])
   @@index([isRead])
