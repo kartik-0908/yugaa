@@ -1,35 +1,36 @@
-'use client'
-import { showToast } from "./Toast"
+"use client"
 import { useFormState } from "react-dom"
 import { useEffect } from "react"
-import { handleSubmit } from "../../lib/actions"
+import { handleSubmit } from "../actions/analytics"
+import { useToasts } from "@geist-ui/core"
+import { set } from "zod"
 
-
-export function Adminform({shopDomain, role}: any){
+export default function Customsignup() {
+    const { setToast } = useToasts()
     const [state, formAction] = useFormState(handleSubmit, {
         status: '',
     })
 
-    useEffect(()=>{
+    useEffect(() => {
         console.log(state)
-        if(state?.status === "success"){
-            showToast("success", <p>Go to your email Inbox</p>)
+        if (state?.status === "success") {
+            setToast({ text: 'Invitation Sent', delay: 2000 })
         }
-        if(state?.status === "error"){
-            showToast("error", <p>Some Technical Issues</p>)
+        if (state?.status === "error") {
+            setToast({ text: 'Error Occured. Please try after some time', delay: 2000 })
         }
-    },[state])
-   
+    }, [state])
     return (
         <div className="bg-black flex justify-center items-center min-h-screen py-12">
             <div className="bg-zinc-900 rounded-lg shadow-xl p-8 w-full max-w-md">
                 <div className="grid w-full items-center gap-6">
                     <header className="text-center">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 40 40" className="mx-auto size-10">
+                            {/* SVG path content remains the same */}
                         </svg>
                         <h1 className="mt-4 text-xl font-medium tracking-tight text-white">Create an account</h1>
                     </header>
-                    <form  action={formAction}>
+                    <form action={formAction}>
                         <div className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-white">Shopify Domain</label>
@@ -37,15 +38,18 @@ export function Adminform({shopDomain, role}: any){
                                     <input
                                         hidden
                                         name='role'
-                                        defaultValue={role}
+                                        defaultValue={"admin"}
                                     />
                                     <input
+                                        required
                                         name='shopDomain'
                                         type="text"
-                                        defaultValue={shopDomain}
                                         placeholder="Enter your shopify domain"
                                         className="w-full rounded-l-md bg-neutral-800 px-3.5 py-2 text-sm text-white outline-none ring-1 ring-inset ring-zinc-700 hover:ring-zinc-600 focus:bg-transparent focus:ring-[1.5px] focus:ring-blue-400 data-[invalid]:ring-red-400"
                                     />
+                                    <div className="w-full rounded-r-md bg-neutral-800 px-3.5 py-2 text-sm border-[1.5px] text-white border-l-0 outline-none ring-1 ring-inset ring-zinc-700 hover:ring-zinc-600 focus:bg-transparent focus:ring-[1.5px] focus:ring-blue-400 data-[invalid]:ring-red-400">
+                                        .myshopify.com
+                                    </div>
                                 </div>
                             </div>
 
