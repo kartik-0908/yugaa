@@ -1,20 +1,45 @@
 "use client"
-import { useState } from "react";
+import { use, useState } from "react";
 import Notification from "./Notification";
 import { Badge, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/react";
+import { useUser } from "@clerk/nextjs";
+import useSWR from "swr";
+import { fetchNotifications } from "../../../actions/analytics";
 
 interface Notification {
   id: string;
   title: string;
   content: string;
-  timestamp: string;
+  createdAt: Date;
 }
 
 
 
 
 const DropdownNotification = () => {
+  const { user, isLoaded } = useUser();
+  if (!isLoaded) return null;
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { data, isLoading, error } = useSWR(`${user?.id}`, fetchNotifications, {
+    refreshInterval: 1000,
+    keepPreviousData: true,
+  });
+  if (isLoading) {
+    return <div>Loading</div>
+  }
+
+  if (error) {
+    return <div>Error</div>
+  }
+
+  if (data) {
+    setNotifications(data);
+
+  }
+
+
+
+
 
   return (
     <Dropdown

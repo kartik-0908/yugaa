@@ -355,6 +355,7 @@ export async function fetchNotifications(userId: string) {
         select: {
             id: true,
             createdAt: true,
+            title: true,
             content: true
         }
     });

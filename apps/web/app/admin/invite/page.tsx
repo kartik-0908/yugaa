@@ -1,6 +1,6 @@
-import MembersComponent from "@/components/inviteUser";
 import { auth } from "@clerk/nextjs/server";
 import axios from "axios";
+import MembersComponent from "../../../components/inviteUser";
 
 export default async function PageComponent() {
   const { sessionClaims } = auth()

@@ -1,4 +1,4 @@
-import Customsignup from '@/components/signup';
+import Customsignup from "../../../components/signup";
 
 const EmailRoleForm = () => {
   return (

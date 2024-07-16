@@ -95,27 +95,6 @@ const ButtonWithForm = () => {
             </PopoverContent>
         </Popover>
 
-        // <>
-        //     <div onClick={onOpen} className='p-2'>
-        //     </div>
-        //     <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        //         <ModalContent>
-        //             {(onClose) => (
-        //                 <>
-        //                     <ModalHeader>
-        //                         Invite Members
-        //                     </ModalHeader>
-        //                     <ModalBody>
-
-        //                     </ModalBody>
-        //                     <ModalFooter>
-        //                        
-        //                     </ModalFooter>
-        //                 </>
-        //             )}
-        //         </ModalContent>
-        //     </Modal>
-        // </>
     );
 };
 
