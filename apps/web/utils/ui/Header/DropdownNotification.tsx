@@ -19,7 +19,6 @@ interface Notification {
 const DropdownNotification = () => {
   const { user, isLoaded } = useUser();
   if (!isLoaded) return null;
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const { data, isLoading, error } = useSWR(`${user?.id}`, fetchNotifications, {
     refreshInterval: 1000 * 60 * 60,
     keepPreviousData: true,
@@ -31,22 +30,12 @@ const DropdownNotification = () => {
   if (error) {
     return <div>Error</div>
   }
-
-  if (data) {
-    setNotifications(data);
-
-  }
-
-
-
-
-
   return (
     <Dropdown
     >
       <DropdownTrigger>
         <div className="p-4">
-          <Badge color="danger" content={5} isInvisible={false} shape="circle">
+          <Badge color="danger" content={data?.length} isInvisible={false} shape="circle">
             <svg
               fill="none"
               height={24}
@@ -80,6 +69,7 @@ const DropdownNotification = () => {
           className="text-black"
         >
           Notifications
+          {JSON.stringify(data)}
         </DropdownItem>
       </DropdownMenu>
     </Dropdown>
