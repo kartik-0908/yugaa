@@ -29,7 +29,7 @@ export function Answered({ start, end }: { start: string, end: string }) {
     const { data, isLoading, error } = useSWR(
         `${process.env.NEXT_PUBLIC_API_URL}/v1/admin/answered?shop=${user?.publicMetadata.shopDomain}&start=${start}&end=${end}`,
         fetcher, {
-        refreshInterval: 1000 * 60 * 10,
+        refreshInterval: 1000 ,
         keepPreviousData: true
 
     }

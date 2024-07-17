@@ -96,10 +96,14 @@ const ChartThree = ({ start, end, users }: { start: string, end: string, users: 
       <SkeletonComp />
     )
   }
-  console.log(data)
+  console.log(`chart the data is ${data}`)
+  
   if (error) {
     return <div>Error from SWR...</div>
   }
+  // if(data){
+  //   setState({series: data})
+  // }
   const allZero = data?.every(value => value === 0);
 
   return (
@@ -119,7 +123,7 @@ const ChartThree = ({ start, end, users }: { start: string, end: string, users: 
               <span className="text-sm">No data available</span>
             </div>
           ) : (
-            <ReactApexChart options={options} series={state.series} type="donut" height={350} />
+            <ReactApexChart options={options} series={data} type="donut" height={350} />
           )}
         </div>
       </div>
@@ -131,7 +135,7 @@ const ChartThree = ({ start, end, users }: { start: string, end: string, users: 
               <span className="mr-2 block h-3 w-full max-w-3 rounded-full" style={{ backgroundColor: colors[index] }}></span>
               <p className="flex w-full justify-between text-sm font-medium ">
                 <span>{category}</span>
-                {data ? (<span>{data[index]}</span>) :
+                {data ? (<span>{data[index] }</span>) :
                   <span>0</span>}
               </p>
             </div>
