@@ -1,14 +1,8 @@
-"use client";
-
 import React from "react";
-import { usePathname } from "next/navigation";
 import { menuItems } from "./items";
 import Element from "./Card";
 
 const ChatSidebar = () => {
-  const pathname = usePathname();
-
-
   return (
     <>
       <div className="no-scrollbar flex flex-col p-2 overflow-y-auto flex-grow">
