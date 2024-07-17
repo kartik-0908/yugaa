@@ -1,12 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { usePathname } from "next/navigation";
 import { menuItems } from "./items";
 import Element from "./Card";
-import { Switch, cn } from "@nextui-org/react";
-import RestrictOperator from "./RestrictOpeartor";
-import RestrictDuration from "./RestrictDuration";
 
 const ChatSidebar = () => {
   const pathname = usePathname();

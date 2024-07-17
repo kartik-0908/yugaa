@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '@clerk/nextjs';
-import { Pagination } from "@nextui-org/react";
+import { Pagination, Skeleton } from "@nextui-org/react";
 import Link from 'next/link';
 import Card from './Card';
 
@@ -15,14 +15,26 @@ type ChatsType = {
 
 export default function ChatList({ status }: { status: string }) {
     const { user, isLoaded } = useUser();
-    const totalInSingle = 10;
     if (!isLoaded) {
         return (
-            <div>
-                still loading
-            </div>
+            <Skeleton className='w-full h-full'>
+                <div className='h-full w-full flex flex-col'>
+                    <div className="w-full h-[90%] rounded-sm  pt-0 flex flex-col">
+                        <div className=" overflow-y-auto">
+                            <Link className='text-black' href={`/admin/inbox/unassigned/`}>
+                                <Card id={"chat.id"} messages={"chat.aiConversationTicketId"} time={"hat.createdAt"} email={"chat.customerEmail"} />
+                            </Link>
+                        </div>
+
+                    </div>
+                    <div className="flex justify-center items-center">
+                    </div>
+                </div>
+            </Skeleton>
         )
     }
+    const totalInSingle = 10;
+
     const [chats, setChats] = useState<ChatsType>([]);
     const [filter, setFilter] = useState('all');
     const [page, setPage] = useState(1);
