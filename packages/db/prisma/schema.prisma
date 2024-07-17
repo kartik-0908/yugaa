@@ -158,7 +158,6 @@ model Notification {
   maintenanceEndTime   DateTime?
   newTicketsCount      Int?
   resolvedTicketsCount Int?
-  userId               String?
 
   @@index([createdAt])
   @@index([isRead])
@@ -206,7 +205,9 @@ model User {
   role                 String?
   emailVerified        DateTime?
   currentActiveTickets Int       @default(0)
-  availableForDist     Boolean   @default(true)
+  unavailableTill      DateTime  @default(now())
+  availabe             Boolean   @default(true)
+  lastNotifiedAt       DateTime  @default(now())
 }
 
 enum EventType {

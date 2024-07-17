@@ -13,7 +13,7 @@ type ChatsType = {
     customerEmail: string
 }[]
 
-export default function ChatList() {
+export default function ChatList({ status }: { status: string }) {
     const { user, isLoaded } = useUser();
     const totalInSingle = 10;
     if (!isLoaded) {
@@ -26,7 +26,7 @@ export default function ChatList() {
     const [chats, setChats] = useState<ChatsType>([]);
     const [filter, setFilter] = useState('all');
     const [page, setPage] = useState(1);
-    const [total, setTotal] = useState(1);
+    const [total, setTotal] = useState(0);
 
     useEffect(() => {
         fetchChats();
@@ -37,7 +37,8 @@ export default function ChatList() {
         const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/v1/admin/getEscwithStatus`, {
             shopDomain: user?.publicMetadata.shopDomain,
             offset: (page - 1) * totalInSingle,
-            count: totalInSingle
+            count: totalInSingle,
+            status: status
         })
         const { retcount } = res.data;
         const { tickets } = res.data;
@@ -63,13 +64,14 @@ export default function ChatList() {
 
             </div>
             <div className="flex justify-center items-center">
-                <Pagination
-                    total={Math.ceil(total / totalInSingle)}
+                {total > 0 ? <Pagination
+                    total={total > 0 ? Math.ceil(total / totalInSingle) : 0}
                     initialPage={1}
                     onChange={(page) => {
                         setPage(page)
                     }}
-                />
+                /> : null}
+
             </div>
         </div>
 

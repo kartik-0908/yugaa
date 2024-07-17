@@ -5,10 +5,13 @@ import { Button, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar }
 import Link from "next/link";
 
 export default function UserComponent() {
+  const { user, isLoaded } = useUser();
+  if(!isLoaded) return null;
+
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Avatar isBordered radius="sm" src="https://i.pravatar.cc/150?u=a04258a2462d826712d" />
+        <Avatar isBordered radius="sm" src={user?.imageUrl} />
       </DropdownTrigger>
       <DropdownMenu
         classNames={{

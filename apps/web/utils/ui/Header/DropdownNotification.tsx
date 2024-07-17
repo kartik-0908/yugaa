@@ -20,7 +20,7 @@ const DropdownNotification = () => {
   const { user, isLoaded } = useUser();
   if (!isLoaded) return null;
   const { data, isLoading, error } = useSWR(`${user?.id}`, fetchNotifications, {
-    refreshInterval: 1000 * 60 * 60,
+    refreshInterval: 1000 * 10,
     keepPreviousData: true,
   });
   if (isLoading) {
@@ -30,6 +30,7 @@ const DropdownNotification = () => {
   if (error) {
     return <div>Error</div>
   }
+  console.log(`notification data`, data)
   return (
     <Dropdown
     >
@@ -82,13 +83,17 @@ const DropdownNotification = () => {
           base: "gap-4",
         }}
       >
-        <DropdownItem
+        {data?.map((notification) => (
+          <DropdownItem isReadOnly title={notification?.title} description={notification?.content} key={notification?.id} />
+        )) ?? <DropdownItem
           href="#"
           isReadOnly={true}
           className="text-black"
         >
-          Notifications
-        </DropdownItem>
+            No notifications
+          </DropdownItem>}
+          
+
       </DropdownMenu>
     </Dropdown>
   );

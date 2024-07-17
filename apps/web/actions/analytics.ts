@@ -1,9 +1,7 @@
 "use server"
-import { PrismaClient } from '@repo/db';
 import axios from 'axios';
 import { revalidatePath } from 'next/cache';
-
-const db = new PrismaClient();
+import db from './db';
 
 export async function getUsers(shopDomain: string) {
     console.log(shopDomain)
@@ -12,12 +10,14 @@ export async function getUsers(shopDomain: string) {
             shopDomain: shopDomain
         },
         select: {
-            availableForDist: true,
+            // unavailableTill: true,
+            availabe: true,
+            shopDomain: true,
             id: true,
             firstName: true,
             lastName: true,
             email: true,
-            role: true
+            role: true,
         }
     })
     return users
@@ -335,13 +335,12 @@ export async function getQueriesbyPriority(data: string): Promise<number[]> {
 export async function fetchNotifications(userId: string) {
     const notifications = await db.notification.findMany({
         where: {
-            userId: userId,
-            isRead: false
+            recipientId: userId,
+            isRead: false,
         },
         orderBy: {
             createdAt: 'desc'
         },
-        take: 5,
         select: {
             id: true,
             createdAt: true,
@@ -349,7 +348,7 @@ export async function fetchNotifications(userId: string) {
             content: true
         }
     });
-    return notifications
+    return notifications;
 }
 
 

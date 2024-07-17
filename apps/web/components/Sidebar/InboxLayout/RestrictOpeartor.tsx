@@ -2,52 +2,39 @@ import { useUser } from "@clerk/nextjs";
 import { useDisclosure } from "@nextui-org/react";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { getUsers } from "../../../actions/analytics";
-import { useState } from "react";
+import { changeOperatorAvailability, updateOperatorAvailability } from "../../../actions/inbox";
 
 export default function RestrictOperator() {
     const { user, isLoaded } = useUser()
     if (!isLoaded) {
-        return <div>Loading...</div>
+        return null;
     }
-    const [selected, setSelected] = useState<Set<string>>(new Set());
+    const { mutate } = useSWRConfig()
     const { onOpen } = useDisclosure();
     const { data, isLoading, error } = useSWR(
         `${user?.publicMetadata.shopDomain}`,
-        getUsers, {
-        refreshInterval: 1000 ,
-        keepPreviousData: true
-    })
-
+        getUsers)
     if (isLoading) {
-        return <div>Loading...</div>
+        return null
     }
-
-    
-
     console.log(data)
-
     if (!data) {
         return null;
     }
-
-    let currentselected: Set<string>  = new Set();
-    data.map((user)=>{
-        if(user.availableForDist){
+    let currentselected: Set<string> = new Set();
+    data.map((user) => {
+        if (user.availabe) {
             currentselected.add(user.id)
         }
     })
-    setSelected(currentselected)
 
     return (
         <Popover showArrow placement="right"
-        classNames={{
-            base:"shadow-none",
-            content: [
-                "bg-gradient-to-br from-white to-default-300",
-              ],
-        }}
+            classNames={{
+                base: "shadow-none",
+            }}
         >
             <PopoverTrigger>
                 <div className="flex flex-row gap-2">
@@ -58,15 +45,30 @@ export default function RestrictOperator() {
                 </div>
 
             </PopoverTrigger>
-            <PopoverContent  className="p-1 bg-transparent shadow-none"> 
+            <PopoverContent className="p-1  shadow-none">
                 <div className="flex flex-col gap-3">
                     <Table
-                    
+                        onSelectionChange={(key) => {
+                            if (key === "all") {
+                                const allIds = data.map((user) => user.id);
+                                changeOperatorAvailability(allIds)
+                            }
+                            else {
+                                const arr = Array.from(key);
+                                const userIds: string[] = arr.map((item) => item.toString())
+                                updateOperatorAvailability(userIds, true)
+                                const allIds = data.map((user) => user.id);
+                                const missingIds = allIds.filter((user) => !userIds.includes(user));
+                                updateOperatorAvailability(missingIds, false)
+                            }
+                            mutate(`${user?.publicMetadata.shopDomain}`)
+
+                        }}
                         color="primary"
                         className="shadow-none"
                         selectionMode="multiple"
                         aria-label="Example static collection table"
-                        selectedKeys={selected}
+                        defaultSelectedKeys={currentselected}
                     >
                         <TableHeader>
                             <TableColumn>NAME</TableColumn>
