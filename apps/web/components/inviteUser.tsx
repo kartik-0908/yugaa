@@ -92,19 +92,25 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
 
     return (
         <div className="relative p-4">
-            <div className="bg-gray-100 p-4 mb-6 rounded-md">
+            <div className=" p-4 mb-6 rounded-md te">
                 <h2 className="text-lg font-medium mb-2">Invite Links</h2>
-                <div className="flex items-center mb-2">
-                    <Input readOnly value={adminInviteLink} className="mr-2 flex-1" />
-                    <Snippet>{adminInviteLink}</Snippet>
+                <div className="flex flex-col mb-2">
+                    <div className="flex mb-2">
+                        <Snippet classNames={{
+                            pre: "m-0"
+                        }} size="sm" symbol="For admins: " >{adminInviteLink}</Snippet>
+                    </div>
+                    <div className="flex ">
+                        <Snippet classNames={{
+                            pre: "m-0"
+                        }} size="sm" symbol="For members: " >{memberInviteLink}</Snippet>
+                    </div>
                 </div>
-                <div className="flex items-center">
-                    <Snippet>{memberInviteLink}</Snippet>
-                </div>
+
             </div>
             <div className="overflow-x-auto mt-10">
-                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead className="text-xs text-center text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <table className="w-full  text-left ">
+                    <thead className="text-xs text-center text-gray-700 uppercase bg-gray-50 ">
                         <tr>
                             <th scope="col" className="px-6 py-3">
                                 User
@@ -122,7 +128,7 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                     </thead>
                     <tbody>
                         {members.map((member, index) => (
-                            <tr key={index} className="text-center bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <tr key={index} className="text-center bg-white border-b ">
                                 <td className="px-6 py-4">{member.name}</td>
                                 <td className="px-6 py-4">
                                     <Select
