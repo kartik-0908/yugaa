@@ -112,7 +112,7 @@ const PriorityBar = ({ start, end, users }: { start: string, end: string, users:
       <div className="mb-3 justify-between gap-4 sm:flex">
         <div>
           <h5 className="text-xl font-semibold ">
-            Query Status
+            Priority Distribution
           </h5>
         </div>
       </div>

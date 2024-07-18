@@ -10,7 +10,6 @@ export async function getUsers(shopDomain: string) {
             shopDomain: shopDomain
         },
         select: {
-            // unavailableTill: true,
             availabe: true,
             shopDomain: true,
             id: true,
