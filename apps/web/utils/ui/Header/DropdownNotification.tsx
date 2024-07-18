@@ -84,7 +84,7 @@ const DropdownNotification = () => {
         }}
       >
         {data?.map((notification) => (
-          <DropdownItem isReadOnly title={notification?.title} description={notification?.content} key={notification?.id} />
+          <DropdownItem isReadOnly title={notification?.notification?.title} description={notification?.notification?.content} key={notification?.id} />
         )) ?? <DropdownItem
           href="#"
           isReadOnly={true}

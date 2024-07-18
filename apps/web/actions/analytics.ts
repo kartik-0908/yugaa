@@ -43,7 +43,7 @@ export async function getFcrPercentage(data: string) {
                 gte: start,
                 lte: end
             },
-            assignedTo: {
+            assignedToId: {
                 in: userIds
             }
         }
@@ -62,7 +62,7 @@ export async function getTransferRate(data: string) {
                 gte: start,
                 lte: end
             },
-            assignedTo: {
+            assignedToId: {
                 in: users
             }
         }
@@ -88,7 +88,7 @@ export async function getMissed(data: string) {
         where: {
             AND: [
                 { createdAt: { gte: start, lte: end } },
-                { assignedTo: { in: users } },
+                { assignedToId: { in: users } },
                 {
                     NOT: {
                         AIEscalatedTicketEvent: {
@@ -137,7 +137,7 @@ export async function getQueriesbyCategory(data: string): Promise<number[]> {
                 gte: new Date(start),
                 lte: new Date(end)
             },
-            assignedTo: {
+            assignedToId: {
                 in: users
             }
         }
@@ -173,7 +173,7 @@ export async function getUserWorkload(data: string) {
     const { users, start, end } = JSON.parse(data);
 
     const workloadData = await db.aIEscalatedTicket.groupBy({
-        by: ['assignedTo'],
+        by: ['assignedToId'],
         _count: {
             id: true
         },
@@ -182,7 +182,7 @@ export async function getUserWorkload(data: string) {
                 gte: new Date(start),
                 lte: new Date(end)
             },
-            assignedTo: {
+            assignedToId: {
                 in: users,
                 not: null
             }
@@ -205,8 +205,8 @@ export async function getUserWorkload(data: string) {
     const userMap = new Map(userDetails.map(user => [user.id, user]));
 
     const result = workloadData.map(item => {
-        if (item.assignedTo === null) return null;
-        const user = userMap.get(item.assignedTo);
+        if (item.assignedToId === null) return null;
+        const user = userMap.get(item.assignedToId);
         return {
             name: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
             workload: item._count.id
@@ -247,7 +247,7 @@ export async function getQueriesbyStatus(data: string): Promise<number[]> {
                 gte: new Date(start),
                 lte: new Date(end)
             },
-            assignedTo: {
+            assignedToId: {
                 in: users
             }
         }
@@ -300,7 +300,7 @@ export async function getQueriesbyPriority(data: string): Promise<number[]> {
                 gte: new Date(start),
                 lte: new Date(end)
             },
-            assignedTo: {
+            assignedToId: {
                 in: users
             }
         }
@@ -333,22 +333,20 @@ export async function getQueriesbyPriority(data: string): Promise<number[]> {
 }
 
 export async function fetchNotifications(userId: string) {
-    const notifications = await db.notification.findMany({
+    const notifications = await db.user.findUnique({
         where: {
-            recipientId: userId,
-            isRead: false,
+            id: userId
         },
-        orderBy: {
-            createdAt: 'desc'
-        },
-        select: {
-            id: true,
-            createdAt: true,
-            title: true,
-            content: true
+        include: {
+            notifications: {
+                include: {
+                    notification: true
+                }
+            }
         }
-    });
-    return notifications;
+    })
+    console.log(notifications)
+    return notifications?.notifications;
 }
 
 

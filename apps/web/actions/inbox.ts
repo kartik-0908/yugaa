@@ -1,6 +1,8 @@
 "use server"
 
+import { user } from "@nextui-org/react";
 import db from "./db";
+import { randomUUID } from "crypto";
 
 
 export async function changeOperatorAvailability(userId: string[]) {
@@ -44,7 +46,7 @@ export async function updateOperatorAvailability(userId: string[], available: bo
 
 }
 
-export async function updateAssignee(id: string, assigneeId: string) {
+export async function updateAssignee(id: string, assigneeId: string, by: string) {
     let currentAssigneeId;
     if (assigneeId === "Unassigned") {
         currentAssigneeId = null
@@ -52,13 +54,29 @@ export async function updateAssignee(id: string, assigneeId: string) {
     else {
         currentAssigneeId = assigneeId
     }
-    const res = await db.aIEscalatedTicket.update({
-        where: {
-            id: id
-        },
-        data: {
-            assignedToId: currentAssigneeId
-        }
+    await db.$transaction(async (tx) => {
+        const res = await tx.aIEscalatedTicket.update({
+            where: {
+                id: id
+            },
+            data: {
+                assignedToId: currentAssigneeId
+            }
+        })
+        const resp = await tx.user.findUnique({
+            where: {
+                id: assigneeId
+            }
+        })
+        await tx.aIEscalatedTicketEvent.create({
+            data: {
+                id: randomUUID(),
+                aiEscalatedTicketId: id,
+                changedBy: by,
+                assignedTo: resp?.firstName + " " + resp?.lastName,
+                type: "ASSIGNED"
+            }
+        })
     })
-    console.log(res)
+
 }
