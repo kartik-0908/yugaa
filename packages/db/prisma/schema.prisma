@@ -30,8 +30,9 @@ model AIEscalatedTicket {
   subject                String                   @default("Subject")
   fcr                    Boolean                  @default(false)
   fcrBy                  String?
-  assignedTo             String?
+  assignedToId           String?                  @unique
   AIConversationTicket   AIConversationTicket     @relation(fields: [aiConversationTicketId], references: [id])
+  User                   User?                    @relation(fields: [assignedToId], references: [id])
   AIEscalatedTicketEvent AIEscalatedTicketEvent[]
 }
 
@@ -193,21 +194,22 @@ model ShopifyInstalledShop {
 }
 
 model User {
-  id                   String    @id
-  email                String    @unique
+  id                   String             @id
+  email                String             @unique
   firstName            String?
   lastName             String?
   lastLoginAt          DateTime?
   shopDomain           String?
   image                String?
-  createdAt            DateTime  @default(now())
+  createdAt            DateTime           @default(now())
   updatedAt            DateTime?
   role                 String?
   emailVerified        DateTime?
-  currentActiveTickets Int       @default(0)
-  unavailableTill      DateTime  @default(now())
-  availabe             Boolean   @default(true)
-  lastNotifiedAt       DateTime  @default(now())
+  currentActiveTickets Int                @default(0)
+  unavailableTill      DateTime           @default(now())
+  availabe             Boolean            @default(true)
+  lastNotifiedAt       DateTime           @default(now())
+  AIEscalatedTicket    AIEscalatedTicket?
 }
 
 enum EventType {

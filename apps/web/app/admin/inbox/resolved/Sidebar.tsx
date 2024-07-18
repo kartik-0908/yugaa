@@ -63,14 +63,18 @@ export default function ChatList({ status }: { status: string }) {
         <div className='h-full w-full flex flex-col'>
             <div className="w-full h-[90%] rounded-sm  pt-0 flex flex-col">
                 <div className=" overflow-y-auto">
-                    {
+                {chats.length > 0 ?
                         chats.map((chat, ind) => {
                             return (
                                 <Link className='text-black' href={`/admin/inbox/resolved/${chat.id}`}>
                                     <Card id={chat.id} messages={chat.aiConversationTicketId} time={chat.createdAt} email={chat.customerEmail} />
                                 </Link>
                             )
-                        })
+                        }) : <div className="flex flex-col p-4">
+                            <p className="text-sm leading-4 text-ellipsis font-normal mt-2">
+                                No data to display
+                            </p>
+                        </div>
                     }
                 </div>
 

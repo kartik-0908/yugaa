@@ -43,3 +43,22 @@ export async function updateOperatorAvailability(userId: string[], available: bo
     })
 
 }
+
+export async function updateAssignee(id: string, assigneeId: string) {
+    let currentAssigneeId;
+    if (assigneeId === "Unassigned") {
+        currentAssigneeId = null
+    }
+    else {
+        currentAssigneeId = assigneeId
+    }
+    const res = await db.aIEscalatedTicket.update({
+        where: {
+            id: id
+        },
+        data: {
+            assignedToId: currentAssigneeId
+        }
+    })
+    console.log(res)
+}

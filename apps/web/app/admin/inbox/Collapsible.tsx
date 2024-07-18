@@ -10,10 +10,12 @@ import { generate, generateSum, generatelatestSum, suggestResp } from '../../../
 import { readStreamableValue } from 'ai/rsc';
 import TextMessage from '../../../components/copy';
 import { formatDate } from '../../../common/function';
+import AssignedTo from '../../../components/AssignedTo';
 
 const RightPanelToggle = ({ ticket, messages, emails }: any) => {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return (<div>Loading...</div>);
+
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(true);
     const [activeTab, setActiveTab] = useState('Tab1'); // Initialize with the first tab
     const [currentAiMessage, setCurrentAiMessage] = useState('');
@@ -137,6 +139,11 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
                                     <option value="In Progress">In Progress</option>
                                     <option value="Resolved">Resolved</option>
                                 </select>
+                            </div>
+
+                            <div>
+                                <AssignedTo id={ticket.id} assigneeId={ticket.assignedTo} shopDomain={user?.publicMetadata.shopDomain as string} />
+
                             </div>
                         </div>
                     </div>
