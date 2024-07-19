@@ -183,7 +183,6 @@ export async function getUserWorkload(data: string) {
             },
             assignedToId: {
                 in: users,
-                not: null
             }
         }
     });
