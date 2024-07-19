@@ -8,11 +8,11 @@ datasource db {
 }
 
 model AIConversationTicket {
-  id                String              @id
+  id                String              @id @default(uuid())
   shopDomain        String              @default("default")
   status            String?
   createdAt         DateTime            @default(now())
-  updatedAt         DateTime
+  updatedAt         DateTime            @default(now())
   AIEscalatedTicket AIEscalatedTicket[]
   Message           Message[]
 }
@@ -30,7 +30,7 @@ model AIEscalatedTicket {
   subject                String                   @default("Subject")
   fcr                    Boolean                  @default(false)
   fcrBy                  String?
-  assignedToId           String?                  @unique
+  assignedToId           String                   @unique @default("Unassigned")
   AIConversationTicket   AIConversationTicket     @relation(fields: [aiConversationTicketId], references: [id])
   User                   User?                    @relation(fields: [assignedToId], references: [id])
   AIEscalatedTicketEvent AIEscalatedTicketEvent[]
@@ -49,9 +49,8 @@ model UserNotification {
   @@index([notificationId])
 }
 
-
 model AIEscalatedTicketEvent {
-  id                  String            @id
+  id                  String            @id @default(uuid())
   aiEscalatedTicketId String
   changedBy           String?
   oldStatus           String?
@@ -104,7 +103,7 @@ model Customer {
 }
 
 model Email {
-  id                     String                   @id
+  id                     String                   @id @default(uuid())
   createdAt              DateTime                 @default(now())
   from                   String
   subject                String
@@ -114,24 +113,11 @@ model Email {
 }
 
 model FeatureRequest {
-  id          String @id
+  id          String @id @default(uuid())
   shop        String
   description String
   details     String
   category    String
-}
-
-model InvitedUser {
-  id                String   @id
-  email             String   @unique
-  role              String
-  shopDomain        String
-  invitationToken   String   @unique
-  invitationSentAt  DateTime @default(now())
-  invitationExpires DateTime
-  verified          Boolean  @default(false)
-
-  @@unique([shopDomain, email])
 }
 
 model KnowledgeBase {
@@ -144,7 +130,7 @@ model KnowledgeBase {
 }
 
 model Message {
-  id                   String               @id
+  id                   String               @id @default(uuid())
   createdAt            DateTime             @default(now())
   message              String
   sender               String
@@ -188,7 +174,7 @@ model PlanDetails {
 }
 
 model RegisteredWebhooks {
-  id          String   @id
+  id          String   @id @default(uuid())
   address     String
   topic       String
   created_at  DateTime
@@ -197,17 +183,17 @@ model RegisteredWebhooks {
 }
 
 model ShopifyInstalledShop {
-  id               String   @id
+  id               String   @id @default(uuid())
   shop             String   @unique
   accessToken      String?
-  adminInviteCode  String
-  memberInviteCode String
+  adminInviteCode  String   @default(uuid())
+  memberInviteCode String   @default(uuid())
   email            String[]
   autoAssignment   Boolean  @default(true)
 }
 
 model User {
-  id                   String             @id
+  id                   String             @id @default(uuid())
   email                String             @unique
   firstName            String?
   lastName             String?
@@ -224,7 +210,6 @@ model User {
   lastNotifiedAt       DateTime           @default(now())
   AIEscalatedTicket    AIEscalatedTicket?
   notifications        UserNotification[]
-
 }
 
 enum EventType {
