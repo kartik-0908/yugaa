@@ -30,7 +30,7 @@ model AIEscalatedTicket {
   subject                String                   @default("Subject")
   fcr                    Boolean                  @default(false)
   fcrBy                  String?
-  assignedToId           String                   @unique @default("Unassigned")
+  assignedToId           String?                   @unique
   AIConversationTicket   AIConversationTicket     @relation(fields: [aiConversationTicketId], references: [id])
   User                   User?                    @relation(fields: [assignedToId], references: [id])
   AIEscalatedTicketEvent AIEscalatedTicketEvent[]

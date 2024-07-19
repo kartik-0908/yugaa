@@ -47,20 +47,13 @@ export async function updateOperatorAvailability(userId: string[], available: bo
 }
 
 export async function updateAssignee(id: string, assigneeId: string, by: string) {
-    let currentAssigneeId;
-    if (assigneeId === "Unassigned") {
-        currentAssigneeId = null
-    }
-    else {
-        currentAssigneeId = assigneeId
-    }
     await db.$transaction(async (tx) => {
         const res = await tx.aIEscalatedTicket.update({
             where: {
                 id: id
             },
             data: {
-                assignedToId: currentAssigneeId
+                assignedToId: assigneeId
             }
         })
         const resp = await tx.user.findUnique({
