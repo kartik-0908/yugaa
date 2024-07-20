@@ -3,10 +3,9 @@ import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import { getUsers } from "../../../actions/analytics";
 import { today, getLocalTimeZone, now } from '@internationalized/date';
-import { Chip, DateRangePicker, Select } from "@nextui-org/react";
-import { SelectItem } from "@nextui-org/react";
 import { useUser } from '@clerk/nextjs';
 import dynamic from "next/dynamic";
+import { Chip, DateRangePicker, Select, SelectItem } from "@nextui-org/react";
 const Answered = dynamic(() => import("./Cards/Answered").then(mod => mod.Answered), { ssr: false });
 const UnAnswered = dynamic(() => import("./Cards/Answered").then(mod => mod.UnAnswered), { ssr: false });
 const TimeSaved = dynamic(() => import("./Cards/Answered").then(mod => mod.TimeSaved), { ssr: false });
@@ -77,7 +76,7 @@ export default function Analytics() {
               placeholder="Choose Member"
               selectionMode="multiple"
               className='min-w-[250px]'
-              onSelectionChange={(keys: React.Key[]) => {
+              onSelectionChange={(keys: "all" | Set<React.Key> & {anchorKey?: string; currentKey?: string} ) => {
                 console.log(keys)
                 const selectedKeys = Array.from(keys);
                 setUsers(selectedKeys)
