@@ -1,3 +1,4 @@
+require("dotenv").config();
 import { tool } from "@langchain/core/tools";
 import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
 import { OpenAIEmbeddings } from "@langchain/openai";
@@ -7,6 +8,8 @@ const retriverSchema = z.object({
     question: z.string(),
     shopDomain: z.string()
 });
+console.log(process.env.MONGODB_ATLAS_URI)
+console.log("process.MONGODB_ATLAS_URI")
 const client = new MongoClient(process.env.MONGODB_ATLAS_URI || "");
 const collection = client.db(process.env.MONGO_DB_NAME).collection(process.env.MONGO_DB_COLLECTION || "");
 const embeddingModel = new OpenAIEmbeddings(

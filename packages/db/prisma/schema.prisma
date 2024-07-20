@@ -52,7 +52,6 @@ model AIEscalatedTicketEvent {
   AIEscalatedTicket   AIEscalatedTicket @relation(fields: [aiEscalatedTicketId], references: [id])
   Email               Email?            @relation(fields: [emailId], references: [id])
   User                User?             @relation(fields: [changedBy], references: [id])
-  userId              String?
 }
 
 model ChatbotCustomization {

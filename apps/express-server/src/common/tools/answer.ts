@@ -3,7 +3,6 @@ import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { MongoClient } from "mongodb";
 import { z } from "zod";
-import { IState } from "../reply.js";
 const retriverSchema = z.object({
     question: z.string(),
     shopDomain: z.string()

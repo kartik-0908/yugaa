@@ -1,13 +1,12 @@
 import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-require('dotenv').config();
 const app = express();
 const v1router = require("./routes/v1/routes")
 const webhookRouter = require("./routes/webhooks/routes")
 import { getPreviousMessages } from './common/user';
-import { db } from './common/db';
 import { replytriaal } from './common/reply';
+import { db } from './common/db';
 var cors = require('cors')
 app.use(cors())
 app.use('/webhooks', webhookRouter)

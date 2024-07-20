@@ -1,13 +1,11 @@
+const path = require('path');
+require('dotenv').config({path: path.join(__dirname, '../.env')});
 import axios from "axios";
-import { sendInitialEmail } from "./common/email";
-import { createMssg, productUpdate, subscribeWebhook, updateProduct } from "./common/function";
-import { fetchDocs } from "./fetchDocs";
-import { fetchLinks } from "./fetchLinks";
+import { createMssg, productUpdate, subscribeWebhook } from "./common/function";
 import { fetchProducts } from "./fetchProducts";
-// import { getVideoTranscript } from "./fetchVideo";
 import { PubSub } from '@google-cloud/pubsub';
 import { chatModel } from "./lib/azureOpenai/embedding";
-import { ChatPromptTemplate, MessagesPlaceholder, PromptTemplate } from "@langchain/core/prompts";
+import {  PromptTemplate } from "@langchain/core/prompts";
 import { db } from "./lib/db";
 import { pushAdminNotification, pushIndividualNoti } from "./common/pubsubPublisher";
 
@@ -20,7 +18,6 @@ const pubSubClient = new PubSub({
 });
 
 
-require('dotenv').config();
 
 async function startWorker() {
 
