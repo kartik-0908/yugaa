@@ -77,16 +77,16 @@ export default function Analytics() {
               placeholder="Choose Member"
               selectionMode="multiple"
               className='min-w-[250px]'
-              onSelectionChange={(keys) => {
+              onSelectionChange={(keys: React.Key[]) => {
                 console.log(keys)
                 const selectedKeys = Array.from(keys);
                 setUsers(selectedKeys)
 
               }}
-              renderValue={(items) => {
+              renderValue={(items: any) => {
                 return (
                   <div className="flex flex-wrap gap-2">
-                    {items.map((item) => (
+                    {items.map((item: any) => (
                       <Chip key={item.key}>{item.textValue}</Chip>
                     ))}
                   </div>
