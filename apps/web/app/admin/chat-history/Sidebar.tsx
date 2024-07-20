@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '@clerk/nextjs';
 import Card from './Card';
-import { Pagination } from "@nextui-org/react";
+import { Pagination, Skeleton } from "@nextui-org/react";
 import Link from 'next/link';
 
 type ChatsType = {
     id: string,
-    messages?: {
+    Message?: {
         id: string,
         createdAt: string,
         message: string,
@@ -22,11 +22,25 @@ export default function ChatList() {
     const totalInSingle = 10;
     if (!isLoaded) {
         return (
-            <div>
-                still loading
-            </div>
+            <Skeleton className='w-full h-full'>
+                <div className="h-full rounded-sm border border-stroke bg-white py-6 dark:border-strokedark dark:bg-boxdark xl:col-span-4">
+
+
+                    <div className="h-[9%] flex justify-between items-center px-7.5 mb-6">
+                        Content is full how are youoojj vj bfj f fv kjkjoj
+                    </div>
+                    <div className="content  mb-6 h-[80%] overflow-y-auto">
+
+                    </div>
+                    <div className=" px-7.5 flex h-[6%] justify-center items-center">
+
+                    </div>
+                </div>
+            </Skeleton>
+
         )
     }
+
     const [chats, setChats] = useState<ChatsType>([]);
     const [filter, setFilter] = useState('all');
     const [page, setPage] = useState(1);
@@ -47,12 +61,13 @@ export default function ChatList() {
         const { tickets } = res.data;
         setTotal(retcount)
         setChats(tickets)
+        console.log(tickets)
 
     }
 
     return (
-        <div className="h-[600px] rounded-sm border border-stroke bg-white py-6 dark:border-strokedark dark:bg-boxdark xl:col-span-4">
-            <div className="header flex justify-between items-center px-7.5 mb-6">
+        <div className="h-full rounded-sm border border-stroke bg-white py-6 dark:border-strokedark dark:bg-boxdark xl:col-span-4">
+            <div className="h-[9%] flex justify-between items-center px-7.5 mb-6">
                 <div className="text-4xl font-semibold ml-8 ">
                     Tickets
                 </div>
@@ -64,15 +79,14 @@ export default function ChatList() {
                     <option value="answered">Answered</option>
                 </select>
             </div>
-            <div className="content  mb-6 h-[440px] overflow-y-auto">
+            <div className="content  mb-6 h-[80%] overflow-y-auto">
                 <div className="overflow-y-auto">
                     {
                         chats.map((chat, ind) => {
-                            if (chat && chat.messages && chat.messages.length > 0) {
+                            if (chat && chat.Message && chat.Message.length > 0) {
                                 return (
                                     <Link className='text-black' href={`/admin/chat-history/${chat.id}`}>
-                                        <Card id={chat.id} messages={chat.messages} />
-
+                                        <Card id={chat.id} messages={chat.Message} />
                                     </Link>
                                 )
                             }
@@ -80,7 +94,7 @@ export default function ChatList() {
                     }
                 </div>
             </div>
-            <div className=" px-7.5 flex justify-center items-center">
+            <div className=" px-7.5 flex h-[6%] justify-center items-center">
                 <Pagination
                     total={Math.ceil(total / totalInSingle)}
                     initialPage={1}

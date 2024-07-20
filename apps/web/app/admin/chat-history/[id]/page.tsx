@@ -19,11 +19,11 @@ export default async function ChatPage({ params }: any) {
         id: params.id
     })
     const { ticket } = res.data
-    const { messages } = ticket;
+    const { Message } = ticket;
     return (
         <div className="p-4 h-full overflow-y-auto ">
             {
-                messages.map((msg: Message) => {
+                Message.map((msg: Message) => {
                     // console.log(msg)
                     if (msg.message) {
                         console.log(msg.sender)

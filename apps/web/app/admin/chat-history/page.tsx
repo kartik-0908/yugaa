@@ -1,18 +1,8 @@
-export default async function Chat({
-  searchParams,
-}: {
-  searchParams?: {
-    filter?: string;
-    page?: string;
-  };
-}) {
-  const filter = searchParams?.filter || 'all';
-  const currentPage = Number(searchParams?.page) || 1;
-
+export default async function Chat() {
   return (
-   <div>
-    Select somthing
-   </div>
+    <div className="w-full h-full flex items-center justify-center">
+      <span>Select a chat to view the full conversation</span>
+    </div>
   );
 };
 
