@@ -1,6 +1,5 @@
 import { PubSub } from '@google-cloud/pubsub';
-import { db } from '../lib/db';
-
+import db from './db';
 const pubSubClient = new PubSub({
     projectId: "yugaa-424705",
     credentials: {
@@ -9,20 +8,6 @@ const pubSubClient = new PubSub({
     },
 });
 
-export async function updateProductwithID(shopDomain: string, id: string, type: string) {
-    const topicName = 'update-product-with-id';
-    const dataBuffer = Buffer.from(JSON.stringify({
-        shopDomain,
-        id,
-        type: type
-    }));
-    try {
-        const messageId = await pubSubClient.topic(topicName).publishMessage({ data: dataBuffer });
-        console.log(`Message ${messageId} published to ${topicName}.`);
-    } catch (error) {
-        console.error(`Error publishing message to ${topicName}:`, error);
-    }
-}
 
 export async function pushIndividualNoti(userId: string, title: string, content: string) {
     const topicName = 'notifications';
@@ -39,7 +24,6 @@ export async function pushIndividualNoti(userId: string, title: string, content:
     }
 }
 export async function pushAdminNotification(shopDomain: string, title: string, content: string,) {
-    //type: individual, admin
     const topicName = 'notifications';
     const users = await db.user.findMany({
         where: {
@@ -54,5 +38,3 @@ export async function pushAdminNotification(shopDomain: string, title: string, c
         pushIndividualNoti(user.id, title, content)
     }
 }
-
-

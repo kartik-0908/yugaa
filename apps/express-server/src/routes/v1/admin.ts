@@ -87,9 +87,9 @@ router.post('/settings', async (req, res) => {
 })
 
 router.get('/ai-tickets', async (req, res) => {
-    console.log("fetching for home peak interaction time")
+    // console.log("fetching for home peak interaction time")
     const { shop, start, end } = req.query
-    console.log(req.query)
+    // console.log(req.query)
 
     if (typeof shop !== 'string' || typeof start !== 'string' || typeof end !== 'string') {
         return res.status(400).json({ message: "Invalid query parameters" });
@@ -590,7 +590,8 @@ router.post('/chat', async (req, res) => {
 
 router.post('/completeChat', async (req, res) => {
     console.log("fetching chat list")
-    const { id, } = req.body
+
+    const { id } = req.body
     try {
         const ticket = await db.aIConversationTicket.findUnique({
             where: {

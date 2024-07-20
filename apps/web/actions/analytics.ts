@@ -1,7 +1,7 @@
 "use server"
 import axios from 'axios';
 import { revalidatePath } from 'next/cache';
-import db from './db';
+import db from '../lib/db';
 
 export async function getUsers(shopDomain: string) {
     console.log(shopDomain)
@@ -330,21 +330,32 @@ export async function getQueriesbyPriority(data: string): Promise<number[]> {
     return resultArray;
 }
 
-export async function fetchNotifications(userId: string) {
-    const notifications = await db.user.findUnique({
+export async function fetchNotifications(payload: string) {
+    const data = JSON.parse(payload);
+    console.log(data);
+    const { userId } = JSON.parse(payload);
+    const { start } = JSON.parse(payload);
+    console.log(`fetching notifications for user ${userId} after ${start}`);
+    const startTime = new Date(start);
+    const startMinus48Hours = new Date(startTime.getTime() - 48 * 60 * 60 * 1000);
+
+    const notifications = await db.notification.findMany({
         where: {
-            id: userId
-        },
-        include: {
-            notifications: {
-                include: {
-                    notification: true
-                }
+            userId: userId,
+            createdAt: {
+                gte: startMinus48Hours
             }
+        },
+        select: {
+            id: true,
+            createdAt: true,
+            title: true,
+            content: true,
+            isRead: true
         }
     })
-    console.log(notifications)
-    return notifications?.notifications;
+    // console.log(notifications)
+    return notifications;
 }
 
 

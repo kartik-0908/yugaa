@@ -1,6 +1,6 @@
 import axios from "axios";
-import openai from "../lib/openai";
 import { addContent, deleteContent } from "../lib/langchain/mongodb";
+import { db } from "../lib/db";
 
 export function chunkDocument(text: string): string[] {
     const wordsPerChunk = 1000;
@@ -143,18 +143,23 @@ function generateUniqueId() {
     return `${timestamp}-${randomStr}`;
 }
 
+function containsErrorOrSorry(text: string): boolean {
+    const lowercaseText = text.toLowerCase();
+    return lowercaseText.includes("error") || lowercaseText.includes("sorry");
+}
+
 export async function createMssg(ticketId: string, sender: string, message: string, timestamp: any) {
     console.log(timestamp)
-    try {
-        await axios.post(`${process.env.WORKER_WEBHOOK_URL}/save-mssg`, {
-            ticketId,
-            sender,
-            message,
-            timestamp
-        })
-    } catch (error) {
-        console.log(error)
-    }
+    const errorOrSorry = containsErrorOrSorry(message);
+    await db.message.create({
+        data: {
+            ticketId: ticketId,
+            sender: sender,
+            message: message,
+            createdAt: timestamp,
+            unanswered: errorOrSorry
+        }
+    });
 }
 
 function extractProductData(product: any) {
@@ -357,32 +362,3 @@ export async function saveWebhookDetails(webhookResponse: any, shopDomain: any) 
         console.log('could not save wwebhook details')
     }
 }
-
-// export async function deleteRecordsWithPrefix(indexName: string, prefix: string) {
-//     try {
-//         const index = pc.index(indexName);
-//         let paginationToken: string | undefined = undefined;
-//         let pageList = await index.listPaginated({ prefix });
-//         let vectorIds = pageList?.vectors?.map((vector) => vector.id);
-//         if (!vectorIds || !vectorIds.length) {
-//             return;
-//         }
-//         if (vectorIds?.length > 0) {
-//             await index.deleteMany(vectorIds);
-//         }
-//         paginationToken = pageList.pagination?.next;
-//         while (paginationToken) {
-//             pageList = await index.listPaginated({ prefix, paginationToken });
-//             vectorIds = pageList?.vectors?.map((vector) => vector.id);
-//             if (!vectorIds || !vectorIds.length) {
-//                 return;
-//             }
-//             if (vectorIds.length > 0) {
-//                 await index.deleteMany(vectorIds);
-//             }
-//             paginationToken = pageList.pagination?.next;
-//         }
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }

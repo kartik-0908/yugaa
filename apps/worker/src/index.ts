@@ -8,6 +8,8 @@ import { fetchProducts } from "./fetchProducts";
 import { PubSub } from '@google-cloud/pubsub';
 import { chatModel } from "./lib/azureOpenai/embedding";
 import { ChatPromptTemplate, MessagesPlaceholder, PromptTemplate } from "@langchain/core/prompts";
+import { db } from "./lib/db";
+import { pushAdminNotification, pushIndividualNoti } from "./common/pubsubPublisher";
 
 const pubSubClient = new PubSub({
     projectId: "yugaa-424705",
@@ -30,7 +32,8 @@ async function startWorker() {
             { name: 'store-mssg-sub', handler: handleCreateMssg },
             { name: 'fetch-products', handler: handlefetchProduct },
             { name: 'update-product-with-id-sub', handler: handleUpdateProductwithID },
-            // { name: 'escalate-ticket-sub', handler: handleEscalateTicket },
+            { name: 'escalate-ticket-sub', handler: handleEscalateTicket },
+            { name: 'notifications-sub', handler: handleSendNotification },
         ];
 
         console.log(`Waiting for messages in subscriptions: ${subscriptions.map(sub => sub.name).join(', ')}...`);
@@ -70,17 +73,34 @@ function formatMessages(messages: {
 }
 const { LLMChain } = require("langchain/chains");
 
+async function handleSendNotification(data: any) {
+    const { userId, title, content } = data;
+
+    await db.notification.create({
+        data: {
+            userId,
+            title,
+            content,
+        }
+    })
+}
+
 
 async function handleEscalateTicket(data: any) {
     const { shopDomain, userEmail, ticketId } = data;
     console.log(ticketId)
-    const res = await axios.post(`${process.env.BASE_API_URL}/v1/admin/completeChat`, {
-        id: ticketId
+    const ticket = await db.aIConversationTicket.findUnique({
+        where: {
+            id: ticketId
+        },
+        include: {
+            Message: true
+        }
     })
-    const { ticket } = res.data;
-    const { messages } = ticket;
-
-    const conv = formatMessages(messages);
+    if (!ticket) {
+        throw new Error("Ticket not found")
+    }
+    const conv = formatMessages(ticket?.Message);
     const assistantPrompt = `
         Given a conversation b/w a AI customer support assistant and a consumer.
         Respond with a subject which describes the complete Conversation in 4-5 words.
@@ -98,18 +118,71 @@ async function handleEscalateTicket(data: any) {
     const chain = new LLMChain({ llm: chatModel, prompt: prompt });
     const response = await chain.call({ conversation: conv });
     const subject = response.text.trim()
-    const resp = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/v1/shopify/autoAssignment`, {
-        shopDomain: shopDomain
+    const shopSetings = await db.shopifyInstalledShop.findUnique({
+        where: {
+            shop: shopDomain
+        }
     })
-    if (resp.data.isAutoAssignment){
-        
-
-    }
-    else {
-        await axios.post(`${process.env.WORKER_WEBHOOK_URL}/escalate-ticket`, {
-            ticketId, shopDomain, userEmail, subject
+    let assigneeId = null;
+    let assigneeName: string;
+    if (shopSetings?.autoAssignment) {
+        const user = await db.user.findFirst({
+            where: {
+                shopDomain: shopDomain,
+                availabe: true
+            },
+            orderBy: {
+                AIEscalatedTicket: {
+                    _count: 'asc'
+                }
+            },
+            select: {
+                id: true,
+                firstName: true,
+            }
         })
+        assigneeId = user?.id;
+        assigneeName = user?.firstName as string;
     }
+    const shop = trimShopifyDomain(shopDomain)
+    await db.$transaction(async (prisma) => {
+        // Count the number of tickets for the shopDomain
+        const ticketCount = await prisma.aIEscalatedTicket.count({
+            where: {
+                shopDomain: shopDomain,
+            },
+        });
+        const newTicketId = `${shop}-${ticketCount + 1}`;
+        const newTicket = await prisma.aIEscalatedTicket.create({
+            data: {
+                updatedAt: new Date(),
+                id: newTicketId,
+                shopDomain: shopDomain,
+                customerEmail: userEmail,
+                aiConversationTicketId: ticketId,
+                subject: subject,
+                assignedToId: assigneeId,
+                status: assigneeId ? 'Queued':'Unassigned',
+            },
+        });
+        await prisma.aIEscalatedTicketEvent.create({
+            data: {
+                aiEscalatedTicketId: newTicket.id,
+                type: 'CREATED',
+                newStatus: newTicket.status, // Assuming the status is set to a default value
+            },
+        });
+        if (assigneeId) {
+            pushAdminNotification(shopDomain, "New Ticket Raised by AI", `A new ticket has been raised by AI and assigned to ${assigneeName}`)
+            pushIndividualNoti(assigneeId, "New Ticket Raised by AI", `A new ticket has been raised by AI and assigned to you`)
+        }
+        else {
+            pushAdminNotification(shopDomain, "New Ticket Raised by AI", `A new ticket has been raised by AI. Please assign it to an operator`)
+        }
+        await prisma.$executeRaw`SELECT pg_advisory_xact_lock(1);`;
+    }, {
+        isolationLevel: 'Serializable', // Ensuring the highest isolation level
+    });
 }
 
 async function handlefetchProduct(data: any) {
@@ -138,11 +211,7 @@ async function handleinitializeShop(data: any) {
         console.log(error)
     }
 }
-async function handleSendEmail(data: any) {
-    // const { shop, accessToken } = data;
-    // console.log(data)
-    await sendInitialEmail(data.fromAddress, data.recipientAddress, data.subject, data.htmlContent)
-}
+
 
 async function handleUpdateProductwithID(data: any) {
     const { id, shopDomain, type } = data;
@@ -175,6 +244,14 @@ async function handleProductUpdate(data: any) {
     })
     const { accessToken } = res.data;
     await productUpdate(id, shopDomain, accessToken, type);
+}
+
+function trimShopifyDomain(url: string): string {
+    const shopifySuffix = '.myshopify.com';
+    if (url.endsWith(shopifySuffix)) {
+        return url.slice(0, -shopifySuffix.length);
+    }
+    return url;
 }
 
 startWorker();

@@ -188,7 +188,7 @@ router.post('/save-mssg', async function (req, res) {
 })
 
 router.post('/escalate-ticket', async function (req, res) {
-    const { ticketId, shopDomain, userEmail, subject } = req.body;
+    const { ticketId, shopDomain, userEmail, subject, assigneeId } = req.body;
     const shop = trimShopifyDomain(shopDomain)
     try {
         await db.$transaction(async (prisma) => {

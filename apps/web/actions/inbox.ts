@@ -1,8 +1,8 @@
 "use server"
 
-import { user } from "@nextui-org/react";
-import db from "./db";
+import db from "../lib/db";
 import { randomUUID } from "crypto";
+import { pushAdminNotification, pushIndividualNoti } from "../lib/pubSub";
 
 
 export async function changeOperatorAvailability(userId: string[]) {
@@ -46,7 +46,8 @@ export async function updateOperatorAvailability(userId: string[], available: bo
 
 }
 
-export async function updateAssignee(id: string, assigneeId: string, by: string) {
+export async function updateAssignee(id: string, assigneeId: string, by: string, shopDomain: string) {
+    let assigneeName;
     await db.$transaction(async (tx) => {
         const res = await tx.aIEscalatedTicket.update({
             where: {
@@ -61,15 +62,17 @@ export async function updateAssignee(id: string, assigneeId: string, by: string)
                 id: assigneeId
             }
         })
+        assigneeName = resp?.firstName + " " + resp?.lastName;
         await tx.aIEscalatedTicketEvent.create({
             data: {
                 id: randomUUID(),
                 aiEscalatedTicketId: id,
                 changedBy: by,
-                assignedTo: resp?.firstName + " " + resp?.lastName,
+                assignedTo: assigneeName,
                 type: "ASSIGNED"
             }
         })
     })
-
+    await pushAdminNotification(shopDomain, "Assignee Changed", `The assignee for ticket ${id} has been changed to ${assigneeName} by ${by}`)
+    await pushIndividualNoti(assigneeId, "Assignee Changed", `You have been assigned to ticket ${id} by ${by}`)
 }

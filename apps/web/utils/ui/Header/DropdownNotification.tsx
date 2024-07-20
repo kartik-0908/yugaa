@@ -1,10 +1,12 @@
 "use client"
 import { use, useState } from "react";
 import Notification from "./Notification";
-import { Badge, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/react";
+import { Badge, Button, Card, CardBody, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
 import { useUser } from "@clerk/nextjs";
 import useSWR from "swr";
 import { fetchNotifications } from "../../../actions/analytics";
+import { markNotificationAsRead } from "../../../actions/header";
+import { Bell, Check, Eye } from "lucide-react";
 
 interface Notification {
   id: string;
@@ -19,10 +21,17 @@ interface Notification {
 const DropdownNotification = () => {
   const { user, isLoaded } = useUser();
   if (!isLoaded) return null;
-  const { data, isLoading, error } = useSWR(`${user?.id}`, fetchNotifications, {
+  const [start] = useState(new Date());
+  const payload = {
+    type: "notification",
+    userId: user?.id,
+    start: start.toISOString(),
+  }
+  const { data, isLoading, error } = useSWR(JSON.stringify(payload), fetchNotifications, {
     refreshInterval: 1000 * 10,
     keepPreviousData: true,
   });
+  let badgeValue = 0;
   if (isLoading) {
     return <div>Loading</div>
   }
@@ -30,13 +39,17 @@ const DropdownNotification = () => {
   if (error) {
     return <div>Error</div>
   }
-  console.log(`notification data`, data)
+  data?.map(noti=>{
+    if(!noti.isRead){
+      badgeValue++
+    }
+  })
+  // console.log(`notification data`, data)
   return (
-    <Dropdown
-    >
-      <DropdownTrigger>
+    <Popover placement="bottom-end" showArrow offset={10}>
+      <PopoverTrigger>
         <div className="p-4">
-          {data?.length != 0 && <Badge color="danger" content={data?.length} isInvisible={false} shape="circle">
+          {badgeValue != 0 && <Badge color="danger" content={badgeValue} isInvisible={false} shape="circle">
             <svg
               fill="none"
               height={24}
@@ -53,7 +66,7 @@ const DropdownNotification = () => {
             </svg>
           </Badge>}
           {
-            data?.length === 0 && (
+            badgeValue === 0 && (
               <svg
                 fill="none"
                 height={24}
@@ -72,30 +85,47 @@ const DropdownNotification = () => {
           }
 
         </div>
-
-      </DropdownTrigger>
-      <DropdownMenu
-        classNames={{
-          list: "m-0"
-        }}
-        itemClasses={{
-
-          base: "gap-4",
-        }}
-      >
-        {data?.map((notification) => (
-          <DropdownItem isReadOnly title={notification?.notification?.title} description={notification?.notification?.content} key={notification?.id} />
-        )) ?? <DropdownItem
-          href="#"
-          isReadOnly={true}
-          className="text-black"
-        >
-            No notifications
-          </DropdownItem>}
-          
-
-      </DropdownMenu>
-    </Dropdown>
+      </PopoverTrigger>
+      <PopoverContent className="w-[240px]">
+        <div className="max-w-[100px] h-[200px] overflow-y-auto">
+          {data?.length ? (
+            <>
+              {data?.map((notification) => (
+                <div className={` p-1 rounded-lg border-b border-stroke ${notification.isRead ? 'bg-gray-100' : 'bg-white'}`}>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold m-0">{notification.title}</h3>
+                    {notification.isRead ? (
+                      <Eye className="w-5 h-5 text-gray-500" />
+                    ) : (
+                      <Bell className="w-5 h-5 text-blue-500" />
+                    )}
+                  </div>
+                  <p className="text-gray-600 mb-1 mt-1">{notification.content}</p>
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <span>{notification.createdAt.toDateString()}</span>
+                    {!notification.isRead && (
+                      <button
+                        onClick={()=>{
+                          markNotificationAsRead(notification.id)
+                        }}
+                        className="flex items-center text-blue-500 hover:text-blue-600"
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        Mark as read
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </>
+          ) : (
+            <div className="text-center p-4">
+              <p className="text-lg font-medium">No new notifications</p>
+            </div>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 

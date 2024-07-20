@@ -5,8 +5,8 @@ import { updateAssignee } from "../actions/inbox"
 import { useUser } from "@clerk/nextjs"
 
 export default function AssignedTo({ id, assigneeId, shopDomain }: { id: string, shopDomain: string, assigneeId: string }) {
-    const {user, isLoaded} = useUser()
-    if(!isLoaded) return (<div>Loading...</div>)
+    const { user, isLoaded } = useUser()
+    if (!isLoaded) return (<div>Loading...</div>)
     const { data, isLoading, error } = useSWR(
         `${shopDomain}`,
         getUsers)
@@ -32,7 +32,7 @@ export default function AssignedTo({ id, assigneeId, shopDomain }: { id: string,
                 disabledKeys={disabledKeys}
                 onSelectionChange={(key) => {
                     const arr = Array.from(key);
-                    updateAssignee(id, arr[0] as string, user?.fullName as string)
+                    updateAssignee(id, arr[0] as string, user?.fullName as string, user?.publicMetadata.shopDomain as string)
                 }}
                 selectionMode="single"
                 listboxProps={{

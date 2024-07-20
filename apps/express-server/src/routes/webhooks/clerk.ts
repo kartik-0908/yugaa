@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import { Webhook, WebhookRequiredHeaders } from 'svix';
 import { IncomingHttpHeaders } from 'http';
 import { db } from '../../common/db';
+import { pushAdminNotification } from '../../common/pubsubPublisher';
 
 type EventType = "user.created" | "user.updated" | "*";
 
@@ -85,6 +86,9 @@ router.post('/', async function (req, res) {
                         emailVerified: userData.emailVerified,
                     },
                 });
+                if(newUser.role === "member"){
+                    await pushAdminNotification(userData.shopDomain || "","New Operator Joined",`${newUser.firstName} ${newUser.lastName} has joined the app upon your invitation`)
+                }
                 console.log('User stored:', newUser);
             }
         }

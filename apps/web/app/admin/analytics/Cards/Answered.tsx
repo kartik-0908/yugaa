@@ -30,7 +30,6 @@ export function Answered({ start, end }: { start: string, end: string }) {
         `${process.env.NEXT_PUBLIC_API_URL}/v1/admin/answered?shop=${user?.publicMetadata.shopDomain}&start=${start}&end=${end}`,
         fetcher, {
         refreshInterval: 1000 ,
-        keepPreviousData: true
 
     }
     )

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { db } from '../../common/db';
+import { pushAdminNotification, pushIndividualNoti } from '../../common/pubsubPublisher';
 const sgMail = require('@sendgrid/mail');
 const express = require('express');
 const router = Router();
@@ -8,10 +9,10 @@ router.use(express.json())
 
 router.post('/update', async (req, res) => {
     const { id, field, value, by } = req.body;
-    console.log(req.body)   
+    console.log(req.body)
 
     try {
-        await db.aIEscalatedTicket.update({
+        const resp = await db.aIEscalatedTicket.update({
             where: {
                 id: id,
             },
@@ -28,6 +29,10 @@ router.post('/update', async (req, res) => {
                     changedBy: by
                 }
             })
+            await pushAdminNotification(resp.shopDomain, "Ticket Status", `Status of ticket ${id} has been changed to ${value} by ${by} `);
+            if (resp.assignedToId) {
+                await pushIndividualNoti(resp.assignedToId, "Ticket Status", `Status of ticket ${id} assigned to you has been changed to ${value} by ${by} `);
+            }
         }
         if (field === "priority") {
             await db.aIEscalatedTicketEvent.create({
@@ -38,6 +43,10 @@ router.post('/update', async (req, res) => {
                     changedBy: by
                 }
             })
+            await pushAdminNotification(resp.shopDomain, "Priority Changed", `The priority of ticket ${id} has been changed to ${value} by ${by} `);
+            if (resp.assignedToId) {
+                await pushIndividualNoti(resp.assignedToId, "Priority Changed", `The priority of ticket ${id} assigned to you has been changed to ${value} by ${by} `);
+            }
         }
         if (field === 'category') {
             await db.aIEscalatedTicketEvent.create({
