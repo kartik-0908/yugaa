@@ -1,3 +1,5 @@
+@import '@fontsource/montserrat-alternates';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

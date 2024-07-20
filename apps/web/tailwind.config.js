@@ -21,6 +21,7 @@ module.exports = {
           'Segoe UI Symbol',
           'Noto Color Emoji',
         ],
+        'montserrat-alternates': ['Montserrat Alternates', 'sans-serif']
       }
     },
   },
