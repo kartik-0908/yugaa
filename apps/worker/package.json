@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsup",
+    "build": "esbuild src/index.ts --platform=node --bundle --outdir=dist",
     "start": "ts-node dist/index.js",
     "dev": "ts-node src/index.ts"
   },
