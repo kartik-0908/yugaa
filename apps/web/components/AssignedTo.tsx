@@ -1,6 +1,6 @@
 import useSWR from "swr"
 import { getUsers } from "../actions/analytics"
-import { Select, SelectItem, user } from "@nextui-org/react"
+import { Select, SelectItem } from "@nextui-org/react"
 import { updateAssignee } from "../actions/inbox"
 import { useUser } from "@clerk/nextjs"
 
@@ -30,7 +30,7 @@ export default function AssignedTo({ id, assigneeId, shopDomain }: { id: string,
         return (
             <Select
                 disabledKeys={disabledKeys}
-                onSelectionChange={(key) => {
+                onSelectionChange={(key : any) => {
                     const arr = Array.from(key);
                     updateAssignee(id, arr[0] as string, user?.fullName as string, user?.publicMetadata.shopDomain as string)
                 }}

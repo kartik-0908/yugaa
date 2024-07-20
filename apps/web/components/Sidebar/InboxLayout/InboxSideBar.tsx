@@ -4,10 +4,11 @@
 import React, { useEffect, useState } from "react";
 import { menuItems } from "./items";
 import Element from "./Card";
-import { Accordion, AccordionItem, Input, Skeleton, Switch, cn } from "@nextui-org/react";
+import { Accordion, AccordionItem, Input, Skeleton, Switch } from "@nextui-org/react";
 import RestrictOperator from "./RestrictOpeartor";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
+import { cn } from "../../../utils/ui/Header/cn";
 
 const InboxSidebar = () => {
   const { user, isLoaded } = useUser()

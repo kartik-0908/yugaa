@@ -83,7 +83,7 @@ export default function ChatList({ status }: { status: string }) {
                 {total > 0 ? <Pagination
                     total={total > 0 ? Math.ceil(total / totalInSingle) : 0}
                     initialPage={1}
-                    onChange={(page) => {
+                    onChange={(page: any) => {
                         setPage(page)
                     }}
                 /> : null}

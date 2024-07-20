@@ -76,3 +76,22 @@ export async function updateAssignee(id: string, assigneeId: string, by: string,
     await pushAdminNotification(shopDomain, "Assignee Changed", `The assignee for ticket ${id} has been changed to ${assigneeName} by ${by}`)
     await pushIndividualNoti(assigneeId, "Assignee Changed", `You have been assigned to ticket ${id} by ${by}`)
 }
+
+export async function getEscTicket(id: string) {
+    const escalatedTicket = await db.aIEscalatedTicket.findUnique({
+        where: { id: id },
+        include: {
+            AIEscalatedTicketEvent: {
+                orderBy: { createdAt: 'asc' },
+            },
+            AIConversationTicket: {
+                include: {
+                    Message: {
+                        orderBy: { createdAt: 'asc' },
+                    },
+                },
+            },
+        },
+    });
+    return escalatedTicket;
+}
