@@ -97,7 +97,8 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                 <div className="flex flex-col mb-2">
                     <div className="flex mb-2">
                         <Snippet classNames={{
-                            pre: "m-0"
+                            pre: "m-0",
+                            symbol:"font-default"
                         }} size="sm" symbol="For admins: " >{adminInviteLink}</Snippet>
                     </div>
                     <div className="flex ">

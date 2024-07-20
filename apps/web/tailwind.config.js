@@ -7,10 +7,22 @@ module.exports = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "../../node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
- 
+
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: [
+          'ui-sans-serif',
+          'system-ui',
+          'sans-serif',
+          'Apple Color Emoji',
+          'Segoe UI Emoji',
+          'Segoe UI Symbol',
+          'Noto Color Emoji',
+        ],
+      }
+    },
   },
-   plugins: [nextui()],
+  plugins: [nextui()],
 }

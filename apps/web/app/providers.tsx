@@ -10,7 +10,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <NextUIProvider>
       <GeistProvider>
-        <CssBaseline />
+        {/* <CssBaseline /> */}
         <ClerkProvider>
           {children}
         </ClerkProvider>

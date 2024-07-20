@@ -42,3 +42,7 @@ ul li:before {
   content: none !important;
   display: none !important;
 }
+
+body {
+  @apply font-sans;
+}
