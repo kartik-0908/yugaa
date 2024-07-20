@@ -482,7 +482,7 @@ const TablesPage = () => {
 
                                         />
                                         <div>
-                                            <div className="text-2xl font-bold">Error Message Style</div>
+                                            <div className="text-2xl font-bold">Response Tone</div>
                                         </div>
                                         <Tabs
                                             selectedKey={errorMessageStyle}

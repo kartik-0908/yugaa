@@ -126,7 +126,7 @@ export async function replytriaal(ticketId: string, query: string, shopDomain: s
           if(!output[msg.id]){
             output[msg.id] = "";
           }
-          output[msg.id]?.concat(msg.content as string)
+          output[msg.id]+=(msg.content as string)
 
           io.in(roomName).emit('streamChunk', { id: msg.id, message: output[msg.id] })
           // console.log(`msg : content : $e{msg.content}`);

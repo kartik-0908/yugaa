@@ -1,4 +1,5 @@
-import { Button } from '@nextui-org/react';
+import { Button, Popover, PopoverContent, PopoverTrigger } from '@nextui-org/react';
+import { MoreHorizontal } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { HexColorPicker } from "react-colorful";
 
@@ -13,6 +14,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ colors, onSelect, defaultColo
   const [currentColor, setCurrentColor] = useState<string>(defaultColor || colors[0]);
   const [selectedColor, setSelectedColor] = useState<string>(defaultColor || colors[0]);
   const [displayColors, setDisplayColors] = useState<string[]>([])
+  const [isOpen, setIsOpen] = React.useState(false);
   const isColorInPredefined = (color: string) => colors.includes(color);
 
   useEffect(() => {
@@ -43,6 +45,8 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ colors, onSelect, defaultColo
   const removeColorPicker = () => {
     setDisplayColorPicker(false); // Close the picker
     setDisplayColors([...displayColors, selectedColor])
+    setIsOpen(false); // Close the picker
+
   };
   const toggleColorPicker = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -60,25 +64,28 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ colors, onSelect, defaultColo
           onClick={(event) => handleColorSelect(event, color)}
         />
       ))}
-      <button onClick={(event) => toggleColorPicker(event)} className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-300 text-lg">
-        ...
-      </button>
-      {displayColorPicker && (
-        <div className="fixed inset-0 z-999 flex items-center justify-center">
-          <div className="bg-white p-2 shadow-xl rounded-lg text-center">
-            {/* <SketchPicker color={selectedColor} onChangeComplete={handleChangeComplete} /> */}
-            <HexColorPicker color={selectedColor} onChange={handleApplyColor} />
-            <Button
-              color='default'
-              onClick={removeColorPicker}
-              className="mt-2"
-            >
+      <Popover isOpen={isOpen} onOpenChange={(open) => setIsOpen(open)} placement="right">
+        <PopoverTrigger>
+          <button onClick={(event) => toggleColorPicker(event)} className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-300 text-lg">
+            <MoreHorizontal className="w-5 h-5 text-gray-600" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[240px]">
+          <div className="fixed flex items-center justify-center">
+            <div className="bg-white p-2 shadow-xl rounded-lg text-center">
+              <HexColorPicker color={selectedColor} onChange={handleApplyColor} />
+              <Button
+                color='default'
+                onClick={removeColorPicker}
+                className="mt-2"
+              >
 
-              Apply
-            </Button>
+                Apply
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };
