@@ -5,7 +5,7 @@ export default async function LayoutAdmin({ children }: { children: React.ReactN
             <div className="w-1/7 h-full border-r-2 border-stroke">
                 <InboxSidebar />
             </div>
-            <div className=" h-full w-6/7">
+            <div className=" h-full w-6/7 flex-grow">
                 {children}
             </div>
         </div>

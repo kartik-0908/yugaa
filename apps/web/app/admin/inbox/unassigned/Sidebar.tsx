@@ -5,6 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import { Pagination, Skeleton } from "@nextui-org/react";
 import Link from 'next/link';
 import Card from './Card';
+import { redirect } from 'next/navigation';
 
 type ChatsType = {
     id: string,
@@ -57,6 +58,10 @@ export default function ChatList({ status }: { status: string }) {
         setTotal(retcount)
         setChats(tickets)
 
+    }
+
+    if(total ===0){
+        redirect('/admin/inbox/empty')
     }
 
     return (

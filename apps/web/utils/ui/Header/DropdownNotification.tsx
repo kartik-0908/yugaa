@@ -15,9 +15,6 @@ interface Notification {
   createdAt: Date;
 }
 
-
-
-
 const DropdownNotification = () => {
   const { user, isLoaded } = useUser();
   if (!isLoaded) return null;
