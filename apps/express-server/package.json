@@ -5,7 +5,9 @@
   "scripts": {
     "build": "tsup",
     "start": "ts-node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "custom-build": "esbuild src/index.ts --platform=node --bundle --outdir=dist"
+    
   },
   "keywords": [],
   "author": "",
