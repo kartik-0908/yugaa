@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "tsup",
     "start": "ts-node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "custom-build": "esbuild src/index.ts --platform=node --bundle --outdir=dist"
+    "build": "esbuild src/index.ts --platform=node --bundle --outdir=dist"
     
   },
   "keywords": [],
