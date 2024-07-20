@@ -354,7 +354,7 @@ export async function fetchNotifications(payload: string) {
             isRead: true
         }
     })
-    // console.log(notifications)
+    console.log(notifications)
     return notifications;
 }
 
