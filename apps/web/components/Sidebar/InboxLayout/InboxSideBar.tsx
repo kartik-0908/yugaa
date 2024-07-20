@@ -8,7 +8,6 @@ import { Accordion, AccordionItem, Input, Skeleton, Switch } from "@nextui-org/r
 import RestrictOperator from "./RestrictOpeartor";
 import axios from "axios";
 import { useUser } from "@clerk/nextjs";
-import { cn } from "../../../utils/ui/Header/cn";
 
 const InboxSidebar = () => {
   const { user, isLoaded } = useUser()
@@ -42,10 +41,10 @@ const InboxSidebar = () => {
               {/* <RestrictDuration /> */}
               <Switch
                 classNames={{
-                  base: cn(
+                  base: [
                     "inline-flex flex-row-reverse ",
-                    "justify-between ",
-                  ),
+                    "justify-between",
+                  ],
                 }}
                 size="sm"
               >
@@ -110,10 +109,10 @@ const InboxSidebar = () => {
             }}
             className="pt-2"
             classNames={{
-              base: cn(
+              base: [
                 "inline-flex flex-row-reverse ",
                 "justify-between ",
-              ),
+              ]
             }}
             size="sm"
             isSelected={isAutoAssignment}

@@ -60,7 +60,7 @@ const ButtonWithForm = () => {
                                         list: ["w-[30px]"]
                                     },
                                 }}
-                                onChange={(e) => {
+                                onChange={(e: any) => {
                                     setRole(e.target.value)
                                 }}
                             >
@@ -82,7 +82,7 @@ const ButtonWithForm = () => {
                             classNames={{
                                 base:"mt-0"
                             }}
-                            onChange={(e) => {
+                            onChange={(e: any) => {
                                 setEmail(e.target.value)
                             }}
                         />

@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import DropdownNotification from "./DropdownNotification";
 import Invite from "./Invite";
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, NavbarItem } from "@nextui-org/react";
 import UserComponent from "./UserDropdown";
 
 const Header = () => {
