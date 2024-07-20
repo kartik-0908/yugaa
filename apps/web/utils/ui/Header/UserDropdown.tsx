@@ -11,7 +11,7 @@ export default function UserComponent() {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Avatar isBordered radius="sm" src={user?.imageUrl} />
+        <Avatar className="cursor-pointer" isBordered radius="sm" src={user?.imageUrl} />
       </DropdownTrigger>
       <DropdownMenu
         classNames={{

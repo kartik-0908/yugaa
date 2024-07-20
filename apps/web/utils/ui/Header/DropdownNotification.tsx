@@ -39,8 +39,8 @@ const DropdownNotification = () => {
   if (error) {
     return <div>Error</div>
   }
-  data?.map(noti=>{
-    if(!noti.isRead){
+  data?.map(noti => {
+    if (!noti.isRead) {
       badgeValue++
     }
   })
@@ -51,6 +51,7 @@ const DropdownNotification = () => {
         <div className="p-4">
           {badgeValue != 0 && <Badge color="danger" content={badgeValue} isInvisible={false} shape="circle">
             <svg
+              className="cursor-pointer"
               fill="none"
               height={24}
               viewBox="0 0 24 24"
@@ -68,6 +69,8 @@ const DropdownNotification = () => {
           {
             badgeValue === 0 && (
               <svg
+              className="cursor-pointer"
+
                 fill="none"
                 height={24}
                 viewBox="0 0 24 24"
@@ -87,7 +90,7 @@ const DropdownNotification = () => {
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[240px]">
-        <div className="max-w-[100px] h-[200px] overflow-y-auto">
+        <div className=" h-[200px] overflow-y-auto">
           {data?.length ? (
             <>
               {data?.map((notification) => (
@@ -105,7 +108,7 @@ const DropdownNotification = () => {
                     <span>{notification.createdAt.toDateString()}</span>
                     {!notification.isRead && (
                       <button
-                        onClick={()=>{
+                        onClick={() => {
                           markNotificationAsRead(notification.id)
                         }}
                         className="flex items-center text-blue-500 hover:text-blue-600"

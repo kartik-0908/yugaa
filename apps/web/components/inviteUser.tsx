@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button, Input, Select, SelectItem } from "@nextui-org/react";
+import { Button, Input, Select, SelectItem, Tooltip } from "@nextui-org/react";
 import { Snippet } from "@nextui-org/react";
 import { useUser } from "@clerk/nextjs";
+import { Info } from "lucide-react";
 
 interface Member {
     name: string;
@@ -125,7 +126,24 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                                 Email
                             </th>
                             <th scope="col" className="px-6 py-3">
-                                Actions
+                                <div className="flex flexs-col">
+                                    <div>
+                                        Actions
+
+                                    </div>
+                                    <div>
+                                        <Tooltip
+                                            classNames={{
+                                                base:"max-w-[150px]"
+                                            }}
+                                            placement="right-end"
+                                            content="You can’t remove an admin directly. You need to make them member first"
+                                        >
+                                            <Info className="w-3 h-3"></Info>
+                                        </Tooltip>
+                                    </div>
+                                </div>
+
                             </th>
                         </tr>
                     </thead>
