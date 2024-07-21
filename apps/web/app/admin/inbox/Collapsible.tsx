@@ -140,7 +140,6 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
                                     <option value="Resolved">Resolved</option>
                                 </select>
                             </div>
-
                             <div>
                                 <AssignedTo id={ticket.id} assigneeId={ticket.assignedTo} shopDomain={user?.publicMetadata.shopDomain as string} />
 

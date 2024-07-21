@@ -332,12 +332,12 @@ export async function getQueriesbyPriority(data: string): Promise<number[]> {
 
 export async function fetchNotifications(payload: string) {
     const data = JSON.parse(payload);
-    console.log(data);
+    // console.log(data);
     const { userId } = JSON.parse(payload);
     const { start } = JSON.parse(payload);
     const startTime = new Date(start);
     const startMinus48Hours = new Date(startTime.getTime() - 48 * 60 * 60 * 1000);
-    console.log(`fetching notifications for user ${userId} after ${startMinus48Hours}`);
+    // console.log(`fetching notifications for user ${userId} after ${startMinus48Hours}`);
 
     const notifications = await db.notification.findMany({
         where: {
@@ -354,7 +354,7 @@ export async function fetchNotifications(payload: string) {
             isRead: true
         }
     })
-    console.log(notifications)
+    // console.log(notifications)
     return notifications;
 }
 
