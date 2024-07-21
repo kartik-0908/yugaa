@@ -7,7 +7,7 @@ export default async function ticket({ params }: any) {
     const { sessionClaims } = auth()
     const res = await getEscTicket(params.id)
     const ticket = res;
-    const messages = res?.AIConversationTicket;
+    const messages = res?.AIConversationTicket.Message;
     const resp = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/v1/shopify/getEmail`, {
         shopDomain: sessionClaims?.metadata.shopDomain
     })
