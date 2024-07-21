@@ -146,7 +146,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                                     <Popover placement="bottom" showArrow offset={10}>
                                         <PopoverTrigger>
                                             <div className="p-4">
-                                                Icon for Ai
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" className=""><path fill="none" d="M0 0h24v24H0z"></path><path d="m20 7-.95-2.05L17 4l2.05-.95L20 1l.95 2.05L23 4l-2.05.95zM8.5 7l-.95-2.05L5.5 4l2.05-.95L8.5 1l.95 2.05L11.5 4l-2.05.95zM20 18.5l-.95-2.05L17 15.5l2.05-.95.95-2.05.95 2.05 2.05.95-2.05.95zM5.1 21.7l-2.8-2.8q-.3-.3-.3-.725t.3-.725L13.45 6.3q.3-.3.725-.3t.725.3l2.8 2.8q.3.3.3.725t-.3.725L6.55 21.7q-.3.3-.725.3a.99.99 0 0 1-.725-.3m.75-2.1L13 12.4 11.6 11l-7.2 7.15z"></path></svg>
                                             </div>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-[200px] bg-white shadow-none">
