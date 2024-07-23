@@ -49,58 +49,61 @@ export async function generatelatestSum(ticketId: string) {
 }
 
 async function combineChatAndEvents(ticketId: string, type: 'latest' | 'complete') {
-    const aiChats = await db.aIEscalatedTicket.findUnique({
+    const shop = await db.ticket.findUnique({
         where: {
             id: ticketId
         },
-        include: {
-            AIConversationTicket: {
-                include: {
-                    Message: true
-                }
-            }
+        select: {
+            shopDomain: true
         }
     })
-
-    const events = await db.aIEscalatedTicketEvent.findMany({
+    const events = await db.ticketEvents.findMany({
         where: {
-            aiEscalatedTicketId: ticketId,
+            ticketId: ticketId,
         },
         orderBy: {
             createdAt: 'asc',
         },
-        include: {
-            Email: true
+        select: {
+            type: true,
+            createdAt: true,
+            EMAIL_RECEIVED: {
+                select: {
+                    Email: true
+                }
+            },
+            EMAIL_SENT: {
+                select: {
+                    Email: true
+                }
+            },
+            AI_TO_USER: true,
+            USER_TO_AI: true
         }
     });
 
     let result = '';
     let skippable = 0;
     let length = events.length;
-    if (aiChats) {
-        length += aiChats.AIConversationTicket.Message.length;
-        if (type === 'latest') {
-            skippable = length / 2;
-        }
-        for (const message of aiChats.AIConversationTicket.Message) {
-            skippable--;
-            if (skippable <= 0) {
-                result += `sender : ${message.sender} \n message: ${message.message} \n ######### \n `;
-            }
-        }
-    }
-
     console.log(result)
-
     if (events) {
         for (const event of events) {
             skippable--;
             if (skippable <= 0) {
                 if (event.type === 'EMAIL_SENT') {
-                    result += `event: Email send to User  message: ${event.Email?.text}\n ######### \n`;
+                    result += `event: Email send to User  message: ${event.EMAIL_SENT?.Email?.text}\n ######### \n`;
                 }
-                else if (event.type === 'EMAIL_RECEIVED') {
-                    result += `event: Email received from User  message: ${event.Email?.text}\n ######### \n`;
+                if (event.type === 'EMAIL_RECEIVED') {
+                    result += `event: Email received from User  message: ${event.EMAIL_RECEIVED?.Email?.text}\n ######### \n`;
+                }
+                if (event.type === 'AI_TO_USER') {
+                    result += `event: AI to User  message: ${event.AI_TO_USER}\n ######### \n`;
+                }
+                if (event.type === 'USER_TO_AI') {
+                    result += `event: User to AI  message: ${event.USER_TO_AI}\n ######### \n`;
+                }
+                if (event.type === 'ESCALATED') {
+                    result += `event: Ticket Escalated to Human Operator }\n ######### \n`;
                 }
             }
 
@@ -108,11 +111,9 @@ async function combineChatAndEvents(ticketId: string, type: 'latest' | 'complete
     }
 
     console.log(result)
-
-
-    let shop = aiChats?.shopDomain
-    if (shop) {
-        shop = shop.replace('.myshopify.com', '');
+    let shopDomain = shop?.shopDomain;
+    if (shopDomain) {
+        shopDomain = shopDomain.replace('.myshopify.com', '');
     }
     if (type === 'latest') {
         return `You are an AI copilot for the operators and admin of brand ${shop},You are given a ticket events, You are provided with the latest events in the tickets Only Response with the summary. Only generate answer with the help of below given events. \n\n

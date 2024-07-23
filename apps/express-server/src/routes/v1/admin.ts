@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { db } from '../../common/db';
 import { of } from 'svix/dist/openapi/rxjsStub';
+import { all } from 'axios';
 const express = require('express');
 const router = Router();
 const multer = require('multer');
@@ -88,14 +89,10 @@ router.post('/settings', async (req, res) => {
 })
 
 router.get('/ai-tickets', async (req, res) => {
-    // console.log("fetching for home peak interaction time")
     const { shop, start, end } = req.query
-    // console.log(req.query)
-
     if (typeof shop !== 'string' || typeof start !== 'string' || typeof end !== 'string') {
         return res.status(400).json({ message: "Invalid query parameters" });
     }
-
     try {
         const tickets = await db.ticket.findMany({
             where: {
@@ -104,6 +101,13 @@ router.get('/ai-tickets', async (req, res) => {
                     gte: new Date(start),
                     lte: new Date(end),
                 },
+                events: {
+                    some: {
+                        type: {
+                            in: ['AI_TO_USER', 'USER_TO_AI']
+                        }
+                    }
+                }
             },
             select: {
                 id: true,
@@ -113,7 +117,6 @@ router.get('/ai-tickets', async (req, res) => {
                 createdAt: 'asc',
             },
         })
-
         res.json({ tickets })
     } catch (error) {
         console.log(error)
@@ -124,16 +127,11 @@ router.get('/ai-tickets', async (req, res) => {
 })
 
 router.get('/total-interaction', async (req, res) => {
-    console.log("fetching for total interaction time")
     const { shop, start, end } = req.query
     console.log(req.query)
-
     if (typeof shop !== 'string' || typeof start !== 'string' || typeof end !== 'string') {
         return res.status(400).json({ message: "Invalid query parameters" });
     }
-    // console.log(startTime)
-    // console.log(endTime)
-    // console.log(shopDomain)
     try {
         const tickets = await db.ticket.findMany({
             where: {
@@ -142,6 +140,13 @@ router.get('/total-interaction', async (req, res) => {
                     gte: start,
                     lte: end,
                 },
+                events: {
+                    some: {
+                        type: {
+                            in: ['AI_TO_USER', 'USER_TO_AI']
+                        }
+                    }
+                }
             },
             select: {
                 id: true,
@@ -151,7 +156,6 @@ router.get('/total-interaction', async (req, res) => {
                 createdAt: 'asc',
             },
         })
-        // console.log(tickets)
         res.json({
             tickets
         })
@@ -162,41 +166,6 @@ router.get('/total-interaction', async (req, res) => {
         })
     }
 })
-
-// router.post('/recent-chats', async (req, res) => {
-//     console.log("fetching for home total interaction time")
-//     const { shopDomain } = req.body
-//     // console.log(shopDomain)
-//     try {
-//         const tickets = await db.aIConversationTicket.findMany({
-//             where: {
-//                 shopDomain: shopDomain,
-//             },
-//             orderBy: {
-//                 createdAt: 'desc',
-//             },
-//             take: 3,
-//             include: {
-//                 Message: {
-//                     take: 2,
-//                 },
-//             },
-//         });
-//         const result = tickets.map(ticket => ({
-//             id: ticket.id,
-//             messages: ticket.Message,
-//         }));
-//         // console.log(result)
-//         res.json({
-//             result
-//         })
-//     } catch (error) {
-//         console.log(error)
-//         res.status(404).json({
-//             "message": "Technical Error"
-//         })
-//     }
-// })
 
 router.get('/unanswered', async (req, res) => {
     console.log("fetching for answered messages")
@@ -292,6 +261,11 @@ router.get('/count-ai-tickets', async (req, res) => {
                     gte: start,
                     lte: end,
                 },
+                events: {
+                    some: {
+                        type: 'AI_TO_USER'
+                    }
+                }
             },
         })
         // console.log(count)
@@ -563,6 +537,13 @@ router.post('/chat', async (req, res) => {
         const retcount = await db.ticket.count({
             where: {
                 shopDomain: shopDomain,
+                events: {
+                    some: {
+                        type: {
+                            in: ['AI_TO_USER', 'USER_TO_AI']
+                        }
+                    }
+                }
             },
         });
         const tickets = await db.ticket.findMany({
@@ -651,48 +632,7 @@ router.post('/feature-request', async (req, res) => {
         })
     }
 })
-// router.post('/getEscwithStatus', async (req, res) => {
-//     const { shopDomain, offset, count, status } = req.body
-//     console.log("inside getting ticket with status")
-//     console.log(shopDomain, offset, count, status)
-//     // console.log(shopDomain)
-//     try {
-//         const retcount = await db.aIEscalatedTicket.count({
-//             where: {
-//                 shopDomain: shopDomain,
-//                 status: status
-//             },
-//         });
-//         const tickets = await db.aIEscalatedTicket.findMany({
-//             skip: offset,
-//             take: count,
-//             where: {
-//                 shopDomain: shopDomain,
-//                 status: status
-//             },
-//             orderBy: {
-//                 createdAt: 'desc',
-//             },
-//             select: {
-//                 id: true,
-//                 aiConversationTicketId: true,
-//                 createdAt: true,
-//                 customerEmail: true
 
-//             },
-//         });
-//         console.log(tickets)
-//         console.log(retcount)
-//         res.json({
-//             retcount, tickets
-//         })
-//     } catch (error) {
-//         console.log(error)
-//         res.status(404).json({
-//             "message": "Technical Error"
-//         })
-//     }
-// })
 
 // router.post('/getEscTicketwithId', async (req, res) => {
 //     const { id } = req.body

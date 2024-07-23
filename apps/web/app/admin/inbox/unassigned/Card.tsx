@@ -44,16 +44,16 @@ function truncateString(str: string, numWords: number = 5): string {
 }
 
 
-export default function Card({ id, time, email }: { id: string, messages: string, time: string, email: string }) {
+export default function Card({ id, time, name, messages }: { id: string, messages: string, time: string, name: string }) {
     return (
         <div className="flex flex-col p-4 border-b-[1px] border-b-[#D3D3D3]">
             <div className="flex justify-between gap-2">
                 <div className="flex items-center">
                     <div className="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-red rounded-full dark:bg-gray-600">
-                        <span className="font-medium text-gray-600 dark:text-gray-300">JL</span>
+                        <span className="font-medium text-gray-600 dark:text-gray-300">{name[0]?.toUpperCase()}</span>
                     </div>
                     <div className="ml-1.5">
-                        <p className="leading-4 font-bold">{email}</p>
+                        <p className="leading-4 font-bold">{name}</p>
                     </div>
                 </div>
                 <div className="flex items-center">
@@ -64,7 +64,7 @@ export default function Card({ id, time, email }: { id: string, messages: string
                 </div>
             </div>
             <p className="text-sm leading-4 text-ellipsis font-normal mt-2">
-                Yet to figure out
+                {truncateString(messages)}
             </p>
         </div>
     );

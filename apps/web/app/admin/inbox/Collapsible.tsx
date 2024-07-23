@@ -11,8 +11,9 @@ import { readStreamableValue } from 'ai/rsc';
 import TextMessage from '../../../components/copy';
 import { formatDate } from '../../../common/function';
 import AssignedTo from '../../../components/AssignedTo';
+import { fetchTicket, fetchTicketEventsbyId } from '../../../actions/inbox';
 
-const RightPanelToggle = ({ ticket, messages, emails }: any) => {
+const RightPanelToggle = ({ id, emails }: any) => {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return (<div>Loading...</div>);
 
@@ -21,15 +22,19 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
     const [currentAiMessage, setCurrentAiMessage] = useState('');
     const [currentAiHeading, setCurrentAiHeading] = useState('');
     const [events, setEvents] = useState<any[]>([]);
-    const [category, setCategory] = useState(ticket.category);
-    const [priority, setPriority] = useState(ticket.priority);
-    const [status, setStatus] = useState(ticket.status);
+    const [category, setCategory] = useState('');
+    const [subject, setSubject] = useState('');
+    const [consumerEmail, setEmail] = useState('');
+    const [priority, setPriority] = useState('');
+    const [status, setStatus] = useState('');
+    const [assigneeId, setAssigneeId] = useState('');
+    const [creationTime, setCreationTime] = useState<Date>();
 
 
     const handleChange = async (field: string, value: string) => {
         try {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/v1/escTicket/update`, {
-                id: ticket.id,
+                id: id,
                 field: field,
                 value: value,
                 by: user?.fullName
@@ -53,15 +58,33 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
 
     useEffect(() => {
         async function fetchEvents() {
-            const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/v1/admin/getEscTicketEvents`, {
-                id: ticket.id
-            })
-            console.log(res.data)
-            const { events } = res.data;
+            const events = await fetchTicketEventsbyId(id);
+            events.forEach((event: any) => {
+                console.log(event)
+                if (event.type === 'ESCALATED') {
+                    setSubject(event.ESCALATED.subject)
+                    setEmail(event.ESCALATED.userEmail)
+                }
+            });
             setEvents(events)
         }
+        async function Ticket() {
+            const ticket = await fetchTicket(id);
+            if (ticket !== null) {
+                if (ticket.category !== null) { setCategory(ticket.category); }
+                if (ticket.status !== null) { setStatus(ticket.status); }
+                if (ticket.priority !== null) { setPriority(ticket.priority); }
+                if (ticket.assigneeId !== null) {
+                    setAssigneeId(ticket.assigneeId);
+                }
+                if (ticket.createdAt !== null) {
+                    setCreationTime((ticket.createdAt))
+                }
+            }
+        }
         fetchEvents();
-    }, [ticket]);
+        Ticket();
+    }, [id]);
 
     const renderContent = () => {
         switch (activeTab) {
@@ -76,23 +99,19 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
                             <tbody>
                                 <tr>
                                     <td>ID</td>
-                                    <td>{ticket.id}</td>
+                                    <td>{id}</td>
                                 </tr>
                                 <tr>
                                     <td>Email</td>
-                                    <td>{ticket.customerEmail}</td>
+                                    <td>{consumerEmail}</td>
                                 </tr>
                                 <tr>
                                     <td>Subject</td>
-                                    <td>{ticket.subject}</td>
-                                </tr>
-                                <tr>
-                                    <td>Assignee</td>
-                                    <td>{ticket.assignedPerson}</td>
+                                    <td>{subject}</td>
                                 </tr>
                                 <tr>
                                     <td>Created At</td>
-                                    <td>{new Date(ticket.createdAt).toLocaleString()}</td>
+                                    <td>{creationTime?.toLocaleString()}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -141,7 +160,7 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
                                 </select>
                             </div>
                             <div>
-                                <AssignedTo id={ticket.id} assigneeId={ticket.assignedTo} shopDomain={user?.publicMetadata.shopDomain as string} />
+                                <AssignedTo id={id} assigneeId={assigneeId} shopDomain={user?.publicMetadata.shopDomain as string} />
 
                             </div>
                         </div>
@@ -155,6 +174,74 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
                 );
             default:
                 return <div>Select a tab</div>;
+        }
+    };
+    const renderEvent = (event: any) => {
+        console.log(event.type)
+        switch (event.type) {
+            case 'USER_TO_AI':
+                return (
+                    <UserCard
+                        message={event.USER_TO_AI.message}
+                        time={formatDate(event.createdAt)}
+                        key={event.id}
+                    />
+                )
+            case 'EMAIL_RECEIVED':
+                return (
+                    <UserCard
+                        message={event.EMAIL_RECEIVED.Email.text}
+                        time={formatDate(event.createdAt)}
+                        key={event.id}
+                    />
+                );
+            case 'AI_TO_USER':
+                return (
+                    <AiCard
+                        message={event.AI_TO_USER.message}
+                        time={formatDate(event.createdAt)}
+                        key={event.id}
+                    />
+                )
+            case 'EMAIL_SENT':
+                return (
+                    <AiCard
+                        message={event.EMAIL_SENT.Email.text}
+                        time={formatDate(event.createdAt)}
+                        key={event.id}
+                    />
+                );
+            default:
+                let message = '';
+                let time = ` at ${formatDate(event.createdAt)}`;
+
+                switch (event.type) {
+                    case 'AI_TICKET_CREATED':
+                        message = 'AI Ticket created';
+                        break;
+                    case 'STATUS_CHANGED':
+                        message = `Status changed to ${event.newStatus}`;
+                        break;
+                    case 'PRIORITY_CHANGED':
+                        message = `Priority changed to ${event.newpriority}`;
+                        break;
+                    case 'CATEGORY_CHANGED':
+                        message = `Category changed to ${event.newcategory}`;
+                        break;
+                    case 'ASSIGNE_CHANGED':
+                        message = `Assigned to ${event.new.name}`;
+                        break;
+                    case 'REOPENED':
+                        message = 'Ticket reopened';
+                        break;
+                    case 'ESCALATED':
+                        message = `Ticket escalated by ${event.name}`;
+                        break;
+                    default:
+                        message = `Unknown event: ${event.type}`;
+                }
+
+                return <EventCard event={`${message}${time}`} key={event.id} />;
         }
     };
 
@@ -222,89 +309,19 @@ const RightPanelToggle = ({ ticket, messages, emails }: any) => {
     return (
         <div className="flex h-full w-full">
             <div className={`h-full transition-all duration-1500 ease-in-out ${isRightPanelVisible ? 'w-2/3' : 'w-full'}`}>
-                <div className="text-2xl pt-1 pl-1 font-bold border-b-1 border-stroke text-ellipsis">
-                    <h2>{ticket.subject}</h2>
-                    <p className="text-sm">{ticket.id}</p>
+                <div className="h-[8%] text-2xl pt-1 pl-1 font-bold border-b-1 border-stroke text-ellipsis">
+                    <h2>{subject}</h2>
+                    <p className="text-sm">{id}</p>
                 </div>
-                <div className="p-4 h-3/5 overflow-y-auto overflow-x-hidden">
-                    {messages.map((msg: any) => {
-                        if (msg.message) {
-                            if (msg.sender === 'ai') {
-                                return (
-                                    <AiCard message={msg.message} time={formatDate(msg.createdAt)} key={msg.id} />
-                                );
-                            } else if (msg.sender === 'user') {
-                                return (
-                                    <UserCard message={msg.message} time={formatDate(msg.createdAt)} key={msg.id} />
-                                );
-                            }
-                        }
-                    })}
-                    {events.map((event: any) => {
-                        if (event.type === 'EMAIL_SENT') {
-                            return (
-                                <AiCard message={event.email.text} time={formatDate(event.email.createdAt)} key={event.id} />
-                            );
-                        }
-                        else if (event.type === 'EMAIL_RECEIVED') {
-                            return (
-                                <UserCard message={event.email.text} time={formatDate(event.email.createdAt)} key={event.id} />
-                            );
-                        }
-                        else {
-                            let message = '';
-                            let actor = '';
-                            let time = '';
-
-                            if (event.changedBy) {
-                                actor = ` by ${event.changedBy}`;
-                            }
-
-                            if (event.time) {
-                                time = ` at ${event.time}`;
-                            } else if (event.createdAt) {
-                                time = ` at ${formatDate(event.createdAt)}`;
-                            }
-
-                            switch (event.type) {
-                                case 'STATUS_CHANGED':
-                                    message = `Status changed to ${event.newStatus}${actor}`;
-                                    break;
-                                case 'PRIORITY_CHANGED':
-                                    message = `Priority changed to ${event.newPriority}${actor}`;
-                                    break;
-                                case 'CATEGORY_CHANGED':
-                                    message = `Category changed to ${event.newCategory}${actor}`;
-                                    break;
-                                case 'ASSIGNED':
-                                    message = `Assigned to ${event.assignee}${actor}`;
-                                    break;
-                                case 'REOPENED':
-                                    message = `Ticket reopened${actor}`;
-                                    break;
-                                case 'CREATED':
-                                    message = `Ticket created${actor}`;
-                                    break;
-                                default:
-                                    message = event.message;
-                            }
-
-                            return (
-                                <EventCard
-                                    event={`${message}${time}`}
-                                    key={event.id}
-                                />
-                            );
-                        }
-
-                    })}
+                <div className="p-4 h-[72%] overflow-y-auto overflow-x-hidden">
+                    {events.map(renderEvent)}
                 </div>
-                <div className='h-1/5'>
+                <div className='h-[20%]'>
                     <MessageForm
                         emails={emails}
-                        customerEmail={ticket.customerEmail}
-                        ticketId={ticket.id}
-                        subject={ticket.subject}
+                        customerEmail={consumerEmail}
+                        ticketId={id}
+                        subject={subject}
                         onMessageSend={handleMessageSend}
                         aiChatassistance={aiChatassistance}
                         latestSum={latestSum}

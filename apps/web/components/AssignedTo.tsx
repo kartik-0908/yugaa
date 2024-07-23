@@ -30,9 +30,9 @@ export default function AssignedTo({ id, assigneeId, shopDomain }: { id: string,
         return (
             <Select
                 disabledKeys={disabledKeys}
-                onSelectionChange={(key : any) => {
+                onSelectionChange={(key: any) => {
                     const arr = Array.from(key);
-                    updateAssignee(id, arr[0] as string, user?.fullName as string, user?.publicMetadata.shopDomain as string)
+                    updateAssignee(id, arr[0] as string, user?.id as string, user?.publicMetadata.shopDomain as string)
                 }}
                 selectionMode="single"
                 listboxProps={{

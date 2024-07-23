@@ -112,34 +112,39 @@ async function handleCreateEvent(data: any) {
     const { id, metadata } = data;
     const meta = JSON.parse(metadata);
     if (meta.type === 'USER_TO_AI') {
-        await db.ticketEvents.create({
-            data: {
-                ticketId: id,
-                type: 'USER_TO_AI',
-                'USER_TO_AI': {
-                    create: {
-                        message: meta.message,
-                        createdAt: meta.createdAt
+        if (meta.message !== '') {
+            await db.ticketEvents.create({
+                data: {
+                    ticketId: id,
+                    type: 'USER_TO_AI',
+                    'USER_TO_AI': {
+                        create: {
+                            message: meta.message,
+                            createdAt: meta.createdAt
+                        }
                     }
                 }
-            }
-        })
+            })
+        }
+
     }
     if (meta.type === 'AI_TO_USER') {
-        const result = containsErrorOrSorry(meta.message);
-        await db.ticketEvents.create({
-            data: {
-                ticketId: id,
-                type: 'AI_TO_USER',
-                'AI_TO_USER': {
-                    create: {
-                        message: meta.message,
-                        createdAt: meta.createdAt,
-                        unanswered: result
+        if (meta.message !== '') {
+            const result = containsErrorOrSorry(meta.message);
+            await db.ticketEvents.create({
+                data: {
+                    ticketId: id,
+                    type: 'AI_TO_USER',
+                    'AI_TO_USER': {
+                        create: {
+                            message: meta.message,
+                            createdAt: meta.createdAt,
+                            unanswered: result
+                        }
                     }
                 }
-            }
-        })
+            })
+        }
     }
     if (meta.type === 'ESCALATED') {
         const events = await db.ticketEvents.findMany({
@@ -226,9 +231,10 @@ async function handleCreateEvent(data: any) {
                     'ESCALATED': {
                         create: {
                             userEmail: meta.userEmail,
-                            createdAt: meta.createdAt,
+                            createdAt: new Date(),
                             name: meta.name,
-                            category: meta.category
+                            category: meta.category,
+                            subject: subject,
                         }
                     }
                 }
@@ -248,6 +254,7 @@ async function handleCreateEvent(data: any) {
                     },
                     data: {
                         assigneeId: assigneeId,
+                        status: 'Queued',
                     }
                 })
                 await db.user.update({

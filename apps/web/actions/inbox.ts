@@ -49,12 +49,12 @@ export async function updateOperatorAvailability(userId: string[], available: bo
 export async function updateAssignee(id: string, assigneeId: string, by: string, shopDomain: string) {
     let assigneeName;
     await db.$transaction(async (tx) => {
-        const res = await tx.aIEscalatedTicket.update({
+        const res = await tx.ticket.update({
             where: {
                 id: id
             },
             data: {
-                assignedToId: assigneeId
+                assigneeId: assigneeId
             }
         })
         const resp = await tx.user.findUnique({
@@ -63,13 +63,17 @@ export async function updateAssignee(id: string, assigneeId: string, by: string,
             }
         })
         assigneeName = resp?.firstName + " " + resp?.lastName;
-        await tx.aIEscalatedTicketEvent.create({
+        await tx.ticketEvents.create({
             data: {
-                id: randomUUID(),
-                aiEscalatedTicketId: id,
-                changedBy: by,
-                assignedTo: assigneeName,
-                type: "ASSIGNED"
+                ticketId: id,
+                type: 'ASSIGNE_CHANGED',
+                ASSIGNE_CHANGED: {
+                    create: {
+                        newid: assigneeId,
+                        byid: by
+                    }
+                }
+
             }
         })
     })
@@ -77,21 +81,92 @@ export async function updateAssignee(id: string, assigneeId: string, by: string,
     await pushIndividualNoti(assigneeId, "Assignee Changed", `You have been assigned to ticket ${id} by ${by}`)
 }
 
-export async function getEscTicket(id: string) {
-    const escalatedTicket = await db.aIEscalatedTicket.findUnique({
-        where: { id: id },
-        include: {
-            AIEscalatedTicketEvent: {
-                orderBy: { createdAt: 'asc' },
+export async function fetchTicketEventsbyId(id: string) {
+    const ticketEvents = await db.ticketEvents.findMany({
+        where: {
+            ticketId: id
+        },
+        orderBy: {
+            createdAt: 'asc'
+        },
+        select: {
+            type: true,
+            createdAt: true,
+            ESCALATED: true,            
+            AI_TO_USER: true,
+            USER_TO_AI: true,
+            EMAIL_RECEIVED: {
+                select: {
+                    Email: true
+                }
             },
-            AIConversationTicket: {
-                include: {
-                    Message: {
-                        orderBy: { createdAt: 'asc' },
+            EMAIL_SENT: {
+                select: {
+                    Email: true
+                }
+            },
+            ASSIGNE_CHANGED: true,
+            CATEGORY_CHANGED: true,
+            PRIORITY_CHANGED: true,
+            STATUS_CHANGED: true,
+        }
+    })
+    return ticketEvents;
+}
+
+export async function fetchTicket(id: string) {
+    return await db.ticket.findUnique({
+        where: {
+            id: id
+        }
+    })
+}
+export async function getEscTicketWithStatus(shopDomain: string, status: string, offset: number, count: number) {
+    console.log(`getEscTicketWithStatus: ${shopDomain} ${status} ${offset} ${count}`);
+    const escalatedTicket = await db.ticket.findMany({
+        where: {
+            shopDomain: shopDomain,
+            status: status
+        },
+        skip: offset,
+        take: count,
+        orderBy: {
+            createdAt: 'desc',
+        },
+        select: {
+            id: true,
+
+            events: {
+                orderBy: { createdAt: 'desc' },
+                select: {
+                    type: true,
+                    createdAt: true,
+                    ESCALATED: true,
+                    EMAIL_RECEIVED: {
+                        select: {
+                            Email: true
+                        }
+                    },
+                    EMAIL_SENT: {
+                        select: {
+                            Email: true
+                        }
                     },
                 },
-            },
-        },
+                take: 1,
+            }
+        }
     });
-    return escalatedTicket;
+    const total = await db.ticket.count({
+        where: {
+            shopDomain: shopDomain,
+            status: status,
+            events: {
+                some: {
+                    type: 'ESCALATED'
+                }
+            }
+        }
+    })
+    return { total: total, currentTickets: escalatedTicket }
 }

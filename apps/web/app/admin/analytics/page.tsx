@@ -62,7 +62,7 @@ export default function Analytics() {
               labelPlacement="outside"
               maxValue={today(getLocalTimeZone())}
               onChange={handlechange}
-              className='min-w-[450px]'
+              className='min-w-[250px]'
               classNames={{
                 calendarContent: "w-[250px]"
               }}

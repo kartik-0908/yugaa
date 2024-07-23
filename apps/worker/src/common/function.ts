@@ -143,25 +143,6 @@ function generateUniqueId() {
     return `${timestamp}-${randomStr}`;
 }
 
-function containsErrorOrSorry(text: string): boolean {
-    const lowercaseText = text.toLowerCase();
-    return lowercaseText.includes("error") || lowercaseText.includes("sorry");
-}
-
-// export async function createMssg(ticketId: string, sender: string, message: string, timestamp: any) {
-//     console.log(timestamp)
-//     const errorOrSorry = containsErrorOrSorry(message);
-//     await db.message.create({
-//         data: {
-//             ticketId: ticketId,
-//             sender: sender,
-//             message: message,
-//             createdAt: timestamp,
-//             unanswered: errorOrSorry
-//         }
-//     });
-// }
-
 function extractProductData(product: any) {
 
     const {

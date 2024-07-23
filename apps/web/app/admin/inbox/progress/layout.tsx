@@ -1,4 +1,4 @@
-import ChatList from "./Sidebar";
+import ChatList from "../unassigned/Sidebar";
 
 export default function home({ children }: any) {
     return (

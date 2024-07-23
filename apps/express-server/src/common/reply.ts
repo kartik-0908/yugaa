@@ -135,15 +135,22 @@ export async function replytriaal(ticketId: string, query: string, shopDomain: s
             }
             output[msg.id] += (msg.content as string)
             io.emit('streamChunk', { id: msg.id, message: output[msg.id] })
+            io.emit('status', { "status": "writing", "where": "on_llm_stream" })
+
           }
         }
       }
       else if (event.event === "on_llm_end") {
         let msg = event.data;
-        io.emit('status', { "status": "input" })
+        // io.emit('status', { "status": "input", "where": "on_llm_end" })
       }
     }
     let snapshot = await persistentGraph.getState(config)
+    console.log(snapshot)
+    if (snapshot.next.length === 0) {
+      io.emit('status', { "status": "input", "where": "no next" })
+      console.log("end")
+    }
     if (snapshot.next[0] === 'sensitiveTools') {
       console.log(snapshot)
       const formFields = [

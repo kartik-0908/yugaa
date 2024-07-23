@@ -8,19 +8,18 @@ datasource db {
 }
 
 model Ticket {
-  id         String   @id @default(uuid())
-  createdAt  DateTime @default(now())
+  id         String         @id @default(uuid())
+  createdAt  DateTime       @default(now())
   shopDomain String
-  status     String?
+  status     String?        @default("Unassigned")
   category   String?
   priority   String?
   assigneeId String?
-  fcr        Boolean  @default(false)
+  fcr        Boolean        @default(false)
   fcrBy      String?
-  missing    Boolean  @default(false)
-
-  events TicketEvents[]
-  User   User[]
+  missing    Boolean        @default(false)
+  events     TicketEvents[]
+  User       User[]
 }
 
 model TicketEvents {
@@ -152,6 +151,7 @@ model ESCALATED {
   userEmail String
   name      String
   category  String
+  subject   String       @default("escalated")
   event     TicketEvents @relation(fields: [id], references: [id])
 }
 
