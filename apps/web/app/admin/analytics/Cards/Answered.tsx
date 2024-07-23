@@ -327,7 +327,7 @@ export function TransferRate({ start, end, users }: { start: string, end: string
                     </svg>
                 </div>
                 <div>
-                    <p className="text-3xl text-default-500 font-bold">{data} %</p>
+                    <p className="text-3xl text-default-500 font-bold">{data?.toPrecision(1)} %</p>
                 </div>
             </CardHeader>
             <CardBody>
