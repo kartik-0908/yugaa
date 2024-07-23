@@ -52,69 +52,49 @@ const io = new SocketIOServer(server, {
 
 io.on('connection', (socket) => {
     console.log('a user connected');
-    socket.on('clientType', (data) => {
-        const { type, merchantId } = data;
-        if (type === 'endUser') {
-            const roomName = `room-${socket.id}`;
-            socket.join(roomName);
-            console.log(`End user connected and joined room: ${roomName}`);
-            socket.emit('roomAssigned', { roomName });
-        } else if (type === 'merchant') {
-            const roomName = `merchant-${merchantId}`;
-            socket.join(roomName);
-            console.log(`Merchant connected and joined room: ${roomName}`);
-
-            // Join all end user rooms for this merchant
-            const endUserRooms = Array.from(socket.rooms).filter(room => room.startsWith('room-'));
-            endUserRooms.forEach(room => {
-                io.sockets.sockets.get(socket.id)?.join(room);
-            });
-        }
-    });
-
     socket.on('sendMessage', async (data) => {
-        const { ticketId, roomName, message, shopifyDomain, userInfo, timestamp } = data;
-        // io.in(conversationId).emit('status', { status: 'understanding' });
+        const { ticketId, message, shopifyDomain, userInfo, timestamp } = data;
         console.log(message)
-        await replytriaal( ticketId, message, shopifyDomain, io, roomName,false)
-        // io.in(roomName).emit('receiveMessage', { sender: 'bot', message: replyMessage });
+        await replytriaal(ticketId, message, shopifyDomain, io, false)
     });
     socket.on('ticketEscalate', async (data) => {
-        const { ticketId, roomName, email, shopifyDomain } = data;
-        // io.in(conversationId).emit('status', { status: 'understanding' });
-        // console.log(message)
-        await replytriaal(ticketId, "", shopifyDomain, io, roomName, true, email)
-        // io.in(roomName).emit('receiveMessage', { sender: 'bot', message: replyMessage });
+        const { ticketId, email,name,category, shopifyDomain } = data;
+        console.log(data)
+        console.log('ticket escalted')
+        await replytriaal(ticketId, "", shopifyDomain, io, true )
     });
 
     socket.on('getPreviousMessages', async (data) => {
         const { ticketId } = data;
         console.log(`Fetching previous messages for ticket ID: ${ticketId}`);
-        const previousMessages = await getPreviousMessages(ticketId);
-        const formattedMessages = previousMessages.map(message => ({
-            sender: message.sender,
-            message: message.message,
-            timeStamp: message.createdAt
-        }));
-        // console.log(formattedMessages)
-        socket.emit('previousMessages', { prevMessages: formattedMessages });
+        const previousevents = await getPreviousMessages(ticketId);
+        socket.emit('previousMessages', { previousevents });
     });
     socket.on('create-ticket', async (data) => {
         const { ticketId, shopDomain } = data;
         console.log(data)
         console.log(`Createing ticket ID: ${ticketId}`);
-        const resp = await db.aIConversationTicket.findUnique({
+        const resp = await db.ticket.findUnique({
             where: {
                 id: ticketId
             }
         })
         if (!resp) {
             console.log(`ticket creatinh withh ${ticketId} for ${shopDomain}`)
-            await db.aIConversationTicket.create({
+            await db.ticket.create({
                 data: {
                     id: ticketId,
                     shopDomain: shopDomain,
-                    updatedAt: new Date(),
+                    events: {
+                        create: {
+                            type: 'AI_TICKET_CREATED',
+                            AI_TICKET_CREATED: {
+                                create: {
+                                    ticketId,
+                                }
+                            }
+                        }
+                    }
                 }
             })
         }

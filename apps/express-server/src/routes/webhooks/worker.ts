@@ -161,76 +161,76 @@ router.post('/save-webhook', async function (req, res) {
 }
 );
 
-router.post('/save-mssg', async function (req, res) {
-    const { ticketId, sender, message, timestamp } = req.body;
-    try {
-        if (message !== "") {
-            await db.message.create({
-                data: {
-                    ticketId,
-                    sender,
-                    message,
-                    createdAt: timestamp
-                }
-            })
-        }
-        res.status(200).json({
-            success: true,
-            message: 'Webhook received',
-        });
-    } catch (err) {
-        console.log(err)
-        res.status(400).json({
-            success: false,
-            message: (err as Error).message,
-        });
-    }
-})
+// router.post('/save-mssg', async function (req, res) {
+//     const { ticketId, sender, message, timestamp } = req.body;
+//     try {
+//         if (message !== "") {
+//             await db.message.create({
+//                 data: {
+//                     ticketId,
+//                     sender,
+//                     message,
+//                     createdAt: timestamp
+//                 }
+//             })
+//         }
+//         res.status(200).json({
+//             success: true,
+//             message: 'Webhook received',
+//         });
+//     } catch (err) {
+//         console.log(err)
+//         res.status(400).json({
+//             success: false,
+//             message: (err as Error).message,
+//         });
+//     }
+// })
 
-router.post('/escalate-ticket', async function (req, res) {
-    const { ticketId, shopDomain, userEmail, subject, assigneeId } = req.body;
-    const shop = trimShopifyDomain(shopDomain)
-    try {
-        await db.$transaction(async (prisma) => {
-            // Count the number of tickets for the shopDomain
-            const ticketCount = await prisma.aIEscalatedTicket.count({
-                where: {
-                    shopDomain: shopDomain,
-                },
-            });
-            const newTicketId = `${shop}-${ticketCount + 1}`;
-            const newTicket = await prisma.aIEscalatedTicket.create({
-                data: {
-                    updatedAt: new Date(),
-                    id: newTicketId,
-                    shopDomain: shopDomain,
-                    customerEmail: userEmail,
-                    aiConversationTicketId: ticketId,
-                    subject: subject
-                },
-            });
-            await prisma.aIEscalatedTicketEvent.create({
-                data: {
-                    aiEscalatedTicketId: newTicket.id,
-                    type: 'CREATED',
-                    newStatus: newTicket.status, // Assuming the status is set to a default value
-                },
-            });
-            await prisma.$executeRaw`SELECT pg_advisory_xact_lock(1);`;
-        }, {
-            isolationLevel: 'Serializable', // Ensuring the highest isolation level
-        });
-        res.status(200).json({
-            success: true,
-            message: 'Webhook received',
-        });
-    } catch (err) {
-        res.status(400).json({
-            success: false,
-            message: (err as Error).message,
-        });
-    }
-})
+// router.post('/escalate-ticket', async function (req, res) {
+//     const { ticketId, shopDomain, userEmail, subject, assigneeId } = req.body;
+//     const shop = trimShopifyDomain(shopDomain)
+//     try {
+//         await db.$transaction(async (prisma) => {
+//             // Count the number of tickets for the shopDomain
+//             const ticketCount = await prisma.aIEscalatedTicket.count({
+//                 where: {
+//                     shopDomain: shopDomain,
+//                 },
+//             });
+//             const newTicketId = `${shop}-${ticketCount + 1}`;
+//             const newTicket = await prisma.aIEscalatedTicket.create({
+//                 data: {
+//                     updatedAt: new Date(),
+//                     id: newTicketId,
+//                     shopDomain: shopDomain,
+//                     customerEmail: userEmail,
+//                     aiConversationTicketId: ticketId,
+//                     subject: subject
+//                 },
+//             });
+//             await prisma.aIEscalatedTicketEvent.create({
+//                 data: {
+//                     aiEscalatedTicketId: newTicket.id,
+//                     type: 'CREATED',
+//                     newStatus: newTicket.status, // Assuming the status is set to a default value
+//                 },
+//             });
+//             await prisma.$executeRaw`SELECT pg_advisory_xact_lock(1);`;
+//         }, {
+//             isolationLevel: 'Serializable', // Ensuring the highest isolation level
+//         });
+//         res.status(200).json({
+//             success: true,
+//             message: 'Webhook received',
+//         });
+//     } catch (err) {
+//         res.status(400).json({
+//             success: false,
+//             message: (err as Error).message,
+//         });
+//     }
+// })
 
 
 

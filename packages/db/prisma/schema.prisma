@@ -7,51 +7,160 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model AIConversationTicket {
+model Ticket {
+  id         String         @id @default(uuid())
+  createdAt  DateTime       @default(now())
+  shopDomain String
+  status     String?
+  category   String?
+  priority   String?
+  assigneeId String?
+  events     TicketEvents[]
+}
+
+model TicketEvents {
   id                String              @id @default(uuid())
-  shopDomain        String              @default("default")
-  status            String?
+  Ticket            Ticket              @relation(fields: [ticketId], references: [id])
+  ticketId          String
+  type              types
   createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @default(now())
-  AIEscalatedTicket AIEscalatedTicket[]
-  Message           Message[]
+  AI_TICKET_CREATED AI_TICKET_CREATED[]
+  USER_TO_AI        USER_TO_AI[]
+  AI_TO_USER        AI_TO_USER[]
+  DISPLAY_PROD      DISPLAY_PROD[]
+  DISPLAY_INPUT     DISPLAY_INPUT[]
+  EMAIL_RECEIVED    EMAIL_RECEIVED[]
+  EMAIL_SENT        EMAIL_SENT[]
+  STATUS_CHANGED    STATUS_CHANGED[]
+  PRIORITY_CHANGED  PRIORITY_CHANGED[]
+  CATEGORY_CHANGED  CATEGORY_CHANGED[]
+  ASSIGNE_CHANGED   ASSIGNE_CHANGED[]
+  REOPENED          REOPENED[]
+  ESCALATED         ESCALATED[]
 }
 
-model AIEscalatedTicket {
-  id                     String                   @id
-  shopDomain             String
-  customerEmail          String
-  aiConversationTicketId String
-  status                 String                   @default("unassigned")
-  priority               String?
-  category               String?
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime
-  subject                String                   @default("Subject")
-  fcr                    Boolean                  @default(false)
-  fcrBy                  String?
-  assignedToId           String?
-  AIConversationTicket   AIConversationTicket     @relation(fields: [aiConversationTicketId], references: [id])
-  User                   User?                    @relation(fields: [assignedToId], references: [id])
-  AIEscalatedTicketEvent AIEscalatedTicketEvent[]
+model AI_TICKET_CREATED {
+  id        String       @id @default(uuid())
+  event     TicketEvents @relation(fields: [id], references: [id])
+  ticketId  String
+  createdAt DateTime     @default(now())
 }
 
-model AIEscalatedTicketEvent {
-  id                  String            @id @default(uuid())
-  aiEscalatedTicketId String
-  changedBy           String?
-  oldStatus           String?
-  newStatus           String?
-  assignedTo          String?
-  assignedBy          String?
-  newPriority         String?
-  newCategory         String?
-  emailId             String?
-  createdAt           DateTime          @default(now())
-  type                EventType
-  AIEscalatedTicket   AIEscalatedTicket @relation(fields: [aiEscalatedTicketId], references: [id])
-  Email               Email?            @relation(fields: [emailId], references: [id])
-  User                User?             @relation(fields: [changedBy], references: [id])
+model USER_TO_AI {
+  id        String       @id @default(uuid())
+  event     TicketEvents @relation(fields: [id], references: [id])
+  message   String
+  createdAt DateTime     @default(now())
+}
+
+model AI_TO_USER {
+  id        String       @id @default(uuid())
+  event     TicketEvents @relation(fields: [id], references: [id])
+  message   String
+  createdAt DateTime     @default(now())
+}
+
+model DISPLAY_PROD {
+  id          String       @id @default(uuid())
+  event       TicketEvents @relation(fields: [id], references: [id])
+  crereatedAt DateTime     @default(now())
+  metadata    Json
+}
+
+model DISPLAY_INPUT {
+  id        String       @id @default(uuid())
+  event     TicketEvents @relation(fields: [id], references: [id])
+  createdAt DateTime     @default(now())
+  metadata  Json
+}
+
+model EMAIL_RECEIVED {
+  id        String       @id @default(uuid())
+  event     TicketEvents @relation(fields: [id], references: [id])
+  createdAt DateTime     @default(now())
+  emailId   String
+  Email     Email        @relation(fields: [emailId], references: [id])
+}
+
+model EMAIL_SENT {
+  id        String       @id @default(uuid())
+  event     TicketEvents @relation(fields: [id], references: [id])
+  createdAt DateTime     @default(now())
+  emailId   String
+  Email     Email        @relation(fields: [emailId], references: [id])
+}
+
+model STATUS_CHANGED {
+  id        String       @id @default(uuid())
+  event     TicketEvents @relation(fields: [id], references: [id])
+  newStatus String
+  oldStatus String?
+  byid      String?
+  by        User?        @relation(fields: [byid], references: [id])
+  createdAt DateTime     @default(now())
+}
+
+model PRIORITY_CHANGED {
+  id          String       @id @default(uuid())
+  event       TicketEvents @relation(fields: [id], references: [id])
+  newpriority String
+  oldpriority String?
+  byid        String?
+  by          User?        @relation(fields: [byid], references: [id])
+  createdAt   DateTime     @default(now())
+}
+
+model CATEGORY_CHANGED {
+  id          String       @id @default(uuid())
+  event       TicketEvents @relation(fields: [id], references: [id])
+  newcategory String
+  oldcategory String?
+  byid        String?
+  by          User?        @relation(fields: [byid], references: [id])
+  createdAt   DateTime     @default(now())
+}
+
+model ASSIGNE_CHANGED {
+  id        String       @id @default(uuid())
+  createdAt DateTime     @default(now())
+  event     TicketEvents @relation(fields: [id], references: [id])
+  byid      String
+  by        User         @relation("ChangedBy", fields: [byid], references: [id])
+  newid     String
+  new       User         @relation("newAssignee", fields: [newid], references: [id])
+  oldid     String?
+  old       User?        @relation("oldAssignee", fields: [oldid], references: [id])
+}
+
+model REOPENED {
+  id        String       @id @default(uuid())
+  createdAt DateTime     @default(now())
+  event     TicketEvents @relation(fields: [id], references: [id])
+  byid      String?
+  by        User?        @relation(fields: [byid], references: [id])
+}
+
+model ESCALATED {
+  id        String       @id @default(uuid())
+  createdAt DateTime     @default(now())
+  userEmail String
+  event     TicketEvents @relation(fields: [id], references: [id])
+}
+
+enum types {
+  AI_TICKET_CREATED
+  USER_TO_AI
+  AI_TO_USER
+  DISPLAY_PROD
+  DISPLAY_INPUT
+  EMAIL_RECEIVED
+  EMAIL_SENT
+  STATUS_CHANGED
+  PRIORITY_CHANGED
+  CATEGORY_CHANGED
+  ASSIGNE_CHANGED
+  REOPENED
+  ESCALATED
 }
 
 model ChatbotCustomization {
@@ -91,13 +200,14 @@ model Customer {
 }
 
 model Email {
-  id                     String                   @id @default(uuid())
-  createdAt              DateTime                 @default(now())
-  from                   String
-  subject                String
-  text                   String
-  to                     String
-  AIEscalatedTicketEvent AIEscalatedTicketEvent[]
+  id             String           @id @default(uuid())
+  createdAt      DateTime         @default(now())
+  from           String
+  subject        String
+  text           String
+  to             String
+  EMAIL_RECEIVED EMAIL_RECEIVED[]
+  EMAIL_SENT     EMAIL_SENT[]
 }
 
 model FeatureRequest {
@@ -115,16 +225,6 @@ model KnowledgeBase {
   shopDomain            String   @id
   termsAndConditionsUrl String?
   videoLinkUrls         String[]
-}
-
-model Message {
-  id                   String               @id @default(uuid())
-  createdAt            DateTime             @default(now())
-  message              String
-  sender               String
-  ticketId             String
-  unanswered           Boolean              @default(false)
-  AIConversationTicket AIConversationTicket @relation(fields: [ticketId], references: [id])
 }
 
 model Notification {
@@ -169,33 +269,27 @@ model ShopifyInstalledShop {
 }
 
 model User {
-  id                   String                   @id @default(uuid())
-  email                String                   @unique
+  id                   String             @id @default(uuid())
+  email                String             @unique
   firstName            String?
   lastName             String?
   lastLoginAt          DateTime?
   shopDomain           String?
   image                String?
-  createdAt            DateTime                 @default(now())
+  createdAt            DateTime           @default(now())
   updatedAt            DateTime?
   role                 String?
   emailVerified        DateTime?
-  currentActiveTickets Int                      @default(0)
-  unavailableTill      DateTime                 @default(now())
-  availabe             Boolean                  @default(true)
-  lastNotifiedAt       DateTime                 @default(now())
-  AIEscalatedTicket    AIEscalatedTicket[]
-  events               AIEscalatedTicketEvent[]
+  currentActiveTickets Int                @default(0)
+  unavailableTill      DateTime           @default(now())
+  availabe             Boolean            @default(true)
+  lastNotifiedAt       DateTime           @default(now())
   notifications        Notification[]
-}
-
-enum EventType {
-  EMAIL_RECEIVED
-  EMAIL_SENT
-  STATUS_CHANGED
-  PRIORITY_CHANGED
-  CATEGORY_CHANGED
-  ASSIGNED
-  REOPENED
-  CREATED
+  STATUS_CHANGED       STATUS_CHANGED[]
+  PRIORITY_CHANGED     PRIORITY_CHANGED[]
+  CATEGORY_CHANGED     CATEGORY_CHANGED[]
+  assigneeChangesby    ASSIGNE_CHANGED[]  @relation("ChangedBy")
+  REOPENED             REOPENED[]
+  assigneeChangedNew   ASSIGNE_CHANGED[]  @relation("newAssignee")
+  oldassignee          ASSIGNE_CHANGED[]  @relation("oldAssignee")
 }

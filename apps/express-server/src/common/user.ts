@@ -58,9 +58,12 @@ import { client } from "../lib/prisma"
 // }
 export const getPreviousMessages = async (ticketId: string) => {
     try {
-        return await client.message.findMany({
+        return await client.ticketEvents.findMany({
             where: {
-                ticketId
+                ticketId,
+                type:{
+                    in:["AI_TO_USER","USER_TO_AI","DISPLAY_INPUT","DISPLAY_PROD"]
+                }
             },
             orderBy: {
                 createdAt: 'asc',

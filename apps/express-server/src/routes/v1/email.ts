@@ -33,21 +33,35 @@ router.post('/send-email', async (req, res) => {
                 to: to,
             }
         })
-        await db.aIEscalatedTicketEvent.create({
+        await db.ticketEvents.create({
             data: {
-                aiEscalatedTicketId: ticketId,
-                emailId: newEmail.id,
+                ticketId: ticketId,
                 type: "EMAIL_SENT",
+                EMAIL_SENT: {
+                    create: {
+                        emailId: newEmail.id
+                    }
+                }
             }
         })
-        await db.aIEscalatedTicket.update({
+        const resp = await db.ticket.findUnique({
             where: {
-                id: ticketId,
-            },
-            data: {
-                status: status,
+                id: ticketId
             }
         })
+        if (resp?.status !== status) {
+            await db.ticketEvents.create({
+                data: {
+                    ticketId,
+                    type: "STATUS_CHANGED",
+                    STATUS_CHANGED: {
+                        create: {
+                            newStatus: status
+                        }
+                    }
+                }
+            })
+        }
         res.status(200).json({ message: 'Email sent successfully' });
     } catch (error) {
         console.log(error)

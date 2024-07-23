@@ -1,5 +1,7 @@
+require("dotenv").config();
 import { PubSub } from '@google-cloud/pubsub';
 import { db } from './db';
+
 
 const pubSubClient = new PubSub({
     projectId: "yugaa-424705",

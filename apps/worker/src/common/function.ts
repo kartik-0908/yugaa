@@ -148,19 +148,19 @@ function containsErrorOrSorry(text: string): boolean {
     return lowercaseText.includes("error") || lowercaseText.includes("sorry");
 }
 
-export async function createMssg(ticketId: string, sender: string, message: string, timestamp: any) {
-    console.log(timestamp)
-    const errorOrSorry = containsErrorOrSorry(message);
-    await db.message.create({
-        data: {
-            ticketId: ticketId,
-            sender: sender,
-            message: message,
-            createdAt: timestamp,
-            unanswered: errorOrSorry
-        }
-    });
-}
+// export async function createMssg(ticketId: string, sender: string, message: string, timestamp: any) {
+//     console.log(timestamp)
+//     const errorOrSorry = containsErrorOrSorry(message);
+//     await db.message.create({
+//         data: {
+//             ticketId: ticketId,
+//             sender: sender,
+//             message: message,
+//             createdAt: timestamp,
+//             unanswered: errorOrSorry
+//         }
+//     });
+// }
 
 function extractProductData(product: any) {
 

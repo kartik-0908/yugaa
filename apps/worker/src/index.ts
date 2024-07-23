@@ -1,7 +1,7 @@
 const path = require('path');
 require('dotenv').config({path: path.join(__dirname, '../.env')});
 import axios from "axios";
-import { createMssg, productUpdate, subscribeWebhook } from "./common/function";
+import { productUpdate, subscribeWebhook } from "./common/function";
 import { fetchProducts } from "./fetchProducts";
 import { PubSub } from '@google-cloud/pubsub';
 import { chatModel } from "./lib/azureOpenai/embedding";
@@ -29,7 +29,7 @@ async function startWorker() {
             { name: 'store-mssg-sub', handler: handleCreateMssg },
             { name: 'fetch-products', handler: handlefetchProduct },
             { name: 'update-product-with-id-sub', handler: handleUpdateProductwithID },
-            { name: 'escalate-ticket-sub', handler: handleEscalateTicket },
+            // { name: 'escalate-ticket-sub', handler: handleEscalateTicket },
             { name: 'notifications-sub', handler: handleSendNotification },
         ];
 
@@ -83,104 +83,104 @@ async function handleSendNotification(data: any) {
 }
 
 
-async function handleEscalateTicket(data: any) {
-    const { shopDomain, userEmail, ticketId } = data;
-    console.log(ticketId)
-    const ticket = await db.aIConversationTicket.findUnique({
-        where: {
-            id: ticketId
-        },
-        include: {
-            Message: true
-        }
-    })
-    if (!ticket) {
-        throw new Error("Ticket not found")
-    }
-    const conv = formatMessages(ticket?.Message);
-    const assistantPrompt = `
-        Given a conversation b/w a AI customer support assistant and a consumer.
-        Respond with a subject which describes the complete Conversation in 4-5 words.
+// async function handleEscalateTicket(data: any) {
+//     const { shopDomain, userEmail, ticketId } = data;
+//     console.log(ticketId)
+//     const ticket = await db.aIConversationTicket.findUnique({
+//         where: {
+//             id: ticketId
+//         },
+//         include: {
+//             Message: true
+//         }
+//     })
+//     if (!ticket) {
+//         throw new Error("Ticket not found")
+//     }
+//     const conv = formatMessages(ticket?.Message);
+//     const assistantPrompt = `
+//         Given a conversation b/w a AI customer support assistant and a consumer.
+//         Respond with a subject which describes the complete Conversation in 4-5 words.
 
-        <Conversation>
-        {conversation}
-        </Conversation>
+//         <Conversation>
+//         {conversation}
+//         </Conversation>
 
-        Respond with the subject only
-        `
-    const prompt = new PromptTemplate({
-        template: assistantPrompt,
-        inputVariables: ["conversation"]
-    })
-    const chain = new LLMChain({ llm: chatModel, prompt: prompt });
-    const response = await chain.call({ conversation: conv });
-    const subject = response.text.trim()
-    const shopSetings = await db.shopifyInstalledShop.findUnique({
-        where: {
-            shop: shopDomain
-        }
-    })
-    let assigneeId = null;
-    let assigneeName: string;
-    if (shopSetings?.autoAssignment) {
-        const user = await db.user.findFirst({
-            where: {
-                shopDomain: shopDomain,
-                availabe: true
-            },
-            orderBy: {
-                AIEscalatedTicket: {
-                    _count: 'asc'
-                }
-            },
-            select: {
-                id: true,
-                firstName: true,
-            }
-        })
-        assigneeId = user?.id;
-        assigneeName = user?.firstName as string;
-    }
-    const shop = trimShopifyDomain(shopDomain)
-    await db.$transaction(async (prisma) => {
-        // Count the number of tickets for the shopDomain
-        const ticketCount = await prisma.aIEscalatedTicket.count({
-            where: {
-                shopDomain: shopDomain,
-            },
-        });
-        const newTicketId = `${shop}-${ticketCount + 1}`;
-        const newTicket = await prisma.aIEscalatedTicket.create({
-            data: {
-                updatedAt: new Date(),
-                id: newTicketId,
-                shopDomain: shopDomain,
-                customerEmail: userEmail,
-                aiConversationTicketId: ticketId,
-                subject: subject,
-                assignedToId: assigneeId,
-                status: assigneeId ? 'Queued':'Unassigned',
-            },
-        });
-        await prisma.aIEscalatedTicketEvent.create({
-            data: {
-                aiEscalatedTicketId: newTicket.id,
-                type: 'CREATED',
-                newStatus: newTicket.status, // Assuming the status is set to a default value
-            },
-        });
-        if (assigneeId) {
-            pushAdminNotification(shopDomain, "New Ticket Raised by AI", `A new ticket has been raised by AI and assigned to ${assigneeName}`)
-            pushIndividualNoti(assigneeId, "New Ticket Raised by AI", `A new ticket has been raised by AI and assigned to you`)
-        }
-        else {
-            pushAdminNotification(shopDomain, "New Ticket Raised by AI", `A new ticket has been raised by AI. Please assign it to an operator`)
-        }
-        await prisma.$executeRaw`SELECT pg_advisory_xact_lock(1);`;
-    }, {
-        isolationLevel: 'Serializable', // Ensuring the highest isolation level
-    });
-}
+//         Respond with the subject only
+//         `
+//     const prompt = new PromptTemplate({
+//         template: assistantPrompt,
+//         inputVariables: ["conversation"]
+//     })
+//     const chain = new LLMChain({ llm: chatModel, prompt: prompt });
+//     const response = await chain.call({ conversation: conv });
+//     const subject = response.text.trim()
+//     const shopSetings = await db.shopifyInstalledShop.findUnique({
+//         where: {
+//             shop: shopDomain
+//         }
+//     })
+//     let assigneeId = null;
+//     let assigneeName: string;
+//     if (shopSetings?.autoAssignment) {
+//         const user = await db.user.findFirst({
+//             where: {
+//                 shopDomain: shopDomain,
+//                 availabe: true
+//             },
+//             orderBy: {
+//                 AIEscalatedTicket: {
+//                     _count: 'asc'
+//                 }
+//             },
+//             select: {
+//                 id: true,
+//                 firstName: true,
+//             }
+//         })
+//         assigneeId = user?.id;
+//         assigneeName = user?.firstName as string;
+//     }
+//     const shop = trimShopifyDomain(shopDomain)
+//     await db.$transaction(async (prisma) => {
+//         // Count the number of tickets for the shopDomain
+//         const ticketCount = await prisma.aIEscalatedTicket.count({
+//             where: {
+//                 shopDomain: shopDomain,
+//             },
+//         });
+//         const newTicketId = `${shop}-${ticketCount + 1}`;
+//         const newTicket = await prisma.aIEscalatedTicket.create({
+//             data: {
+//                 updatedAt: new Date(),
+//                 id: newTicketId,
+//                 shopDomain: shopDomain,
+//                 customerEmail: userEmail,
+//                 aiConversationTicketId: ticketId,
+//                 subject: subject,
+//                 assignedToId: assigneeId,
+//                 status: assigneeId ? 'Queued':'Unassigned',
+//             },
+//         });
+//         await prisma.aIEscalatedTicketEvent.create({
+//             data: {
+//                 aiEscalatedTicketId: newTicket.id,
+//                 type: 'CREATED',
+//                 newStatus: newTicket.status, // Assuming the status is set to a default value
+//             },
+//         });
+//         if (assigneeId) {
+//             pushAdminNotification(shopDomain, "New Ticket Raised by AI", `A new ticket has been raised by AI and assigned to ${assigneeName}`)
+//             pushIndividualNoti(assigneeId, "New Ticket Raised by AI", `A new ticket has been raised by AI and assigned to you`)
+//         }
+//         else {
+//             pushAdminNotification(shopDomain, "New Ticket Raised by AI", `A new ticket has been raised by AI. Please assign it to an operator`)
+//         }
+//         await prisma.$executeRaw`SELECT pg_advisory_xact_lock(1);`;
+//     }, {
+//         isolationLevel: 'Serializable', // Ensuring the highest isolation level
+//     });
+// }
 
 async function handlefetchProduct(data: any) {
     const { shopDomain } = data;
@@ -231,7 +231,7 @@ async function handleCreateConv(data: any) {
 
 async function handleCreateMssg(data: any) {
     const { ticketId, sender, message, timestamp } = data;
-    await createMssg(ticketId, sender, message, timestamp);
+    // await createMssg(ticketId, sender, message, timestamp);
 }
 
 async function handleProductUpdate(data: any) {

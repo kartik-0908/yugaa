@@ -7,63 +7,63 @@ const router = Router();
 
 router.use(express.json())
 
-router.post('/update', async (req, res) => {
-    const { id, field, value, by } = req.body;
-    console.log(req.body)
+// router.post('/update', async (req, res) => {
+//     const { id, field, value, by } = req.body;
+//     console.log(req.body)
 
-    try {
-        const resp = await db.aIEscalatedTicket.update({
-            where: {
-                id: id,
-            },
-            data: {
-                [field]: value,
-            },
-        });
-        if (field === "status") {
-            await db.aIEscalatedTicketEvent.create({
-                data: {
-                    aiEscalatedTicketId: id,
-                    type: "STATUS_CHANGED",
-                    newStatus: value,
-                    changedBy: by
-                }
-            })
-            await pushAdminNotification(resp.shopDomain, "Ticket Status", `Status of ticket ${id} has been changed to ${value} by ${by} `);
-            if (resp.assignedToId) {
-                await pushIndividualNoti(resp.assignedToId, "Ticket Status", `Status of ticket ${id} assigned to you has been changed to ${value} by ${by} `);
-            }
-        }
-        if (field === "priority") {
-            await db.aIEscalatedTicketEvent.create({
-                data: {
-                    aiEscalatedTicketId: id,
-                    type: "PRIORITY_CHANGED",
-                    newPriority: value,
-                    changedBy: by
-                }
-            })
-            await pushAdminNotification(resp.shopDomain, "Priority Changed", `The priority of ticket ${id} has been changed to ${value} by ${by} `);
-            if (resp.assignedToId) {
-                await pushIndividualNoti(resp.assignedToId, "Priority Changed", `The priority of ticket ${id} assigned to you has been changed to ${value} by ${by} `);
-            }
-        }
-        if (field === 'category') {
-            await db.aIEscalatedTicketEvent.create({
-                data: {
-                    aiEscalatedTicketId: id,
-                    type: "CATEGORY_CHANGED",
-                    newCategory: value,
-                    changedBy: by
-                }
-            })
-        }
+//     try {
+//         const resp = await db.aIEscalatedTicket.update({
+//             where: {
+//                 id: id,
+//             },
+//             data: {
+//                 [field]: value,
+//             },
+//         });
+//         if (field === "status") {
+//             await db.aIEscalatedTicketEvent.create({
+//                 data: {
+//                     aiEscalatedTicketId: id,
+//                     type: "STATUS_CHANGED",
+//                     newStatus: value,
+//                     changedBy: by
+//                 }
+//             })
+//             await pushAdminNotification(resp.shopDomain, "Ticket Status", `Status of ticket ${id} has been changed to ${value} by ${by} `);
+//             if (resp.assignedToId) {
+//                 await pushIndividualNoti(resp.assignedToId, "Ticket Status", `Status of ticket ${id} assigned to you has been changed to ${value} by ${by} `);
+//             }
+//         }
+//         if (field === "priority") {
+//             await db.aIEscalatedTicketEvent.create({
+//                 data: {
+//                     aiEscalatedTicketId: id,
+//                     type: "PRIORITY_CHANGED",
+//                     newPriority: value,
+//                     changedBy: by
+//                 }
+//             })
+//             await pushAdminNotification(resp.shopDomain, "Priority Changed", `The priority of ticket ${id} has been changed to ${value} by ${by} `);
+//             if (resp.assignedToId) {
+//                 await pushIndividualNoti(resp.assignedToId, "Priority Changed", `The priority of ticket ${id} assigned to you has been changed to ${value} by ${by} `);
+//             }
+//         }
+//         if (field === 'category') {
+//             await db.aIEscalatedTicketEvent.create({
+//                 data: {
+//                     aiEscalatedTicketId: id,
+//                     type: "CATEGORY_CHANGED",
+//                     newCategory: value,
+//                     changedBy: by
+//                 }
+//             })
+//         }
 
-        res.status(200).json({ message: 'Email sent successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error sending email' });
-    }
-})
+//         res.status(200).json({ message: 'Email sent successfully' });
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error sending email' });
+//     }
+// })
 
 router.post('/get-members', async (req, res) => {
     const { body } = req

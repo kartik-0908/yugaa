@@ -8,8 +8,6 @@ const retriverSchema = z.object({
     question: z.string(),
     shopDomain: z.string()
 });
-console.log(process.env.MONGODB_ATLAS_URI)
-console.log("process.MONGODB_ATLAS_URI")
 const client = new MongoClient(process.env.MONGODB_ATLAS_URI || "");
 const collection = client.db(process.env.MONGO_DB_NAME).collection(process.env.MONGO_DB_COLLECTION || "");
 const embeddingModel = new OpenAIEmbeddings(
@@ -21,9 +19,7 @@ const embeddingModel = new OpenAIEmbeddings(
     }
 );
 export const retrieverTool = tool(
-    async (input:{question: string, shopDomain: string}, config): Promise<any> => {
-        // console.log(process.env.MONGO_DB_NAME)
-        // console.log(config)
+    async (input:{question: string, shopDomain: string}): Promise<any> => {
         const vectorStore = new MongoDBAtlasVectorSearch(embeddingModel, {
             collection
         });
@@ -38,9 +34,9 @@ export const retrieverTool = tool(
             }
         })
         console.log(input.question)
-        // const resultOne = await vectorStore.similaritySearch(input.question, 1);
         const resultOne = await retriever.invoke(input.question);
-        // console.log(resultOne);
+        // console.log(resultOne)
+
         return resultOne.map(doc => doc.pageContent).join('\n\n'); 
     },
     {

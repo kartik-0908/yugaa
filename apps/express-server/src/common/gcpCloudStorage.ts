@@ -7,12 +7,12 @@ export async function getLogoFileName(shop: string) {
       shopDomain: shop
     },
     select: {
-      logoFilename: true
+      logo_filename: true
     }
   });
   console.log(existingUser)
   if (existingUser) {
-    return existingUser.logoFilename;
+    return existingUser.logo_filename;
   }
   else {
     return "hell"

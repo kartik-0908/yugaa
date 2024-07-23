@@ -12,6 +12,8 @@ import { ChatGenerationChunk } from "@langchain/core/outputs";
 import { retrieverTool } from "./tools/retriever";
 import { TicketEscalatorTool } from "./tools/ticketescalator";
 import { publishStoreMssg } from "./pubsubPublisher";
+import { ioCache } from "./ioCache";
+import { db } from "./db";
 
 export const chatModel = new ChatOpenAI(
   {
@@ -34,13 +36,22 @@ const graphState: StateGraphArgs<IState>["channels"] = {
 const assistantPrompt = `
 You are a helpful customer support assistant for a brand called {shopDomain}.
 Use the provided tools to search for the information regarding the company to solve the user's query.
-If user is not satisfied then ask for more informaation from user to answer their query.
+
+If user is not satisfied then ask for more information from user to answer their query.
 Even then if unable to answer ask user if you can escalate ticket to a human operator.
 If User agrees then use the escalation tool to escalate the ticket.
 
-Insert '\n' at the end of each line of response
+
+Strictly dont put any links in the response.
+
+Make crisps answers from Knowledge Base.
+Just dont put everything in the response.
+Ask User counter questions for better formulation of response
 
 You are not allowed to discuss anything not related to brand.
+
+Insert '\n' at the end of each line of response
+
 
 `
 const prompt = ChatPromptTemplate.fromMessages([
@@ -53,9 +64,17 @@ async function agent(state: IState, config?: RunnableConfig,) {
   const { messages } = state;
   const shopDomain = config?.configurable?.shopDomain
   const response = await temp.invoke({ messages: messages, shopDomain: shopDomain }, config);
-  // console.log(response)
-  await publishStoreMssg(config?.configurable?.thread_id, "ai", response.content as string, new Date());
-
+  // await db.ticketEvents.create({
+  //   data: {
+  //     ticketId: config?.configurable?.ticketId,
+  //     type: "AI_TO_USER",
+  //     AI_TO_USER: {
+  //       create: {
+  //         message: response.content as string,
+  //       }
+  //     }
+  //   }
+  // })
   return { messages: [response] };
 };
 
@@ -75,15 +94,11 @@ workflow.addEdge(START, "agent");
 type NextNode = 'safeTools' | 'sensitiveTools' | '__end__';
 function routeTools(state: IState): NextNode {
   const next_node = toolsCondition(state);
-  // console.log(state)
-  // console.log(next_node)
   if (next_node === '__end__') {
     return END;
   }
   const ai_message = state.messages[state.messages.length - 1] as AIMessage;
-  // console.log(ai_message)
   const first_tool_call = ai_message.tool_calls;
-  // console.log(first_tool_call)
   if (first_tool_call && first_tool_call[0]?.name === "TicketEscalatorTool") {
     return 'sensitiveTools';
   }
@@ -95,10 +110,24 @@ const memory = SqliteSaver.fromConnString(process.env.SQLITE_URL || "/home/ubunt
 const persistentGraph = workflow.compile({ checkpointer: memory, interruptBefore: ["sensitiveTools"] });
 
 
-export async function replytriaal(ticketId: string, query: string, shopDomain: string, io: any, roomName: string, isContinue: boolean, email?: string) {
+export async function replytriaal(ticketId: string, query: string, shopDomain: string, io: any, isContinue: boolean) {
   let output: { [key: string]: string } = {};
-  await publishStoreMssg(ticketId, "user", query, new Date());
-  let config = { configurable: { thread_id: ticketId, shopDomain: trimMyShopifyDomain(shopDomain), roomName: roomName, userEmail: email } };
+  io.emit('status', { "status": "thinking" });
+
+  ioCache.set(ticketId, io);
+  // await db.ticketEvents.create({
+  //   data: {
+  //     ticketId,
+  //     type: "USER_TO_AI",
+  //     USER_TO_AI: {
+  //       create: {
+  //         message: query
+  //       }
+  //     }
+  //   }
+  // })
+  // await publishStoreMssg(ticketId, "user", query, new Date());
+  let config = { configurable: { thread_id: ticketId, shopDomain: trimMyShopifyDomain(shopDomain) } };
   let inputs;
   if (isContinue) {
     inputs = null
@@ -106,44 +135,64 @@ export async function replytriaal(ticketId: string, query: string, shopDomain: s
   else {
     inputs = { messages: new HumanMessage(query) };
   }
-  for await (
-    const event of await persistentGraph.streamEvents(inputs, {
-      ...config,
-      streamMode: "values",
-      version: "v1",
-    })
-  ) {
 
-    if (event.event === "on_llm_stream") {
-      let chunk: ChatGenerationChunk = event.data?.chunk;
-      let msg = chunk.message as AIMessageChunk
-      if (msg.id) {
-        const key: string = msg.id;
-        if (msg.content != '') {
-          // console.log(output[key])
-          // console.log("content -----")
-          // console.log(msg.content)
-          if(!output[msg.id]){
-            output[msg.id] = "";
+  try {
+    for await (
+      const event of await persistentGraph.streamEvents(inputs, {
+        ...config,
+        streamMode: "values",
+        version: "v1",
+      })
+    ) {
+      if (event.event === "on_llm_stream") {
+        let chunk: ChatGenerationChunk = event.data?.chunk;
+        let msg = chunk.message as AIMessageChunk
+
+        if (msg.id) {
+          const key: string = msg.id;
+          if (msg.content != '') {
+            if (!output[msg.id]) {
+              output[msg.id] = "";
+            }
+            output[msg.id] += (msg.content as string)
+            io.emit('streamChunk', { id: msg.id, message: output[msg.id] })
           }
-          output[msg.id]+=(msg.content as string)
-
-          io.in(roomName).emit('streamChunk', { id: msg.id, message: output[msg.id] })
-          // console.log(`msg : content : $e{msg.content}`);
         }
       }
+      else if (event.event === "on_llm_end") {
+        let msg = event.data;
+        io.emit('status', { "status": "input" })
+      }
     }
-    else if (event.event === "on_llm_end") {
-      let msg = event.data;
-      // console.log(msg)
+    let snapshot = await persistentGraph.getState(config)
+    if (snapshot.next[0] === 'sensitiveTools') {
+      console.log(snapshot)
+      const formFields = [
+        { type: 'input', name: 'name', label: 'Name', placeholder: 'Enter your name' },
+        { type: 'input', name: 'email', label: 'Email', placeholder: 'Enter your email' },
+        {
+          type: 'dropdown',
+          name: 'category',
+          label: 'Choose a Category',
+          options: [
+            { value: 'product_inquiry', label: 'Product inquiry' },
+            { value: 'order_issue', label: 'Order issue' },
+            { value: 'technical_support', label: 'Technical support' },
+            { value: 'account_query', label: 'Account query' },
+            { value: 'billing_issue', label: 'Billing issue' },
+            { value: 'policy_query', label: 'Policy query' },
+            { value: 'compliance_inquiry', label: 'Compliance inquiry' },
+            { value: 'others', label: 'Others' }
+          ]
+        }
+      ];
 
+      io.emit('showInput', { fields: formFields });
     }
   }
-  let snapshot = await persistentGraph.getState(config)
-  if (snapshot.next[0] === 'sensitiveTools') {
-    io.in(roomName).emit('showInput', { fields: ["email"] })
+  finally {
+    ioCache.delete(ticketId);
   }
-
 }
 
 export function trimMyShopifyDomain(inputString: string) {
