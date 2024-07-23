@@ -45,50 +45,54 @@ async function uploadFileToGCS(filename: string, bytes: any) {
 
 
 
-// router.post('/', upload.any(),async (req: any, res: any) => {
+router.post('/', upload.any(), async (req: any, res: any) => {
 
-//     const body = req.body
-//     console.log(body)
-//     console.log("subject: ", body.subject);
-//     console.log("text: ", body.text);
-//     const ticketId = body.subject.match(/\[#(.*?)\]/)
-//     console.log(ticketId[1])
-//     try {
+    const body = req.body
+    console.log(body)
+    console.log("subject: ", body.subject);
+    console.log("text: ", body.text);
+    const ticketId = body.subject.match(/\[#(.*?)\]/)
+    console.log(ticketId[1])
+    try {
 
-//         const newEmail = await db.email.create({
-//             data:{
-//                 subject: body.subject,
-//                 text: body.text,
-//                 from: body.from,
-//                 to: body.to,
-//             }
-//         })
-//         await db.aIEscalatedTicketEvent.create({
-//             data:{
-//                 aiEscalatedTicketId: ticketId[1],
-//                 type: 'EMAIL_RECEIVED',
-//                 emailId: newEmail.id,
-//             }
-//         })
-//             // console.log("attachments: ", body.attachments);
-//     // console.log("attachment-info: ", body['attachment-info']);
-//     // console.log("content-ids: ", body['content-ids']);
-//     // if (req.files.length > 0) {
-//     //     // Log file data
-//     //     console.log(req.files)
-//     // } else {
-//     //     console.log('No files...')
-//     // }
-//         res.json({
-//             message: "ok",
-//         })
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).json({
-//             message: "error",
-//         })
-//     }
-// });
+        const newEmail = await db.email.create({
+            data: {
+                subject: body.subject,
+                text: body.text,
+                from: body.from,
+                to: body.to,
+            }
+        })
+        await db.ticketEvents.create({
+            data: {
+                type: 'EMAIL_RECEIVED',
+                ticketId: ticketId[1],
+                'EMAIL_RECEIVED': {
+                    create: {
+                        emailId: newEmail.id
+                    }
+                }
+            }
+        })
+        // console.log("attachments: ", body.attachments);
+        // console.log("attachment-info: ", body['attachment-info']);
+        // console.log("content-ids: ", body['content-ids']);
+        // if (req.files.length > 0) {
+        //     // Log file data
+        //     console.log(req.files)
+        // } else {
+        //     console.log('No files...')
+        // }
+        res.json({
+            message: "ok",
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "error",
+        })
+    }
+});
 
 module.exports = router;
 

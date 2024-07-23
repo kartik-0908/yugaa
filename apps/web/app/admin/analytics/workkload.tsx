@@ -51,7 +51,7 @@ const WorkloadDistribution = ({ start, end, users }: { start: string, end: strin
   // const allZero = data?.every(value => value === 0);
   if (!data) return <div>No data</div>
 
-  const allZero = data.every(item => item?.workload === 0);
+  const allZero = data.every((item): any => item?.workload === 0);
 
   const latestoptions: ApexOptions = {
 

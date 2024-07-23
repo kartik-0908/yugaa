@@ -8,13 +8,22 @@ import Link from 'next/link';
 
 type ChatsType = {
     id: string,
-    Message?: {
-        id: string,
-        createdAt: string,
-        message: string,
-        sender: string,
-        unanswered: boolean
-    }[]
+    events: ({
+        id: string;
+        createdAt: Date;
+        type: 'AI_TO_USER' | 'USER_TO_AI';
+        USER_TO_AI: {
+            id: string;
+            message: string;
+            createdAt: Date;
+        } | null;
+        AI_TO_USER: {
+            id: string;
+            message: string;
+            unanswered: boolean;
+            createdAt: Date;
+        } | null;
+    })[];
 }[]
 
 export default function ChatList() {
@@ -83,10 +92,18 @@ export default function ChatList() {
                 <div className="overflow-y-auto">
                     {
                         chats.map((chat, ind) => {
-                            if (chat && chat.Message && chat.Message.length > 0) {
+                            if (chat && chat.events && chat.events.length > 0 && chat.events[0]?.type === 'AI_TO_USER' && chat.events[0].AI_TO_USER?.message) {
+
                                 return (
                                     <Link className='text-black' href={`/admin/chat-history/${chat.id}`}>
-                                        <Card id={chat.id} messages={chat.Message} />
+                                        <Card id={chat.id} messages={chat.events[0].AI_TO_USER?.message} timestamp={chat.events[0].AI_TO_USER?.createdAt} sender={'ai'} />
+                                    </Link>
+                                )
+                            }
+                            else if (chat && chat.events && chat.events.length > 0 && chat.events[0]?.type === 'USER_TO_AI' && chat.events[0].USER_TO_AI?.message) {
+                                return (
+                                    <Link className='text-black' href={`/admin/chat-history/${chat.id}`}>
+                                        <Card id={chat.id} messages={chat.events[0].USER_TO_AI?.message} timestamp={chat.events[0].USER_TO_AI?.createdAt} sender={'user'} />
                                     </Link>
                                 )
                             }

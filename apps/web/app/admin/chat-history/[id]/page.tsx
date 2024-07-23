@@ -5,12 +5,19 @@ import { formatDate } from "../../../../common/function";
 
 
 export type Message = {
-    id: string,
-    createdAt: string,
-    message: string,
-    sender: string,
-    unanswered: boolean,
-    ticketId?: string
+    createdAt: Date;
+    type: 'AI_TO_USER' | 'USER_TO_AI';
+    USER_TO_AI: {
+        id: string;
+        message: string;
+        createdAt: Date;
+    } | null;
+    AI_TO_USER: {
+        id: string;
+        message: string;
+        unanswered: boolean;
+        createdAt: Date;
+    } | null;
 }
 
 
@@ -19,24 +26,20 @@ export default async function ChatPage({ params }: any) {
         id: params.id
     })
     const { ticket } = res.data
-    const { Message } = ticket;
     return (
         <div className="p-4 h-full overflow-y-auto ">
             {
-                Message.map((msg: Message) => {
+                ticket.map((msg: Message) => {
                     // console.log(msg)
-                    if (msg.message) {
-                        console.log(msg.sender)
-                        if (msg.sender === 'ai') {
-                            return (
-                                <AiCard message={msg.message} time={formatDate(msg.createdAt)} />
-                            )
-                        }
-                        else if (msg.sender === 'user') {
-                            return (
-                                <UserCard message={msg.message} time={formatDate(msg.createdAt)} />
-                            )
-                        }
+                    if (msg.type === 'AI_TO_USER') {
+                        return (
+                            <AiCard message={msg.AI_TO_USER?.message} time={formatDate(msg.AI_TO_USER?.createdAt.toString() || new Date().toISOString())} />
+                        )
+                    }
+                    else if (msg.type === 'USER_TO_AI') {
+                        return (
+                            <UserCard message={msg.USER_TO_AI?.message} time={formatDate(msg.USER_TO_AI?.createdAt.toString() || new Date().toISOString())} />
+                        )
                     }
                 })
             }

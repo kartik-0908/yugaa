@@ -8,35 +8,40 @@ datasource db {
 }
 
 model Ticket {
-  id         String         @id @default(uuid())
-  createdAt  DateTime       @default(now())
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
   shopDomain String
   status     String?
   category   String?
   priority   String?
   assigneeId String?
-  events     TicketEvents[]
+  fcr        Boolean  @default(false)
+  fcrBy      String?
+  missing    Boolean  @default(false)
+
+  events TicketEvents[]
+  User   User[]
 }
 
 model TicketEvents {
-  id                String              @id @default(uuid())
-  Ticket            Ticket              @relation(fields: [ticketId], references: [id])
+  id                String             @id @default(uuid())
+  Ticket            Ticket             @relation(fields: [ticketId], references: [id])
   ticketId          String
   type              types
-  createdAt         DateTime            @default(now())
-  AI_TICKET_CREATED AI_TICKET_CREATED[]
-  USER_TO_AI        USER_TO_AI[]
-  AI_TO_USER        AI_TO_USER[]
-  DISPLAY_PROD      DISPLAY_PROD[]
-  DISPLAY_INPUT     DISPLAY_INPUT[]
-  EMAIL_RECEIVED    EMAIL_RECEIVED[]
-  EMAIL_SENT        EMAIL_SENT[]
-  STATUS_CHANGED    STATUS_CHANGED[]
-  PRIORITY_CHANGED  PRIORITY_CHANGED[]
-  CATEGORY_CHANGED  CATEGORY_CHANGED[]
-  ASSIGNE_CHANGED   ASSIGNE_CHANGED[]
-  REOPENED          REOPENED[]
-  ESCALATED         ESCALATED[]
+  createdAt         DateTime           @default(now())
+  AI_TICKET_CREATED AI_TICKET_CREATED?
+  USER_TO_AI        USER_TO_AI?
+  AI_TO_USER        AI_TO_USER?
+  DISPLAY_PROD      DISPLAY_PROD?
+  DISPLAY_INPUT     DISPLAY_INPUT?
+  EMAIL_RECEIVED    EMAIL_RECEIVED?
+  EMAIL_SENT        EMAIL_SENT?
+  STATUS_CHANGED    STATUS_CHANGED?
+  PRIORITY_CHANGED  PRIORITY_CHANGED?
+  CATEGORY_CHANGED  CATEGORY_CHANGED?
+  ASSIGNE_CHANGED   ASSIGNE_CHANGED?
+  REOPENED          REOPENED?
+  ESCALATED         ESCALATED?
 }
 
 model AI_TICKET_CREATED {
@@ -54,10 +59,11 @@ model USER_TO_AI {
 }
 
 model AI_TO_USER {
-  id        String       @id @default(uuid())
-  event     TicketEvents @relation(fields: [id], references: [id])
-  message   String
-  createdAt DateTime     @default(now())
+  id         String       @id @default(uuid())
+  event      TicketEvents @relation(fields: [id], references: [id])
+  message    String
+  unanswered Boolean      @default(false)
+  createdAt  DateTime     @default(now())
 }
 
 model DISPLAY_PROD {
@@ -144,6 +150,8 @@ model ESCALATED {
   id        String       @id @default(uuid())
   createdAt DateTime     @default(now())
   userEmail String
+  name      String
+  category  String
   event     TicketEvents @relation(fields: [id], references: [id])
 }
 
@@ -292,4 +300,6 @@ model User {
   REOPENED             REOPENED[]
   assigneeChangedNew   ASSIGNE_CHANGED[]  @relation("newAssignee")
   oldassignee          ASSIGNE_CHANGED[]  @relation("oldAssignee")
+  Ticket               Ticket?            @relation(fields: [ticketId], references: [id])
+  ticketId             String?
 }

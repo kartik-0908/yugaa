@@ -24,7 +24,7 @@ export async function getUsers(shopDomain: string) {
 
 export async function getFcrPercentage(data: string) {
     const { userIds, start, end } = JSON.parse(data)
-    const fcrTickets = await db.aIEscalatedTicket.count({
+    const fcrTickets = await db.ticket.count({
         where: {
             createdAt: {
                 gte: start,
@@ -36,13 +36,13 @@ export async function getFcrPercentage(data: string) {
             }
         }
     })
-    const TotalTickets = await db.aIEscalatedTicket.count({
+    const TotalTickets = await db.ticket.count({
         where: {
             createdAt: {
                 gte: start,
                 lte: end
             },
-            assignedToId: {
+            assigneeId: {
                 in: userIds
             }
         }
@@ -54,24 +54,25 @@ export async function getFcrPercentage(data: string) {
 }
 
 export async function getTransferRate(data: string) {
-    const { users, start, end } = JSON.parse(data)
-    const assignedTickets = await db.aIEscalatedTicket.count({
+    const { users, start, end, shopDomain } = JSON.parse(data)
+    const assignedTickets = await db.ticket.count({
         where: {
             createdAt: {
                 gte: start,
                 lte: end
             },
-            assignedToId: {
+            assigneeId: {
                 in: users
             }
         }
     })
-    const TotalTickets = await db.aIEscalatedTicket.count({
+    const TotalTickets = await db.ticket.count({
         where: {
             createdAt: {
                 gte: start,
                 lte: end
             },
+            shopDomain: shopDomain
         }
     })
     if (TotalTickets <= 0) {
@@ -82,29 +83,12 @@ export async function getTransferRate(data: string) {
 
 export async function getMissed(data: string) {
     const { users, start, end } = JSON.parse(data)
-    const sec = 3 * 60 * 60;
-    const count = await db.aIEscalatedTicket.count({
+    const count = await db.ticket.count({
         where: {
+            missing: true,
             AND: [
                 { createdAt: { gte: start, lte: end } },
-                { assignedToId: { in: users } },
-                {
-                    NOT: {
-                        AIEscalatedTicketEvent: {
-                            some: {
-                                AND: [
-                                    { type: "EMAIL_SENT" },
-                                    { changedBy: { in: users } },
-                                    {
-                                        createdAt: {
-                                            lt: new Date(new Date().getTime() + sec * 1000)
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                }
+                { assigneeId: { in: users } },
             ]
         }
     })
@@ -126,7 +110,7 @@ export async function getQueriesbyCategory(data: string): Promise<number[]> {
         "Compliance inquiry"
     ];
 
-    const count = await db.aIEscalatedTicket.groupBy({
+    const count = await db.ticket.groupBy({
         by: ["category"],
         _count: {
             id: true
@@ -136,7 +120,7 @@ export async function getQueriesbyCategory(data: string): Promise<number[]> {
                 gte: new Date(start),
                 lte: new Date(end)
             },
-            assignedToId: {
+            assigneeId: {
                 in: users
             }
         }
@@ -171,8 +155,8 @@ export async function getQueriesbyCategory(data: string): Promise<number[]> {
 export async function getUserWorkload(data: string) {
     const { users, start, end } = JSON.parse(data);
 
-    const workloadData = await db.aIEscalatedTicket.groupBy({
-        by: ['assignedToId'],
+    const workloadData = await db.ticket.groupBy({
+        by: ['assigneeId'],
         _count: {
             id: true
         },
@@ -181,7 +165,7 @@ export async function getUserWorkload(data: string) {
                 gte: new Date(start),
                 lte: new Date(end)
             },
-            assignedToId: {
+            assigneeId: {
                 in: users,
             }
         }
@@ -203,8 +187,8 @@ export async function getUserWorkload(data: string) {
     const userMap = new Map(userDetails.map(user => [user.id, user]));
 
     const result = workloadData.map(item => {
-        if (item.assignedToId === null) return null;
-        const user = userMap.get(item.assignedToId);
+        if (item.assigneeId === null) return null;
+        const user = userMap.get(item.assigneeId);
         return {
             name: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
             workload: item._count.id
@@ -235,7 +219,7 @@ export async function getQueriesbyStatus(data: string): Promise<number[]> {
         "Resolved",
     ];
 
-    const count = await db.aIEscalatedTicket.groupBy({
+    const count = await db.ticket.groupBy({
         by: ["status"],
         _count: {
             id: true
@@ -245,7 +229,7 @@ export async function getQueriesbyStatus(data: string): Promise<number[]> {
                 gte: new Date(start),
                 lte: new Date(end)
             },
-            assignedToId: {
+            assigneeId: {
                 in: users
             }
         }
@@ -288,7 +272,7 @@ export async function getQueriesbyPriority(data: string): Promise<number[]> {
         "High",
     ];
 
-    const count = await db.aIEscalatedTicket.groupBy({
+    const count = await db.ticket.groupBy({
         by: ["priority"],
         _count: {
             id: true
@@ -298,7 +282,7 @@ export async function getQueriesbyPriority(data: string): Promise<number[]> {
                 gte: new Date(start),
                 lte: new Date(end)
             },
-            assignedToId: {
+            assigneeId: {
                 in: users
             }
         }

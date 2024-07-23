@@ -11,16 +11,12 @@ const pubSubClient = new PubSub({
     },
 });
 
-export async function publishEmailMessage(fromAddress: string, recipientAddress: string, subject: string, htmlContent: string) {
-    const topicName = 'email-topic';
-
+export async function pubslishStoreEvent(ticketId: string, metadata: string) {
+    const topicName = 'store-event';
     const dataBuffer = Buffer.from(JSON.stringify({
-        fromAddress,
-        recipientAddress,
-        subject,
-        htmlContent,
+        id: ticketId,
+        metadata: metadata
     }));
-
     try {
         const messageId = await pubSubClient.topic(topicName).publishMessage({ data: dataBuffer });
         console.log(`Message ${messageId} published to ${topicName}.`);
@@ -28,6 +24,8 @@ export async function publishEmailMessage(fromAddress: string, recipientAddress:
         console.error(`Error publishing message to ${topicName}:`, error);
     }
 }
+
+
 
 export async function publishShopifyStoreProcessData(shopDomain: string) {
     const topicName = 'shopify-store-process-data';

@@ -7,6 +7,7 @@ const webhookRouter = require("./routes/webhooks/routes")
 import { getPreviousMessages } from './common/user';
 import { replytriaal } from './common/reply';
 import { db } from './common/db';
+import { pubslishStoreEvent } from './common/pubsubPublisher';
 var cors = require('cors')
 app.use(cors())
 app.use('/webhooks', webhookRouter)
@@ -58,10 +59,11 @@ io.on('connection', (socket) => {
         await replytriaal(ticketId, message, shopifyDomain, io, false)
     });
     socket.on('ticketEscalate', async (data) => {
-        const { ticketId, email,name,category, shopifyDomain } = data;
+        const { ticketId, email, name, category, shopifyDomain } = data;
         console.log(data)
+        await pubslishStoreEvent(ticketId, JSON.stringify({ "type": "ESCALATED", "userEmail": email, createdAt: new Date().toUTCString(), name: name, category: category }));;
         console.log('ticket escalted')
-        await replytriaal(ticketId, "", shopifyDomain, io, true )
+        await replytriaal(ticketId, "", shopifyDomain, io, true)
     });
 
     socket.on('getPreviousMessages', async (data) => {

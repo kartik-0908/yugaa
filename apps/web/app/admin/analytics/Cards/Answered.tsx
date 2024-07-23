@@ -15,10 +15,7 @@ function SkeletonComp() {
     )
 }
 
-
-
 const fetcher = (url: string) => axios.get(url).then((res) => res.data);
-
 export function Answered({ start, end }: { start: string, end: string }) {
     const { user, isLoaded } = useUser()
     if (!isLoaded) {
@@ -29,7 +26,7 @@ export function Answered({ start, end }: { start: string, end: string }) {
     const { data, isLoading, error } = useSWR(
         `${process.env.NEXT_PUBLIC_API_URL}/v1/admin/answered?shop=${user?.publicMetadata.shopDomain}&start=${start}&end=${end}`,
         fetcher, {
-        refreshInterval: 1000 ,
+        refreshInterval: 1000,
 
     }
     )
@@ -65,8 +62,6 @@ export function Answered({ start, end }: { start: string, end: string }) {
 
     )
 }
-
-
 export function UnAnswered({ start, end }: { start: string, end: string }) {
     const { user, isLoaded } = useUser()
     if (!isLoaded) {
@@ -108,8 +103,6 @@ export function UnAnswered({ start, end }: { start: string, end: string }) {
         </Card>
     )
 }
-
-
 export function TimeSaved({ start, end }: { start: string, end: string }) {
     const { user, isLoaded } = useUser()
     if (!isLoaded) {
@@ -187,8 +180,6 @@ export function TimeSaved({ start, end }: { start: string, end: string }) {
     )
 }
 
-
-
 export function AverageSession({ start, end }: { start: string, end: string }) {
     const { user, isLoaded } = useUser()
     if (!isLoaded) {
@@ -265,7 +256,14 @@ export function AverageSession({ start, end }: { start: string, end: string }) {
     )
 }
 export function TransferRate({ start, end, users }: { start: string, end: string, users: React.Key[] }) {
+    const { user, isLoaded } = useUser()
+    if (!isLoaded) {
+        return (
+            <div>Loading...</div>
+        )
+    }
     const payload = {
+        shopDomain: user?.publicMetadata.shopDomain,
         type: 'transfer-rate',
         start,
         end,
@@ -411,7 +409,7 @@ export function FcrPercentage({ start, end, users }: { start: string, end: strin
 
 export function MissedConv({ start, end, users }: { start: string, end: string, users: React.Key[] }) {
     const payload = {
-        type:'missed-conv',
+        type: 'missed-conv',
         start: start,
         end: end,
         users: users

@@ -1,4 +1,5 @@
 import { Avatar } from "@nextui-org/react";
+import { time } from "console";
 
 function formatTimeDifference(timestamp: string): string {
     const now: Date = new Date();
@@ -46,7 +47,7 @@ function truncateString(str: string, numWords: number = 5): string {
 }
 
 
-export default function Card({ id, messages }: any) {
+export default function Card({ id, messages, sender, timestamp }: any) {
     console.log(messages)
     return (
         <div className="flex flex-col p-4 border-b-[1px] border-b-[#D3D3D3]">
@@ -59,13 +60,13 @@ export default function Card({ id, messages }: any) {
                 </div>
                 <div className="flex items-center">
                     <p className="text-sm">
-                        {formatTimeDifference(messages[0].createdAt)}
+                        {formatTimeDifference(timestamp)}
                     </p>
 
                 </div>
             </div>
             <p className="text-sm leading-4 text-ellipsis font-normal mt-2">
-                {`${toPascalCase(messages[0].sender)}: ${truncateString(messages[0].message, 10)}`}
+                {`${toPascalCase(sender)}: ${truncateString(messages, 10)}`}
             </p>
         </div>
     );

@@ -11,7 +11,7 @@ import { ToolNode, toolsCondition } from "@langchain/langgraph/prebuilt"
 import { ChatGenerationChunk } from "@langchain/core/outputs";
 import { retrieverTool } from "./tools/retriever";
 import { TicketEscalatorTool } from "./tools/ticketescalator";
-import { publishStoreMssg } from "./pubsubPublisher";
+import { publishStoreMssg, pubslishStoreEvent } from "./pubsubPublisher";
 import { ioCache } from "./ioCache";
 import { db } from "./db";
 
@@ -64,17 +64,7 @@ async function agent(state: IState, config?: RunnableConfig,) {
   const { messages } = state;
   const shopDomain = config?.configurable?.shopDomain
   const response = await temp.invoke({ messages: messages, shopDomain: shopDomain }, config);
-  // await db.ticketEvents.create({
-  //   data: {
-  //     ticketId: config?.configurable?.ticketId,
-  //     type: "AI_TO_USER",
-  //     AI_TO_USER: {
-  //       create: {
-  //         message: response.content as string,
-  //       }
-  //     }
-  //   }
-  // })
+  await pubslishStoreEvent(config?.configurable?.thread_id, JSON.stringify({ "type": "AI_TO_USER", "message": response.content as string, createdAt: new Date() }));;
   return { messages: [response] };
 };
 
@@ -115,18 +105,7 @@ export async function replytriaal(ticketId: string, query: string, shopDomain: s
   io.emit('status', { "status": "thinking" });
 
   ioCache.set(ticketId, io);
-  // await db.ticketEvents.create({
-  //   data: {
-  //     ticketId,
-  //     type: "USER_TO_AI",
-  //     USER_TO_AI: {
-  //       create: {
-  //         message: query
-  //       }
-  //     }
-  //   }
-  // })
-  // await publishStoreMssg(ticketId, "user", query, new Date());
+  await pubslishStoreEvent(ticketId, JSON.stringify({ "type": "USER_TO_AI", "message": query, createdAt: new Date() }));;
   let config = { configurable: { thread_id: ticketId, shopDomain: trimMyShopifyDomain(shopDomain) } };
   let inputs;
   if (isContinue) {
