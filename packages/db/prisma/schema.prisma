@@ -227,12 +227,48 @@ model FeatureRequest {
 }
 
 model KnowledgeBase {
-  documents             Json[]
-  faqUrl                String?
-  helpUrl               String?
-  shopDomain            String   @id
-  termsAndConditionsUrl String?
-  videoLinkUrls         String[]
+  shopDomain String     @id
+  urls       Url[]
+  documents  Document[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Url {
+  id            Int           @id @default(autoincrement())
+  url           String
+  type          UrlType       @relation(fields: [urlType], references: [name])
+  urlType       String
+  knowledgeBase KnowledgeBase @relation(fields: [shopDomain], references: [shopDomain])
+  shopDomain    String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  status        String
+}
+
+model Document {
+  id             Int           @id @default(autoincrement())
+  fileName       String
+  fileType       DocumentType  @relation(fields: [documentTypeId], references: [id])
+  documentTypeId Int
+  fileUrl        String
+  knowledgeBase  KnowledgeBase @relation(fields: [shopDomain], references: [shopDomain])
+  shopDomain     String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  status         String
+}
+
+model UrlType {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  Url  Url[]
+}
+
+model DocumentType {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  documents Document[]
 }
 
 model Notification {

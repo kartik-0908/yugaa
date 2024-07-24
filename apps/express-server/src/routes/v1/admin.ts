@@ -117,7 +117,22 @@ router.get('/ai-tickets', async (req, res) => {
                 createdAt: 'asc',
             },
         })
-        res.json({ tickets })
+        const hourCounts: { [hour: number]: number } = {};
+        tickets.forEach((ticket) => {
+          const hour = ticket.createdAt.getHours();
+          hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+        });
+      
+        // Find the hour with the maximum count
+        let maxCount = 0;
+        let peakHour: number | null = null;
+        for (const [hour, count] of Object.entries(hourCounts)) {
+          if (count > maxCount) {
+            maxCount = count;
+            peakHour = parseInt(hour);
+          }
+        }
+        res.json({ tickets, peakHour })
     } catch (error) {
         console.log(error)
         res.status(404).json({

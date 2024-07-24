@@ -7,6 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { SkeletonComp, fetcher } from "./peakInteraction";
 import useSWR from "swr";
 
+import { TrendingUp } from "lucide-react"
 function getWeekTimestamps(): [string, string] {
     const now = new Date(new Date().toLocaleString("en-US"));
     const startOfWeek = new Date(now);
@@ -91,7 +92,6 @@ export default function TotalInteraction() {
         total: number,
         data: { name: string, data: number[] }[]
     } = { total: 0, data: [{ name: "Total Interactions", data: [0, 0, 0, 0, 0, 0, 0] }] }
-    let count = 0;
     formattedTickets.forEach((ticket) => {
         const dayIndex = getDayOfWeekIndex(ticket.localCreatedAt)
         // console.log(dayIndex)
@@ -109,7 +109,7 @@ export default function TotalInteraction() {
 let initialOptions: ApexOptions = {
     colors: ["#3C50E0", "#80CAEE"],
     tooltip: {
-        enabled: false
+        enabled: true
     },
     chart: {
         fontFamily: "Satoshi, sans-serif",
@@ -159,13 +159,16 @@ let initialOptions: ApexOptions = {
     },
 
     xaxis: {
+        
         categories: ["M", "T", "W", "T", "F", "S", "S"],
     },
     yaxis: {
+        show: true,
+        showAlways: true,
+        showForNullSeries: true,
         min: 0,
         decimalsInFloat: 0,
         stepSize: 10,
-        forceNiceScale: false
     },
     legend: {
         position: "top",
@@ -191,20 +194,34 @@ function ChartTwo({ data }: any) {
 
     useEffect(() => {
         if (data.total === 0) {
-          setChartOptions(prevOptions => ({
-            ...prevOptions,
-            yaxis: {
-              ...prevOptions.yaxis,
-              min: 0,
-              decimalsInFloat: 0,
-              stepSize: 10,
-              forceNiceScale: true
-            }
-          }));
+            setChartOptions(prevOptions => ({
+                ...prevOptions,
+                yaxis: {
+                    ...prevOptions.yaxis,
+                    min: 0,
+                    decimalsInFloat: 0,
+                    stepSize: 10,
+                    // forceNiceScale: true
+                }
+            }));
         }
-      }, [data.total]);
+        else {
+            setChartOptions(prevOptions => ({
+                ...prevOptions,
+                yaxis: {
+                    ...prevOptions.yaxis,
+                    min: 0,
+                    decimalsInFloat: 0,
+                    stepSize: Math.floor(data.total/5),
+                    // forceNiceScale: true
+                }
+            }));
+
+        }
+    }, [data.total]);
 
     return (
+        
         <div className="text-lg bg-white rounded-sm border p-4 font-semibold rounded-sm border border-stroke">
             <div className="justify-between gap-4">
                 <div>

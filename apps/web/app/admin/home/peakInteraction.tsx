@@ -4,6 +4,10 @@ export const fetcher = (url: string) => axios.get(url).then(res => res.data)
 import axios from "axios";
 import { useUser } from '@clerk/nextjs';
 import useSWR from 'swr';
+import { ApexOptions } from "apexcharts";
+import React, { useEffect } from 'react';
+import ReactApexChart from "react-apexcharts";
+import { peakInteraction } from '../../../actions/home';
 interface Ticket {
     id: string;
     createdAt: Date;
@@ -66,12 +70,17 @@ export default function Chart() {
     useEffect(() => {
     }, [])
     const [start, end] = getWeekTimestamps();
+    // const { data, isLoading, error } = useSWR(
+    //     `${process.env.NEXT_PUBLIC_API_URL}/v1/admin/ai-tickets?shop=${user?.publicMetadata.shopDomain}&start=${start}&end=${end}`,
+    //     fetcher, {
+    //     refreshInterval: 1000,
+    //     keepPreviousData: true
+    // }
     const { data, isLoading, error } = useSWR(
-        `${process.env.NEXT_PUBLIC_API_URL}/v1/admin/ai-tickets?shop=${user?.publicMetadata.shopDomain}&start=${start}&end=${end}`,
-        fetcher, {
+        { shop: user?.publicMetadata.shopDomain, start: start, end: end },
+        peakInteraction, {
         refreshInterval: 1000,
         keepPreviousData: true
-
     }
     )
     if (isLoading) {
@@ -84,6 +93,10 @@ export default function Chart() {
         return <div>Error from SWR...</div>
     }
 
+    if(!data){
+        return null;
+    }
+
     const formattedTickets = convertTicketsToLocalTime(data.tickets, getLocalTimezone())
     let finalData: {
         name: string,
@@ -94,23 +107,20 @@ export default function Chart() {
         finalData[dayIndex]?.data.push([dayIndex, hour])
     })
     return (
-        <ScatterChartComp data={finalData} />
+        <ScatterChartComp data={finalData} time={data.peakHour} />
     )
 
 
 }
-import { ApexOptions } from "apexcharts";
-import React, { useEffect } from 'react';
-import ReactApexChart from "react-apexcharts";
-
 
 const options: ApexOptions = {
     colors: ["#FF4560", "#00E396", "#FEB019", "#775DD0", "#FF66C3", "#546E7A", "#D10CE8"],
     tooltip: {
         enabled: false,
+
         x: {
             show: false
-        }
+        },
     },
     chart: {
         fontFamily: "Satoshi, sans-serif",
@@ -206,7 +216,7 @@ const options: ApexOptions = {
     },
 };
 
-function ScatterChartComp({ data }: any) {
+function ScatterChartComp({ data, time }: any) {
     return (
 
         <div
@@ -217,8 +227,8 @@ function ScatterChartComp({ data }: any) {
                     <h4 className="">
                         Peak Interaction Time
                     </h4>
-                    <h1 className="text-3xl text-white">
-                        {"data.total"}
+                    <h1 className="text-3xl ">
+                       {time && time + 1 ? `${time}:00 - ${time + 1}:00` : ''}
                     </h1>
                 </div>
             </div>
