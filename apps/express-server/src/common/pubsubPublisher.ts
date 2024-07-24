@@ -115,3 +115,31 @@ export async function pushAdminNotification(shopDomain: string, title: string, c
         pushIndividualNoti(user.id, title, content)
     }
 }
+
+export async function pubslishUrl(type: string, id: number) {
+    const topicName = 'process-url';
+    const dataBuffer = Buffer.from(JSON.stringify({
+        id: id,
+        type: type
+    }));
+    try {
+        const messageId = await pubSubClient.topic(topicName).publishMessage({ data: dataBuffer });
+        console.log(`Message ${messageId} published to ${topicName}.`);
+    } catch (error) {
+        console.error(`Error publishing message to ${topicName}:`, error);
+    }
+}
+
+export async function pubslishDoc(type: string, id: number) {
+    const topicName = 'process-doc';
+    const dataBuffer = Buffer.from(JSON.stringify({
+        id: id,
+        type: type
+    }));
+    try {
+        const messageId = await pubSubClient.topic(topicName).publishMessage({ data: dataBuffer });
+        console.log(`Message ${messageId} published to ${topicName}.`);
+    } catch (error) {
+        console.error(`Error publishing message to ${topicName}:`, error);
+    }
+}

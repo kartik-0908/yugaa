@@ -1,7 +1,13 @@
-import { pubslishDoc, pubslishUrl } from "../../../../actions/pubSub";
-import db from "../../../../lib/db";
+import { Router } from 'express';
+import { db } from '../../common/db';
+import { pubslishDoc, pubslishUrl } from '../../common/pubsubPublisher';
+const sgMail = require('@sendgrid/mail');
+const express = require('express');
+const router = Router();
 
-export async function GET() {
+router.use(express.json())
+
+router.get('/kb', async () => {
 
     console.log("inside cron route")
 
@@ -16,7 +22,7 @@ export async function GET() {
     })
     console.log(pendingURLS)
     pendingURLS.map(async (url) => {
-        await pubslishUrl( "add", url.id);
+        await pubslishUrl("add", url.id);
 
     })
     const pendingdoc = await db.document.findMany({
@@ -30,7 +36,7 @@ export async function GET() {
     })
     pendingdoc.map(async (doc) => {
         if (doc.fileUrl) {
-            await pubslishDoc( "add", doc.id);
+            await pubslishDoc("add", doc.id);
         }
     })
     const deletingURLS = await db.url.findMany({
@@ -57,8 +63,10 @@ export async function GET() {
     })
     deletingdoc.map(async (doc) => {
         if (doc.fileUrl) {
-            await pubslishDoc( "deleting", doc.id);
+            await pubslishDoc("deleting", doc.id);
         }
     })
     return Response.json({ "message": "ok" });
-}
+})
+
+module.exports = router;
