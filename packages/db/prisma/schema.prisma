@@ -249,9 +249,7 @@ model Url {
 model Document {
   id             Int           @id @default(autoincrement())
   fileName       String
-  fileType       DocumentType  @relation(fields: [documentTypeId], references: [id])
-  documentTypeId Int
-  fileUrl        String
+  fileUrl        String?
   knowledgeBase  KnowledgeBase @relation(fields: [shopDomain], references: [shopDomain])
   shopDomain     String
   createdAt      DateTime      @default(now())
@@ -263,12 +261,6 @@ model UrlType {
   id   Int    @id @default(autoincrement())
   name String @unique
   Url  Url[]
-}
-
-model DocumentType {
-  id        Int        @id @default(autoincrement())
-  name      String     @unique
-  documents Document[]
 }
 
 model Notification {

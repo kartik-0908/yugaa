@@ -1,5 +1,4 @@
 "use server"
-import ticket from "../app/admin/inbox/progress/[id]/page";
 import db from "../lib/db";
 
 export async function fetchRecentChats(shopDomain: string) {

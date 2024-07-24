@@ -8,7 +8,7 @@ import { fetchRecentChats } from "../../../actions/home";
 
 export default async function RecentChat() {
     const { sessionClaims } = auth()
-    const res = await fetchRecentChats(sessionClaims?.shopDomain as string) 
+    const res = await fetchRecentChats(sessionClaims?.metadata.shopDomain as string) 
     return (
         <Suspense fallback={<p>loading recent chats</p>}>
             <ChatCard data={res} />

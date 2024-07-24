@@ -1,27 +1,35 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal } from "lucide-react"
+import { Trash2 } from "lucide-react"
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "../../../components/ui/dropdown-menu"
-import { Button } from "../../../components/ui/button"
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "../../../components/ui/alert-dialog"
+import { Button, buttonVariants } from "../../../components/ui/button"
+import Link from "next/link"
+import ViewButton from "./ViewButton"
+import { deleteDoc, deleteLink } from "../../../actions/kb"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-export type Payment = {
+export type KbTable = {
+    type: "link" | "doc"
+    shopDomain: string
     id: string
     name: string
-    status: "pending" | "processing" | "success" | "failed"
+    status: string
     url: string
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<KbTable>[] = [
     {
         accessorKey: "status",
         header: "Status",
@@ -33,45 +41,57 @@ export const columns: ColumnDef<Payment>[] = [
     {
         accessorKey: "url",
         header: "URL",
-    },
-    // {
-    //     accessorKey: "amount",
-    //     header: () => <div className="text-right">Amount</div>,
-    //     cell: ({ row }) => {
-    //         const amount = parseFloat(row.getValue("amount"))
-    //         const formatted = new Intl.NumberFormat("en-US", {
-    //             style: "currency",
-    //             currency: "USD",
-    //         }).format(amount)
+        cell: ({ row }) => {
+            if (row.original.type === "link") {
+                return (
+                    <Link href={row.original.url} target="_blank" className={buttonVariants({ variant: "outline" })}>Click here</Link>
+                )
+            }
+            else if (row.original.type === "doc") {
+                return (
+                    <ViewButton id={row.original.id} name={row.original.name} shopDomain={row.original.shopDomain} />
+                )
+            }
 
-    //         return <div className="text-right font-medium">{formatted}</div>
-    //     },
-    // },
+        }
+    },
     {
+        header: "Actions",
         id: "actions",
         cell: ({ row }) => {
-            const payment = row.original
+            const currRow = row.original
 
             return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(payment.id)}
-                        >
-                            Copy payment ID
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>View customer</DropdownMenuItem>
-                        <DropdownMenuItem>View payment details</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button disabled={currRow.status === "processing" || currRow.status === "deleting"} className=" bg-transparent hover:bg-transparent" >
+                                <Trash2 className="text-black mr-2 h-4 w-4" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete this data and remove your data from our servers.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction className="bg-red-500" onClick={() => {
+                                    console.log(currRow)
+                                    if (currRow.type === "link") {
+                                        deleteLink(currRow.id)
+                                    }
+                                    else if (currRow.type === "doc") {
+                                        deleteDoc(currRow.id)
+                                    }
+                                }}>Continue</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+
+                </>
             )
         },
     },

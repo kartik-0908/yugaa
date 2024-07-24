@@ -1,7 +1,8 @@
 "use client"
 import { useState } from "react";
 import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from "../../../components/ui/drop-zone";
-import { Paperclip } from "lucide-react";
+import { uploadDoc } from "../../../actions/gcpservices";
+import { useUser } from "@clerk/nextjs";
 
 const FileSvgDraw = () => {
     return (
@@ -33,15 +34,18 @@ const FileSvgDraw = () => {
 };
 
 const FileUploaderTest = () => {
+    const { user, isLoaded } = useUser()
+    if (!isLoaded) return null;
     const [files, setFiles] = useState<File[] | null>(null);
-    function handleChange(files: File[] | null): void {
+    function handleChange(files: File[] | null) {
         files?.map((file: File) => {
+            const form = new FormData();
+            form.append('file', file, file.name);
+            uploadDoc(form, user?.publicMetadata.shopDomain)
             console.log(file.name);
             console.log(file.type);
         });
-        setFiles(files);
     }
-
     const dropZoneConfig = {
         maxFiles: 5,
         accept: {

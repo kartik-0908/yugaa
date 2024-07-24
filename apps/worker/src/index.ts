@@ -8,6 +8,10 @@ import { chatModel } from "./lib/azureOpenai/embedding";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { db } from "./lib/db";
 import { pushAdminNotification, pushIndividualNoti } from "./common/pubsubPublisher";
+import { addDocs, deletDocs } from "./fetchDocs";
+import { addLinks, deleteLinks } from "./fetchLinks";
+const { LLMChain } = require("langchain/chains");
+
 
 const pubSubClient = new PubSub({
     projectId: "yugaa-424705",
@@ -29,6 +33,8 @@ async function startWorker() {
             { name: 'fetch-products', handler: handlefetchProduct },
             { name: 'update-product-with-id-sub', handler: handleUpdateProductwithID },
             { name: 'notifications-sub', handler: handleSendNotification },
+            { name: 'process-doc-sub', handler: handleProcessDoc },
+            { name: 'process-url-sub', handler: handleProcessUrl },
         ];
 
         console.log(`Waiting for messages in subscriptions: ${subscriptions.map(sub => sub.name).join(', ')}...`);
@@ -56,8 +62,67 @@ async function startWorker() {
     }
 }
 
-
-const { LLMChain } = require("langchain/chains");
+async function handleProcessDoc(data: any) {
+    const { id, type } = data;
+    if (type === 'add') {
+        const res = await db.document.update({
+            where: {
+                id: id
+            },
+            data: {
+                status: 'processing'
+            }
+        })
+        if (!res.fileUrl) {
+            throw new Error("File url not found")
+        }
+        await addDocs(res.fileUrl, res.shopDomain, res.id.toString())
+    }
+    if (type === 'delete') {
+        await deletDocs(id)
+        await db.document.update({
+            where: {
+                id: id
+            },
+            data: {
+                status: 'deleted'
+            }
+        })
+    }
+}
+async function handleProcessUrl(data: any) {
+    const { id, type } = data;
+    if (type === 'add') {
+        const res = await db.url.update({
+            where: {
+                id: id
+            },
+            data: {
+                status: 'processing'
+            }
+        })
+        await addLinks(res.id, res.shopDomain, res.url)
+        await db.url.update({
+            where: {
+                id: id
+            },
+            data: {
+                status: 'active'
+            }
+        })
+    }
+    if (type === 'delete') {
+        await deleteLinks(id)
+        await db.url.update({
+            where: {
+                id: id
+            },
+            data: {
+                status: 'deleted'
+            }
+        })
+    }
+}
 
 async function handleSendNotification(data: any) {
     const { userId, title, content } = data;

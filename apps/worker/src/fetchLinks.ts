@@ -1,58 +1,49 @@
-import axios from "axios";
-// import { chunkDocument, createandInsertEmbeddings, deleteRecordsWithPrefix, extractIndexName } from "./common/function";
 require('dotenv').config();
-import "cheerio";
+console.log(process.env.SCRAPING_ANT_API_KEY);
+import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
+import { MongoClient } from "mongodb";
+import { embeddingModel } from "./lib/azureOpenai/embedding";
+import { CharacterTextSplitter } from "@langchain/textsplitters";
+import axios from "axios";
 
-//id:0 - faq
-//id:1 - terms
-//id:2 - help
-export async function fetchLinks(id: number, shop: string, url: string, type: string) {
 
-    // const indexName = extractIndexName(shop);
+export async function addLinks(id: number, shop: string, url: string) {
+    const res = await axios.get(`https://api.scrapingant.com/v2/markdown?url=${url}&x-api-key=${process.env.SCRAPING_ANT_API_KEY}`);
+    const { markdown } = res.data;
+    //   console.log(newDocuments);
+    const client = new MongoClient(process.env.MONGODB_ATLAS_URI || "");
+    const collection = client.db(process.env.MONGO_DB_NAME).collection(process.env.MONGO_DB_COLLECTION || "");
+    const textSplitter = new CharacterTextSplitter({
+        separator: "\n\n",
+        chunkSize: 1000,
+        chunkOverlap: 200,
+    });
+    const texts = await textSplitter.createDocuments([markdown], [{ yugaa_type: 'url', url_id: id, yugaa_shop: shop }]);
+    texts.map(async (text) => {
+        console.log(text);
+        const res = await new MongoDBAtlasVectorSearch(embeddingModel, {
+            collection,
+        }).addDocuments([text]);
+        console.log(res);
+    })
+}
+
+
+export async function deleteLinks(id: number) {
+
+    const client = new MongoClient(process.env.MONGODB_ATLAS_URI || "");
     try {
-        // Extract data from the URL using Scraping Ant API
-
-        if (type === "delete") {
-            if (id === 0) {
-                // await deleteRecordsWithPrefix(indexName, "faq")
-            }
-            else if (id === 1) {
-                // await deleteRecordsWithPrefix(indexName, "terms")
-            }
-            else if (id === 2) {
-                // await deleteRecordsWithPrefix(indexName, "help")
-            }
-        }
-        else {
-            const response = await axios.get("https://api.scrapingant.com/v2/extract", {
-                params: {
-                    url: url,
-                    extract_properties: "content",
-                },
-                headers: {
-                    "x-api-key": process.env.SCRAPING_ANT_API_KEY,
-                },
-            });
-
-            const { content } = response.data;
-            console.log(typeof (content))
-            if (id === 0) {
-                // const chunks = chunkDocument(content);
-                // await createandInsertEmbeddings(chunks, indexName, "faq")
-            }
-            else if (id === 1) {
-                // const chunks = chunkDocument(content);
-                // console.log(chunks)
-                // await createandInsertEmbeddings(chunks, indexName, "terms")
-            }
-            else if (id === 2) {
-                // const chunks = chunkDocument(content);
-                // await createandInsertEmbeddings(chunks, indexName, "help")
-            }
-        }
-
-
+        await client.connect();
+        console.log('Connected to MongoDB');
+        const db = client.db(process.env.MONGO_DB_NAME);
+        const collection = db.collection(process.env.MONGO_DB_COLLECTION || "");
+        const result = await collection.deleteMany({ url_id: id });
+        console.log(`${result.deletedCount} document(s) were deleted.`);
     } catch (error) {
-        console.error(`Error processing URL: ${url}`, error);
+        console.error('Error:', error);
+    } finally {
+        await client.close();
+        console.log('Disconnected from MongoDB');
     }
+
 }
