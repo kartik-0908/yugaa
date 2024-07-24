@@ -150,6 +150,11 @@ async function handlefetchProduct(data: any) {
 async function handleinitializeShop(data: any) {
     const { shopDomain } = data;
     try {
+        await db.knowledgeBase.create({
+            data: {
+                shopDomain: shopDomain
+            }
+        })
         const res1 = await axios.post(`${process.env.WORKER_WEBHOOK_URL}/initialize/plan`, {
             shopDomain
         })
