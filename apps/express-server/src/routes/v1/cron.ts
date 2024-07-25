@@ -27,7 +27,7 @@ router.get('/kb', async (req,res) => {
     })
     const pendingdoc = await db.document.findMany({
         where: {
-            status: "pending",
+            status: "uploaded",
             updatedAt: {
                 gte: new Date(Date.now() - 1000 * 60 * 30)
             }
