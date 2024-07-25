@@ -7,7 +7,7 @@ const router = Router();
 
 router.use(express.json())
 
-router.get('/kb', async () => {
+router.get('/kb', async (req,res) => {
 
     console.log("inside cron route")
 
@@ -66,7 +66,7 @@ router.get('/kb', async () => {
             await pubslishDoc("deleting", doc.id);
         }
     })
-    return Response.json({ "message": "ok" });
+    return res.json({ "message": "ok" });
 })
 
 module.exports = router;
