@@ -77,6 +77,14 @@ async function handleProcessDoc(data: any) {
             throw new Error("File url not found")
         }
         await addDocs(res.fileUrl, res.shopDomain, res.id.toString())
+        await db.document.update({
+            where: {
+                id: id
+            },
+            data: {
+                status: 'active'
+            }
+        })
     }
     if (type === 'delete') {
         await deletDocs(id)
@@ -181,6 +189,7 @@ async function handleUpdateProductwithID(data: any) {
 async function handleCreateEvent(data: any) {
     const { id, metadata } = data;
     const meta = JSON.parse(metadata);
+    console.log(data)
     if (meta.type === 'USER_TO_AI') {
         if (meta.message !== '') {
             await db.ticketEvents.create({

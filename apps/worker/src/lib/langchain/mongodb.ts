@@ -10,9 +10,7 @@ export async function addContent(id: string, shopDomain: string, pageContent: st
         collection,
     }).addDocuments([
         { pageContent: pageContent, metadata: metadata }
-    ],{
-        
-    })
+    ])
     console.log(vectorstore);
 }
 
