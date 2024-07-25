@@ -135,7 +135,6 @@ export async function getEscTicketWithStatus(shopDomain: string, status: string,
         },
         select: {
             id: true,
-
             events: {
                 orderBy: { createdAt: 'desc' },
                 select: {
@@ -153,7 +152,6 @@ export async function getEscTicketWithStatus(shopDomain: string, status: string,
                         }
                     },
                 },
-                take: 1,
             }
         }
     });

@@ -39,7 +39,9 @@ export default function ChatList({ status }: { status: string }) {
         }
     };
     const getLatestEventInfo = (chat: any) => {
+        // console.log('chat', chat);
         if (!chat.events || chat.events.length === 0) {
+            // console.log('No events found for chat', chat);
             return { message: 'No events', time: chat.createdAt, name: chat.customerEmail };
         }
 
@@ -48,12 +50,19 @@ export default function ChatList({ status }: { status: string }) {
         let time = latestEvent.createdAt || chat.createdAt;
         let name = chat.customerEmail;
 
+        chat.events.map((event: any) => {
+            if (event.type === 'ESCALATED') {
+                message = 'Ticket Escalated';
+                name = event.ESCALATED?.name;
+            }
+        });
+
         if (latestEvent.type === 'ESCALATED' && latestEvent.ESCALATED) {
-            name = latestEvent.ESCALATED.name;
+            // console.log('ESCALATED EVENT FOUND', latestEvent.ESCALATED);
             message = 'Ticket Escalated';
         }
         else {
-            message = latestEvent.Email.text
+            message = latestEvent?.Email?.text || ""
         }
 
         return { message, time, name };
@@ -70,6 +79,7 @@ export default function ChatList({ status }: { status: string }) {
             const { total, currentTickets } = await getEscTicketWithStatus(user?.publicMetadata.shopDomain as string, status, (page - 1) * totalInSingle, totalInSingle)
             setTotal(total)
             setChats(currentTickets)
+            console.log(currentTickets)
         }
         fetchChats();
     }, [page, status]);

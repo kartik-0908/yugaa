@@ -50,7 +50,7 @@ export default function Card({ id, time, name, messages }: { id: string, message
             <div className="flex justify-between gap-2">
                 <div className="flex items-center">
                     <div className="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-red rounded-full dark:bg-gray-600">
-                        <span className="font-medium text-gray-600 dark:text-gray-300">{name[0]?.toUpperCase()}</span>
+                        <span className="font-medium text-gray-600 dark:text-gray-300">{name? name.substring(0,1) : "A"}</span>
                     </div>
                     <div className="ml-1.5">
                         <p className="leading-4 font-bold">{name}</p>
