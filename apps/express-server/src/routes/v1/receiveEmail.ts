@@ -65,7 +65,7 @@ router.post('/', upload.any(), async (req: any, res: any) => {
         })
         const ticket = await db.ticket.findUnique({
             where: {
-                displayId: displayId
+                displayId: displayId.parseInt()
             }
         })
         if (ticket && ticket.id) {
