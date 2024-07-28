@@ -63,7 +63,7 @@ router.post('/', upload.any(), async (req: any, res: any) => {
                 to: body.to,
             }
         })
-        const ticket = await db.ticket.findFirst({
+        const ticket = await db.ticket.findUnique({
             where: {
                 displayId: displayId
             }
@@ -72,7 +72,7 @@ router.post('/', upload.any(), async (req: any, res: any) => {
             await db.ticketEvents.create({
                 data: {
                     type: 'EMAIL_RECEIVED',
-                    ticketId: ticket?.id,
+                    ticketId: ticket.id,
                     'EMAIL_RECEIVED': {
                         create: {
                             emailId: newEmail.id
