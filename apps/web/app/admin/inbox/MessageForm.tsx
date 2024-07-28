@@ -8,7 +8,7 @@ interface MessageFormProps {
     customerEmail: string;
     ticketId: string;
     subject: string;
-    onMessageSend: (message: string) => void;
+    onMessageSend: (message: string, status: string) => void;
     aiChatassistance: (message: string) => void;
     suggest: (message: string) => void;
     latestSum: (ticketId: string) => void;
@@ -25,17 +25,17 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
             text: "Send as In progress",
             sendFunction: async () => {
                 setIsSending(true)
-                const res = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_URL}/v1/email/send-email`,
-                    {
-                        to: customerEmail,
-                        from: currentSendEmail,
-                        subject: `Re : ${subject} [#${ticketId}]`,
-                        text: message,
-                        ticketId: ticketId,
-                        status: "In progress"
-                    })
-                onMessageSend(message)
+                // const res = await axios.post(
+                //     `${process.env.NEXT_PUBLIC_API_URL}/v1/email/send-email`,
+                //     {
+                //         to: customerEmail,
+                //         from: currentSendEmail,
+                //         subject: `Re : ${subject} [#${ticketId}]`,
+                //         text: message,
+                //         ticketId: ticketId,
+                //         status: "In progress"
+                //     })
+                onMessageSend(message, "In Progress")
                 setMessage("")
                 setIsSending(false)
                 console.log("Send as In progress")

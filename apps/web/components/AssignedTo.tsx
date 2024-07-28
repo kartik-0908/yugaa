@@ -1,56 +1,45 @@
 import useSWR from "swr"
 import { getUsers } from "../actions/analytics"
-import { Select, SelectItem } from "@nextui-org/react"
 import { updateAssignee } from "../actions/inbox"
-import { useUser } from "@clerk/nextjs"
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "../components/ui/select"
 
 export default function AssignedTo({ id, assigneeId, shopDomain }: { id: string, shopDomain: string, assigneeId: string }) {
-    const { user, isLoaded } = useUser()
-    if (!isLoaded) return (<div>Loading...</div>)
-    const { data, isLoading, error } = useSWR(
+    const { data, isLoading } = useSWR(
         `${shopDomain}`,
         getUsers)
     if (isLoading) {
         return null
     }
     console.log(`assigneeId: ${assigneeId}`)
-    const modifiedData = [{ title: "Unassigned", key: "Unassigned" }]
+    const modifiedData = [{ title: "Unassigned", key: "Unassigned", disabled: false }]
+    console.log(data)
 
     data?.map((user: any) => {
-        modifiedData.push({ title: `${user.firstName} ${user.lastName}`, key: user.id })
+        console.log(`user.available: ${user.available}`)
+        modifiedData.push({ title: `${user.firstName} ${user.lastName}`, key: user.id, disabled: !user.available })
     })
-    const disabledKeys: any = []
-    data?.map((user) => {
-        if (user.availabe === false) {
-            disabledKeys.push(user.id)
-        }
-    })
-    console.log(`disabledKeys: ${disabledKeys}`)
-    if (data != undefined) {
-        return (
-            <Select
-                disabledKeys={disabledKeys}
-                onSelectionChange={(key: any) => {
-                    const arr = Array.from(key);
-                    updateAssignee(id, arr[0] as string, user?.id as string, user?.publicMetadata.shopDomain as string)
-                }}
-                selectionMode="single"
-                listboxProps={{
-                    classNames: {
-                        base: "m-0",
-                        list: "m-0"
-                    }
-                }}
-                label="Assigned To" className="max-w-[200px] m-0 p-0" size="sm" defaultSelectedKeys={assigneeId ? [assigneeId] : ["Unassigned"]}>
-                {modifiedData?.map((user: any) => {
-                    return (
-                        <SelectItem className="m-0" key={user.key} >{user.title}</SelectItem>
-                    )
-                })
-                }
-
-            </Select >
-        )
-    }
-
+    console.log(modifiedData)
+    return (
+        <Select value={assigneeId}>
+            <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Assignee" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectGroup>
+                    {modifiedData?.map((user: any) => {
+                        return (
+                            <SelectItem disabled={user.disabled} className={`m-0 hover:bg-gray-200 `} value={user.key} >{user.title}</SelectItem>
+                        )
+                    })}
+                </SelectGroup>
+            </SelectContent>
+        </Select >
+    )
 }

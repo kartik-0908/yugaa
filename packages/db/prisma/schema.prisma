@@ -18,6 +18,7 @@ model Ticket {
   fcr        Boolean        @default(false)
   fcrBy      String?
   missing    Boolean        @default(false)
+  displayId  Int            @unique @default(autoincrement())
   events     TicketEvents[]
   User       User[]
 }
@@ -247,14 +248,14 @@ model Url {
 }
 
 model Document {
-  id             Int           @id @default(autoincrement())
-  fileName       String
-  fileUrl        String?
-  knowledgeBase  KnowledgeBase @relation(fields: [shopDomain], references: [shopDomain])
-  shopDomain     String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  status         String
+  id            Int           @id @default(autoincrement())
+  fileName      String
+  fileUrl       String?
+  knowledgeBase KnowledgeBase @relation(fields: [shopDomain], references: [shopDomain])
+  shopDomain    String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  status        String
 }
 
 model UrlType {
@@ -318,7 +319,7 @@ model User {
   emailVerified        DateTime?
   currentActiveTickets Int                @default(0)
   unavailableTill      DateTime           @default(now())
-  availabe             Boolean            @default(true)
+  available            Boolean            @default(true)
   lastNotifiedAt       DateTime           @default(now())
   notifications        Notification[]
   STATUS_CHANGED       STATUS_CHANGED[]

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import AiCard from './unassigned/[id]/AiCard';
 import UserCard from './unassigned/[id]/UserCard';
 import MessageForm from './MessageForm';
@@ -11,11 +11,16 @@ import { readStreamableValue } from 'ai/rsc';
 import TextMessage from '../../../components/copy';
 import { formatDate } from '../../../common/function';
 import AssignedTo from '../../../components/AssignedTo';
-import { fetchTicket, fetchTicketEventsbyId } from '../../../actions/inbox';
+import { fetchTicket, fetchTicketEventsbyId, updateEscTicket } from '../../../actions/inbox';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../../../components/ui/select';
 
 const RightPanelToggle = ({ id, emails }: any) => {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return (<div>Loading...</div>);
+    const containerRef = useRef(null);
+    
+
 
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(true);
     const [activeTab, setActiveTab] = useState('Tab1'); // Initialize with the first tab
@@ -27,22 +32,19 @@ const RightPanelToggle = ({ id, emails }: any) => {
     const [consumerEmail, setEmail] = useState('');
     const [priority, setPriority] = useState('');
     const [status, setStatus] = useState('');
+    const [displayId, setDisplayId] = useState('');
     const [assigneeId, setAssigneeId] = useState('');
     const [creationTime, setCreationTime] = useState<Date>();
 
+    useEffect(() => {
+        if (containerRef.current) {
+            //@ts-ignore
+            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        }
+    }, [events]);
+
 
     const handleChange = async (field: string, value: string) => {
-        try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/v1/escTicket/update`, {
-                id: id,
-                field: field,
-                value: value,
-                by: user?.fullName
-            })
-        } catch (error) {
-            console.log(error)
-        }
-
         switch (field) {
             case 'category':
                 setCategory(value);
@@ -54,6 +56,14 @@ const RightPanelToggle = ({ id, emails }: any) => {
                 setStatus(value);
                 break;
         }
+        try {
+            console.log(id, field, value, user?.id as string)
+            await updateEscTicket(id, field, value, user?.id as string)
+        } catch (error) {
+            console.log(error)
+        }
+
+
     };
 
     useEffect(() => {
@@ -64,6 +74,9 @@ const RightPanelToggle = ({ id, emails }: any) => {
                 if (event.type === 'ESCALATED') {
                     setSubject(event.ESCALATED.subject)
                     setEmail(event.ESCALATED.userEmail)
+                }
+                if (event.Ticket.displayId) {
+                    setDisplayId(event.Ticket.displayId)
                 }
             });
             setEvents(events)
@@ -99,7 +112,7 @@ const RightPanelToggle = ({ id, emails }: any) => {
                             <tbody>
                                 <tr>
                                     <td>ID</td>
-                                    <td>{id}</td>
+                                    <td>{displayId}</td>
                                 </tr>
                                 <tr>
                                     <td>Email</td>
@@ -116,52 +129,59 @@ const RightPanelToggle = ({ id, emails }: any) => {
                             </tbody>
                         </table>
                         <div className='mt-4'>
-                            <div>
-                                <label htmlFor="category">Category: </label>
-                                <select
-                                    id="category"
-                                    value={category}
-                                    onChange={(e) => handleChange('category', e.target.value)}
-                                >
-                                    <option value="">Select a query category</option>
-                                    <option value="Product inquiry">Product inquiry</option>
-                                    <option value="Order issue">Order issue</option>
-                                    <option value="Technical support">Technical support</option>
-                                    <option value="Account query">Account query</option>
-                                    <option value="Billing issue">Billing issue</option>
-                                    <option value="Policy query">Policy query</option>
-                                    <option value="Compliance inquiry">Compliance inquiry</option>
-                                    <option value="Miscellaneous issues">Miscellaneous issues</option>
-                                    <option value="Others">Others</option>
-                                </select>
+                            <div className='mb-4'>
+                                <Select onValueChange={(e) => handleChange('category', e)} value={category}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Select a category" />
+                                    </SelectTrigger>
+                                    <SelectContent className='bg-white'>
+                                        <SelectGroup>
+                                            <SelectLabel>Select Category</SelectLabel>
+                                            <SelectItem value="product_inquiry">Product inquiry</SelectItem>
+                                            <SelectItem value="order_issue">Order issue</SelectItem>
+                                            <SelectItem value="technical_support">Technical support</SelectItem>
+                                            <SelectItem value="account_query">Account query</SelectItem>
+                                            <SelectItem value="billing_issue">Billing issue</SelectItem>
+                                            <SelectItem value="policy_query">Policy query</SelectItem>
+                                            <SelectItem value="compliance_inquiry">Compliance inquiry</SelectItem>
+                                            <SelectItem value="miscellaneous_issues">Miscellaneous issues</SelectItem>
+                                            <SelectItem value="others">Others</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select >
                             </div>
-                            <div style={{ marginTop: '10px' }}>
-                                <label htmlFor="priority">Priority: </label>
-                                <select
-                                    id="priority"
-                                    value={priority}
-                                    onChange={(e) => handleChange('priority', e.target.value)}
-                                >
-                                    <option value="High">High</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Low">Low</option>
-                                </select>
+                            <div className='mb-4' >
+                                <Select onValueChange={(e) => handleChange('priority', e)} value={priority}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Select priority" />
+                                    </SelectTrigger>
+                                    <SelectContent className='bg-white'>
+                                        <SelectGroup>
+                                            <SelectLabel>Select Priority</SelectLabel>
+                                            <SelectItem value="High">High</SelectItem>
+                                            <SelectItem value="Medium">Medium</SelectItem>
+                                            <SelectItem value="Low">Low</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select >
                             </div>
-                            <div style={{ marginTop: '10px' }}>
-                                <label htmlFor="status">Status: </label>
-                                <select
-                                    id="status"
-                                    value={status}
-                                    onChange={(e) => handleChange('status', e.target.value)}
-                                >
-                                    <option value="Queued">Queued</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Resolved">Resolved</option>
-                                </select>
+                            <div className='mb-4'>
+                                <Select onValueChange={(e) => handleChange('status', e)} value={status}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Select Status" />
+                                    </SelectTrigger>
+                                    <SelectContent className='bg-white'>
+                                        <SelectGroup>
+                                            <SelectLabel>Status</SelectLabel>
+                                            <SelectItem value="Queued">Queued</SelectItem>
+                                            <SelectItem value="In Progress">In Progress</SelectItem>
+                                            <SelectItem value="Resolved">Resolved</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select >
                             </div>
                             <div>
                                 <AssignedTo id={id} assigneeId={assigneeId} shopDomain={user?.publicMetadata.shopDomain as string} />
-
                             </div>
                         </div>
                     </div>
@@ -220,16 +240,16 @@ const RightPanelToggle = ({ id, emails }: any) => {
                         message = 'AI Ticket created';
                         break;
                     case 'STATUS_CHANGED':
-                        message = `Status changed to ${event.newStatus}`;
+                        message = `Status changed to ${event.STATUS_CHANGED.newStatus}`;
                         break;
                     case 'PRIORITY_CHANGED':
-                        message = `Priority changed to ${event.newpriority}`;
+                        message = `Priority changed to ${event.PRIORITY_CHANGED.newpriority}`;
                         break;
                     case 'CATEGORY_CHANGED':
-                        message = `Category changed to ${event.newcategory}`;
+                        message = `Category changed to ${event.CATEGORY_CHANGED.newcategory}`;
                         break;
                     case 'ASSIGNE_CHANGED':
-                        message = `Assigned to ${event.new.name}`;
+                        message = `Assigned to ${event.ASSIGNE_CHANGED.newId}`;
                         break;
                     case 'REOPENED':
                         message = 'Ticket reopened';
@@ -245,7 +265,13 @@ const RightPanelToggle = ({ id, emails }: any) => {
         }
     };
 
-    async function handleMessageSend(message: string) {
+    async function handleMessageSend(message: string, status: string) {
+        setEvents([...events, { type: 'AI_TO_USER', AI_TO_USER: { message }, createdAt: new Date() }]);
+        // <AiCard
+        //     message={event.EMAIL_SENT.Email.text}
+        //     time={formatDate(event.createdAt)}
+        //     key={event.id}
+        // />
         console.log(message)
     }
     async function aiChatassistance(message: string) {
@@ -311,9 +337,8 @@ const RightPanelToggle = ({ id, emails }: any) => {
             <div className={`h-full transition-all duration-1500 ease-in-out ${isRightPanelVisible ? 'w-2/3' : 'w-full'}`}>
                 <div className="h-[8%] text-2xl pt-1 pl-1 font-bold border-b-1 border-stroke text-ellipsis">
                     <h2>{subject}</h2>
-                    <p className="text-sm">{id}</p>
                 </div>
-                <div className="p-4 h-[72%] overflow-y-auto overflow-x-hidden">
+                <div ref={containerRef} className="p-4 h-[72%] overflow-y-auto overflow-x-hidden">
                     {events.map(renderEvent)}
                 </div>
                 <div className='h-[20%]'>
@@ -351,10 +376,10 @@ const RightPanelToggle = ({ id, emails }: any) => {
             )}
             <button
                 id="openRightPanel"
-                className="absolute top-32 right-2 bg-blue-500 text-white px-2 py-1 rounded"
+                className="absolute top-32 right-2 bg-gray-300 text-white px-2 py-1 rounded-2xl"
                 onClick={() => setIsRightPanelVisible(!isRightPanelVisible)}
             >
-                Toggle
+                {isRightPanelVisible ? <ChevronLeft /> : <ChevronRight />}
             </button>
         </div>
     );

@@ -287,7 +287,7 @@ async function handleCreateEvent(data: any) {
             const user = await db.user.findFirst({
                 where: {
                     shopDomain: shop?.shopDomain,
-                    availabe: true
+                    available: true
                 },
                 orderBy: {
                     currentActiveTickets: 'asc'

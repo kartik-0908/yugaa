@@ -4,7 +4,6 @@ import { Server as SocketIOServer } from 'socket.io';
 const app = express();
 const v1router = require("./routes/v1/routes")
 const webhookRouter = require("./routes/webhooks/routes")
-import { getPreviousMessages } from './common/user';
 import { replytriaal } from './common/reply';
 import { db } from './common/db';
 import { pubslishStoreEvent } from './common/pubsubPublisher';
@@ -69,8 +68,23 @@ io.on('connection', (socket) => {
     socket.on('getPreviousMessages', async (data) => {
         const { ticketId } = data;
         console.log(`Fetching previous messages for ticket ID: ${ticketId}`);
-        const previousevents = await getPreviousMessages(ticketId);
-        socket.emit('previousMessages', { previousevents });
+        const events = await db.ticketEvents.findMany({
+            where:{
+                ticketId:ticketId
+            },
+            orderBy:{
+                createdAt:'asc'
+            },
+            select:{
+                type:true,
+                AI_TO_USER:true,
+                USER_TO_AI:true,
+                ESCALATED: true,
+                createdAt:true
+            }
+        })
+       
+        socket.emit('previousMessages', { events });
     });
     socket.on('create-ticket', async (data) => {
         const { ticketId, shopDomain } = data;

@@ -10,7 +10,7 @@ export async function changeOperatorAvailability(userId: string[]) {
     userId.forEach(async (id) => {
         const user = await db.user.findUnique({
             where: { id },
-            select: { availabe: true }
+            select: { available: true }
         });
         if (user === null) {
             console.log(`User with id ${id} not found`);
@@ -21,7 +21,7 @@ export async function changeOperatorAvailability(userId: string[]) {
                 id: id
             },
             data: {
-                availabe: !user.availabe
+                available: !user.available
             }
         })
         console.log(res)
@@ -37,7 +37,7 @@ export async function updateOperatorAvailability(userId: string[], available: bo
                     id: id
                 },
                 data: {
-                    availabe: available
+                    available: available
                 }
             })
             console.log(res)
@@ -91,8 +91,13 @@ export async function fetchTicketEventsbyId(id: string) {
         },
         select: {
             type: true,
+            Ticket: {
+                select: {
+                    displayId: true,
+                }
+            },
             createdAt: true,
-            ESCALATED: true,            
+            ESCALATED: true,
             AI_TO_USER: true,
             USER_TO_AI: true,
             EMAIL_RECEIVED: {
@@ -167,4 +172,71 @@ export async function getEscTicketWithStatus(shopDomain: string, status: string,
         }
     })
     return { total: total, currentTickets: escalatedTicket }
+}
+
+
+export async function updateEscTicket(id: string, field: string, value: string, by: string) {
+    try {
+        const resp = await db.ticket.update({
+            where: {
+                id: id,
+            },
+            data: {
+                [field]: value,
+            },
+        });
+        if (field === "status") {
+            await db.ticketEvents.create({
+                data: {
+                    ticketId: id,
+                    type: "STATUS_CHANGED",
+                    STATUS_CHANGED: {
+                        create: {
+                            byid: by,
+                            newStatus: value
+                        }
+                    }
+                }
+            })
+            await pushAdminNotification(resp.shopDomain, "Ticket Status", `Status of ticket ${id} has been changed to ${value} by ${by} `);
+            if (resp.assigneeId) {
+                await pushIndividualNoti(resp.assigneeId, "Ticket Status", `Status of ticket ${id} assigned to you has been changed to ${value} by ${by} `);
+            }
+        }
+        if (field === "priority") {
+            await db.ticketEvents.create({
+                data: {
+                    ticketId: id,
+                    type: "PRIORITY_CHANGED",
+                    PRIORITY_CHANGED: {
+                        create: {
+                            byid: by,
+                            newpriority: value
+                        }
+                    }
+                }
+            })
+            await pushAdminNotification(resp.shopDomain, "Priority Changed", `The priority of ticket ${id} has been changed to ${value} by ${by} `);
+            if (resp.assigneeId) {
+                await pushIndividualNoti(resp.assigneeId, "Priority Changed", `The priority of ticket ${id} assigned to you has been changed to ${value} by ${by} `);
+            }
+        }
+        if (field === 'category') {
+            await db.ticketEvents.create({
+                data: {
+                    ticketId: id,
+                    type: "CATEGORY_CHANGED",
+                    CATEGORY_CHANGED: {
+                        create: {
+                            byid: by,
+                            newcategory: value
+                        }
+                    }
+                }
+            })
+        }
+    }
+    catch (error) {
+        console.log(error);
+    }
 }

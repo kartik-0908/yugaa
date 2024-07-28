@@ -7,7 +7,7 @@ const router = Router();
 
 router.use(express.json())
 
-router.get('/kb', async (req,res) => {
+router.get('/kb', async (req, res) => {
 
     console.log("inside cron route")
 
@@ -68,5 +68,47 @@ router.get('/kb', async (req,res) => {
     })
     return res.json({ "message": "ok" });
 })
+
+router.get('/delete-tickets', async (req, res) => {
+    try {
+
+        const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+        const ticketsToDelete = await db.ticket.findMany({
+            where: {
+                createdAt: {
+                    lt: fortyEightHoursAgo
+                }
+            },
+            include: {
+                _count: {
+                    select: { events: true }
+                }
+            }
+        });
+        const ticketIdsToDelete = ticketsToDelete
+            .filter(ticket => ticket._count.events < 2)
+            .map(ticket => ticket.id);
+
+        // Now delete the filtered tickets
+        const deletedTickets = await db.ticket.deleteMany({
+            where: {
+                id: {
+                    in: ticketIdsToDelete
+                }
+            }
+        });
+
+        console.log(`Deleted ${deletedTickets.count} tickets.`);
+
+        return deletedTickets.count;
+
+    } catch (error) {
+
+    }
+
+
+    return res.json({ "message": "ok" });
+})
+
 
 module.exports = router;

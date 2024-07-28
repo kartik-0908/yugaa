@@ -25,7 +25,7 @@ export default function RestrictOperator() {
     }
     let currentselected: Set<string> = new Set();
     data.map((user) => {
-        if (user.availabe) {
+        if (user.available) {
             currentselected.add(user.id)
         }
     })
