@@ -58,6 +58,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                         status: "Resolved"
                     })
                 setIsSending(false)
+                setMessage("")
                 console.log("Send as Resolved")
             }
         }
@@ -99,6 +100,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                 <div className="w-full">
                     <Textarea
                         size='lg'
+                        value={message}
                         maxRows={5}
                         className='w-full'
                         classNames={{
