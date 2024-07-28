@@ -65,7 +65,6 @@ router.post('/send-email', async (req, res) => {
                     STATUS_CHANGED: {
                         create: {
                             newStatus: status,
-                            byid: by
                         }
                     }
                 }

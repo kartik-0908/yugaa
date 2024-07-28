@@ -25,16 +25,16 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
             text: "Send as In progress",
             sendFunction: async () => {
                 setIsSending(true)
-                // const res = await axios.post(
-                //     `${process.env.NEXT_PUBLIC_API_URL}/v1/email/send-email`,
-                //     {
-                //         to: customerEmail,
-                //         from: currentSendEmail,
-                //         subject: `Re : ${subject} [#${ticketId}]`,
-                //         text: message,
-                //         ticketId: ticketId,
-                //         status: "In progress"
-                //     })
+                const res = await axios.post(
+                    `${process.env.NEXT_PUBLIC_API_URL}/v1/email/send-email`,
+                    {
+                        to: customerEmail,
+                        from: currentSendEmail,
+                        subject: `Re : ${subject} [#${ticketId}]`,
+                        text: message,
+                        ticketId: ticketId,
+                        status: "In progress"
+                    })
                 onMessageSend(message, "In Progress")
                 setMessage("")
                 setIsSending(false)
