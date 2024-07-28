@@ -11,7 +11,7 @@ model Ticket {
   id         String         @id @default(uuid())
   createdAt  DateTime       @default(now())
   shopDomain String
-  status     String?        @default("Unassigned")
+  status     String?        @default("default")
   category   String?
   priority   String?
   assigneeId String?
