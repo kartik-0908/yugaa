@@ -53,8 +53,8 @@ router.post('/', upload.any(), async (req: any, res: any) => {
     console.log("text: ", body.text);
     const ticketId = body.subject.match(/\[#(.*?)\]/)
     console.log(ticketId[1])
+    const displayId = ticketId[1];
     try {
-
         const newEmail = await db.email.create({
             data: {
                 subject: body.subject,
@@ -63,17 +63,24 @@ router.post('/', upload.any(), async (req: any, res: any) => {
                 to: body.to,
             }
         })
-        await db.ticketEvents.create({
-            data: {
-                type: 'EMAIL_RECEIVED',
-                ticketId: ticketId[1],
-                'EMAIL_RECEIVED': {
-                    create: {
-                        emailId: newEmail.id
-                    }
-                }
+        const ticket = await db.ticket.findFirst({
+            where: {
+                displayId: displayId
             }
         })
+        if (ticket && ticket.id) {
+            await db.ticketEvents.create({
+                data: {
+                    type: 'EMAIL_RECEIVED',
+                    ticketId: ticket?.id,
+                    'EMAIL_RECEIVED': {
+                        create: {
+                            emailId: newEmail.id
+                        }
+                    }
+                }
+            })
+        }
         // console.log("attachments: ", body.attachments);
         // console.log("attachment-info: ", body['attachment-info']);
         // console.log("content-ids: ", body['content-ids']);

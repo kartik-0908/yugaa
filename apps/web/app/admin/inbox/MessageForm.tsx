@@ -1,7 +1,8 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dropdown, DropdownMenu, DropdownTrigger, DropdownItem, Button, Textarea, Select, SelectItem, Popover, PopoverTrigger, PopoverContent, ListboxItem, Listbox } from "@nextui-org/react";
 import axios from 'axios';
+import { getDisplayID } from '../../../actions/inbox';
 
 interface MessageFormProps {
     emails: string[];
@@ -20,6 +21,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
     const [currentSendEmail, setSendEmail] = useState<string>(emails[0] || "ugu");
     const [message, setMessage] = useState<string>("");
     const [isSending, setIsSending] = useState<boolean>(false);
+    const [displayId, setDisplayId] = useState<number>(-1);
     const buttons = [
         {
             text: "Send as In progress",
@@ -30,7 +32,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                     {
                         to: customerEmail,
                         from: currentSendEmail,
-                        subject: `Re : ${subject} [#${ticketId}]`,
+                        subject: `Re : ${subject} [#${displayId}]`,
                         text: message,
                         ticketId: ticketId,
                         status: "In progress"
@@ -50,7 +52,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                     {
                         to: customerEmail,
                         from: currentSendEmail,
-                        subject: `Re : ${subject} [#${ticketId}]`,
+                        subject: `Re : ${subject} [#${displayId}]`,
                         text: message,
                         ticketId: ticketId,
                         status: "Resolved"
@@ -60,6 +62,15 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
             }
         }
     ]
+    useEffect(() => {
+        const fetchDisplayId = async () => {
+            const id = await getDisplayID(ticketId);
+            if (id !== undefined) {
+                setDisplayId(id)
+            }
+        }
+        fetchDisplayId();
+    }, [])
     return (
         <div className="h-full w-full">
             <div className='w-full gap-2 flex flex-row'>

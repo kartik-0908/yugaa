@@ -3,6 +3,7 @@
 import db from "../lib/db";
 import { randomUUID } from "crypto";
 import { pushAdminNotification, pushIndividualNoti } from "../lib/pubSub";
+import { string } from "zod";
 
 
 export async function changeOperatorAvailability(userId: string[]) {
@@ -172,6 +173,20 @@ export async function getEscTicketWithStatus(shopDomain: string, status: string,
         }
     })
     return { total: total, currentTickets: escalatedTicket }
+}
+
+export async function getDisplayID(id: string) {
+
+    const ticket = await db.ticket.findUnique({
+        where: {
+            id: id
+        },
+        select: {
+            displayId: true
+        }
+    })
+    return ticket?.displayId
+
 }
 
 
