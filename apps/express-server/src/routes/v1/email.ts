@@ -8,7 +8,7 @@ router.use(express.json())
 
 router.post('/send-email', async (req, res) => {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    const { to, subject, text, from, ticketId, status } = req.body;
+    const { to, subject, text, from, ticketId, status,by } = req.body;
     console.log(ticketId)
     const msg = {
         to,
@@ -50,13 +50,22 @@ router.post('/send-email', async (req, res) => {
             }
         })
         if (resp?.status !== status) {
+            await db.ticket.update({
+                where: {
+                    id: ticketId
+                },
+                data: {
+                    status: status
+                }
+            })
             await db.ticketEvents.create({
                 data: {
                     ticketId,
                     type: "STATUS_CHANGED",
                     STATUS_CHANGED: {
                         create: {
-                            newStatus: status
+                            newStatus: status,
+                            byid: by
                         }
                     }
                 }
