@@ -35,7 +35,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                         subject: `Re : ${subject} [#${displayId}]`,
                         text: message,
                         ticketId: ticketId,
-                        status: "In progress"
+                        status: "In Progress"
                     })
                 onMessageSend(message, "In Progress")
                 setMessage("")
