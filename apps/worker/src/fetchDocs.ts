@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { chunkDocument, } from './common/function';
 import { Buffer } from 'buffer';
 import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';

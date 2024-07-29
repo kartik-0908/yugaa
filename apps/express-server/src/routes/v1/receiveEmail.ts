@@ -10,8 +10,6 @@ const upload = multer()
 
 const router = Router();
 
-// router.use(bodyParser.raw({ type: 'multipart/form-data', limit: '10mb' }));
-
 async function uploadFileToGCS(filename: string, bytes: any) {
     const storage = new Storage({
         projectId: process.env.PROJECT_ID,
@@ -43,10 +41,7 @@ async function uploadFileToGCS(filename: string, bytes: any) {
     }
 }
 
-
-
 router.post('/', upload.any(), async (req: any, res: any) => {
-
     const body = req.body
     console.log(body)
     console.log("subject: ", body.subject);
