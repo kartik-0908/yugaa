@@ -11,18 +11,17 @@ import { ToolNode, toolsCondition } from "@langchain/langgraph/prebuilt"
 import { ChatGenerationChunk } from "@langchain/core/outputs";
 import { retrieverTool } from "./tools/retriever";
 import { TicketEscalatorTool } from "./tools/ticketescalator";
-import { publishStoreMssg, pubslishStoreEvent } from "./pubsubPublisher";
+import { pubslishStoreEvent } from "./pubsubPublisher";
 import { ioCache } from "./ioCache";
-import { db } from "./db";
 
 export const chatModel = new ChatOpenAI(
-  
+
   {
     azureOpenAIApiDeploymentName: process.env.AZURE_OPENAI_API_CHAT_DEPLOYMENT_NAME,
     azureOpenAIApiInstanceName: process.env.AZURE_OPENAI_API_INSTANCE_NAME,
     azureOpenAIApiKey: process.env.AZURE_OPENAI_API_KEY,
     azureOpenAIApiVersion: process.env.AZURE_OPENAI_API_CHAT_VERSION,
-    model:"gpt-4o"
+    model: "gpt-4o"
   }
 );
 export interface IState {
