@@ -4,7 +4,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
 import { getUsers } from "../../../actions/analytics";
 import { updateOperatorAvailability } from "../../../actions/inbox";
 import { Checkbox } from "../../ui/checkbox";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../../ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../ui/form";
 import { Button } from "../../ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
