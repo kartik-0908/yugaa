@@ -19,7 +19,7 @@ const RightPanelToggle = ({ id, emails }: any) => {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return (<div>Loading...</div>);
     const containerRef = useRef(null);
-    
+
 
 
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(true);
@@ -335,8 +335,10 @@ const RightPanelToggle = ({ id, emails }: any) => {
     return (
         <div className="flex h-full w-full">
             <div className={`h-full transition-all duration-1500 ease-in-out ${isRightPanelVisible ? 'w-2/3' : 'w-full'}`}>
-                <div className="h-[8%] text-2xl pt-1 pl-1 font-bold border-b-1 border-stroke text-ellipsis">
-                    <h2>{subject}</h2>
+                <div className="h-[8%] text-2xl font-bold border-b-1 border-stroke flex justify-center items-center">
+                    <div>
+                        {subject}
+                    </div>
                 </div>
                 <div ref={containerRef} className="p-4 h-[72%] overflow-y-auto overflow-x-hidden">
                     {events.map(renderEvent)}
@@ -361,9 +363,9 @@ const RightPanelToggle = ({ id, emails }: any) => {
                 <div id="rightPanel" className={` bg-white border-r-1 border-l-1 border-stroke transition-all duration-1500 ease-in-out ${isRightPanelVisible ? 'w-1/3' : 'w-0 overflow-hidden'}`}>
                     {isRightPanelVisible &&
                         <div className="h-full">
-                            <div className="flex justify-between items-center p-4 pb-0 border-b border-stroke space-x-4">
+                            <div className="h-[8%] flex justify-between items-center p-4 pt-0 pb-0 border-b border-stroke space-x-4">
                                 <div className={`cursor-pointer p-2 flex-1 text-center ${activeTab === 'Tab1' ? 'font-bold' : ''}`} onClick={() => setActiveTab('Tab1')}>MetaData</div>
-                                <div className={`cursor-pointer p-2 flex-1 text-center border-l border-gray-400 ${activeTab === 'Tab2' ? 'font-bold' : ''}`} onClick={() => setActiveTab('Tab2')}>AI</div>
+                                <div className={`cursor-pointer p-2 flex-1 text-center border-l border-storke ${activeTab === 'Tab2' ? 'font-bold' : ''}`} onClick={() => setActiveTab('Tab2')}>AI</div>
                             </div>
 
                             <div className="p-4 overflow-y-auto">

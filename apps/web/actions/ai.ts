@@ -84,7 +84,6 @@ async function combineChatAndEvents(ticketId: string, type: 'latest' | 'complete
 
     let result = '';
     let skippable = 0;
-    let length = events.length;
     console.log(result)
     if (events) {
         for (const event of events) {
@@ -97,10 +96,10 @@ async function combineChatAndEvents(ticketId: string, type: 'latest' | 'complete
                     result += `event: Email received from User  message: ${event.EMAIL_RECEIVED?.Email?.text}\n ######### \n`;
                 }
                 if (event.type === 'AI_TO_USER') {
-                    result += `event: AI to User  message: ${event.AI_TO_USER}\n ######### \n`;
+                    result += `event: AI to User  message: ${event.AI_TO_USER?.message}\n ######### \n`;
                 }
                 if (event.type === 'USER_TO_AI') {
-                    result += `event: User to AI  message: ${event.USER_TO_AI}\n ######### \n`;
+                    result += `event: User to AI  message: ${event.USER_TO_AI?.message}\n ######### \n`;
                 }
                 if (event.type === 'ESCALATED') {
                     result += `event: Ticket Escalated to Human Operator }\n ######### \n`;

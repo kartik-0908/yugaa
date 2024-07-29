@@ -1,34 +1,41 @@
 "use client"
-import { use, useState } from "react";
-import Notification from "./Notification";
-import { Badge, Button, Card, CardBody, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
+import { useState } from "react";
+import { Badge } from "@nextui-org/react";
 import { useUser } from "@clerk/nextjs";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { fetchNotifications } from "../../../actions/analytics";
 import { markNotificationAsRead } from "../../../actions/header";
-import { Bell, Check, Eye } from "lucide-react";
-
-interface Notification {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: Date;
-}
+import { Bell, BellRing, Check, Eye } from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card";
+import { cn } from "../../../lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
+import { Button } from "../../../components/ui/button";
+import { Separator } from "../../../components/ui/separator";
 
 const DropdownNotification = () => {
   const { user, isLoaded } = useUser();
   if (!isLoaded) return null;
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [badgeValue, setBadgeValue] = useState(0);
+
   const [start] = useState(new Date());
   const payload = {
     type: "notification",
     userId: user?.id,
     start: start.toISOString(),
   }
-  const { data, isLoading, error } = useSWR(JSON.stringify(payload), fetchNotifications, {
-    refreshInterval: 1000 * 10,
-    keepPreviousData: true,
-  });
-  let badgeValue = 0;
+  const { isLoading, error, mutate } = useSWR(
+    JSON.stringify(payload),
+    fetchNotifications,
+    {
+      refreshInterval: 1000 * 100000,
+      onSuccess: (data) => {
+        setNotifications(data);
+        setBadgeValue(data.filter(noti => !noti.isRead).length);
+      }
+    }
+  );
+
   if (isLoading) {
     return <div>Loading</div>
   }
@@ -36,15 +43,26 @@ const DropdownNotification = () => {
   if (error) {
     return <div>Error</div>
   }
-  data?.map(noti => {
-    if (!noti.isRead) {
-      badgeValue++
+  const handleMarkAsRead = async (notificationId: string) => {
+    try {
+      await markNotificationAsRead(notificationId);
+
+      // Update the local state
+      setNotifications((prevNotifications: any[]) =>
+        prevNotifications.map(notification =>
+          notification.id === notificationId
+            ? { ...notification, isRead: true }
+            : notification
+        )
+      );
+      setBadgeValue(prevValue => Math.max(0, prevValue - 1));
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
     }
-  })
-  // console.log(`notification data`, data)
+  };
   return (
-    <Popover placement="bottom-end" showArrow offset={10}>
-      <PopoverTrigger>
+    <DropdownMenu >
+      <DropdownMenuTrigger className="focus:outline-none">
         <div className="p-4">
           {badgeValue != 0 && <Badge color="danger" content={badgeValue} isInvisible={false} shape="circle">
             <svg
@@ -66,7 +84,7 @@ const DropdownNotification = () => {
           {
             badgeValue === 0 && (
               <svg
-              className="cursor-pointer"
+                className="cursor-pointer"
 
                 fill="none"
                 height={24}
@@ -85,47 +103,50 @@ const DropdownNotification = () => {
           }
 
         </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-[240px]">
-        <div className=" h-[200px] overflow-y-auto">
-          {data?.length ? (
-            <>
-              {data?.map((notification) => (
-                <div className={` p-1 rounded-lg border-b border-stroke ${notification.isRead ? 'bg-gray-100' : 'bg-white'}`}>
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold m-0">{notification.title}</h3>
-                    {notification.isRead ? (
-                      <Eye className="w-5 h-5 text-gray-500" />
-                    ) : (
-                      <Bell className="w-5 h-5 text-blue-500" />
-                    )}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="relative right-2 bg-white w-[340px]">
+        <Card style={{
+          maxHeight: "400px"
+        }} className={cn("w-[380px] border-none max-h-[1px] overflow-y-auto ")} >
+          <CardHeader className="">
+            <CardTitle>Notifications</CardTitle>
+          </CardHeader>
+          <CardContent className="max-h-[200px] overflow-y-auto">
+            <div >
+              {notifications?.map((notification, index) => (
+                <div
+                  key={index}
+                  className="mb-0 grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0"
+                >
+                  <div className="space-y-1">
+                    <p className={`text-sm  leading-none text-muted-foreground ${notification.isRead ? "" : "font-bold"}`}>
+                      {notification.title}
+                    </p>
+                    <p className={`text-sm text-muted-foreground ${notification.isRead ? "" : "font-bold"}`}>
+                      {notification.content}
+                    </p>
                   </div>
-                  <p className="text-gray-600 mb-1 mt-1">{notification.content}</p>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{notification.createdAt.toDateString()}</span>
-                    {!notification.isRead && (
-                      <button
-                        onClick={() => {
-                          markNotificationAsRead(notification.id)
-                        }}
-                        className="flex items-center text-blue-500 hover:text-blue-600"
-                      >
-                        <Check className="w-4 h-4 mr-1" />
-                        Mark as read
-                      </button>
-                    )}
-                  </div>
+                  {!notification.isRead && (
+                    <Button
+                      variant="outline"
+                      className="max-h-[30px]"
+                      onClick={() => handleMarkAsRead(notification.id)}
+                      title="Mark as read"
+                    >
+                      Mark as Read
+                    </Button>
+                  )}
+                  <Separator style={{
+                    backgroundColor: "rgba(0,0,0,.1)",
+                  }} className="mt-2" />
                 </div>
+
               ))}
-            </>
-          ) : (
-            <div className="text-center p-4">
-              <p className="text-lg font-medium">No new notifications</p>
             </div>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
+          </CardContent>
+        </Card>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

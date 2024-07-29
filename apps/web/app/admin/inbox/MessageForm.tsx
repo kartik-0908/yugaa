@@ -1,8 +1,11 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Dropdown, DropdownMenu, DropdownTrigger, DropdownItem, Button, Textarea, Select, SelectItem, Popover, PopoverTrigger, PopoverContent, ListboxItem, Listbox } from "@nextui-org/react";
+import { Textarea, Select, SelectItem, Popover, PopoverTrigger, PopoverContent, ListboxItem, Listbox } from "@nextui-org/react";
 import axios from 'axios';
 import { getDisplayID } from '../../../actions/inbox';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuTrigger } from '../../../components/ui/dropdown-menu';
+import { MoreHorizontal, User } from 'lucide-react';
+import { Button } from '../../../components/ui/button';
 
 interface MessageFormProps {
     emails: string[];
@@ -22,6 +25,8 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
     const [message, setMessage] = useState<string>("");
     const [isSending, setIsSending] = useState<boolean>(false);
     const [displayId, setDisplayId] = useState<number>(-1);
+    const [label, setLabel] = React.useState("feature")
+    const [open, setOpen] = React.useState(false)
     const buttons = [
         {
             text: "Send as In progress",
@@ -112,75 +117,51 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                         placeholder="Type Your Text here"
                         onValueChange={setMessage}
                         endContent={
-                            <div className='h-full pt-2 flex flex-col justify-between pt-2'>
+                            <div className='h-full pt-2 flex flex-col  pt-2'>
+                                <div className='flex flex-row justify-end mt-2'>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger>
+                                            <div className='flex flex-row justify-end items-center w-full'>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" className="">
+                                                    <path fill="none" d="M0 0h24v24H0z"></path>
+                                                    <path d="m20 7-.95-2.05L17 4l2.05-.95L20 1l.95 2.05L23 4l-2.05.95zM8.5 7l-.95-2.05L5.5 4l2.05-.95L8.5 1l.95 2.05L11.5 4l-2.05.95zM20 18.5l-.95-2.05L17 15.5l2.05-.95.95-2.05.95 2.05 2.05.95-2.05.95zM5.1 21.7l-2.8-2.8q-.3-.3-.3-.725t.3-.725L13.45 6.3q.3-.3.725-.3t.725.3l2.8 2.8q.3.3.3.725t-.3.725L6.55 21.7q-.3.3-.725.3a.99.99 0 0 1-.725-.3m.75-2.1L13 12.4 11.6 11l-7.2 7.15z"></path>
+                                                </svg>
+                                            </div>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent className='bg-white'>
+                                            <DropdownMenuItem onClick={() => aiChatassistance(message)} className='m-0' key="new">AI Chat Assistance</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => suggest(message)} className='m-0' key="copy"> Suggest Response</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => latestSum(ticketId)} className='m-0' key="edit">Latest Summary</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => completeSum(ticketId)} className='m-0' key="delete">Complete Summary</DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
                                 <div>
-
-                                    <Button
-                                        size='sm'
-                                        onClick={buttons[currentSendButton]?.sendFunction}
-                                        isLoading={isSending}
-                                        endContent={
-                                            <Dropdown
-                                                className='p-0'
-                                                classNames={{
-                                                    base: "p-0 m-0"
-                                                }}
-                                            >
-                                                <DropdownTrigger className='font-bold text-lg'>
-                                                    ⌄
-                                                </DropdownTrigger>
-                                                <DropdownMenu
-                                                    classNames={{
-                                                        list: "p-0 m-0"
-                                                    }}
-                                                    aria-label="Link Actions" onAction={(e: React.Key) => {
-                                                        setSendButton(parseInt(e as string))
-                                                    }}>
-                                                    <DropdownItem
-                                                        classNames={{
-                                                            base: "p-0 m-0"
-                                                        }}
-                                                        key="0">
+                                    <div className="flex w-full flex-col items-start justify-between rounded-md mt-2 border sm:flex-row sm:items-center">
+                                        <Button
+                                            disabled={message === ""}
+                                            onClick={buttons[currentSendButton]?.sendFunction}
+                                            className='w-full text-black bg-white border-r-1 border-stroke rounded-none hover:bg-gray-200 '>
+                                            {buttons[currentSendButton]?.text}
+                                        </Button>
+                                        <DropdownMenu  open={open} onOpenChange={setOpen}>
+                                            <DropdownMenuTrigger  asChild>
+                                                <Button disabled={message === ""} className='focus:outline-none' variant="ghost" size="sm">
+                                                    <MoreHorizontal />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-[200px]">
+                                                <DropdownMenuGroup className='bg-white'>
+                                                    <DropdownMenuItem onSelect={() => setSendButton(0)}>
                                                         Submit as In Progress
-                                                    </DropdownItem>
-                                                    <DropdownItem key="1">
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onSelect={() => setSendButton(1)}>
                                                         Submit as Resolved
-                                                    </DropdownItem>
-                                                </DropdownMenu>
-                                            </Dropdown>
-                                        }
-                                        className="">
-                                        {buttons[currentSendButton]?.text}
-                                    </Button>
-                                </div>
-                                <div className='flex-grow'>
-                                </div>
-                                <div className='mt-2'>
-                                    <Popover placement="bottom" showArrow offset={10}>
-                                        <PopoverTrigger>
-                                            <div className="p-4">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" className=""><path fill="none" d="M0 0h24v24H0z"></path><path d="m20 7-.95-2.05L17 4l2.05-.95L20 1l.95 2.05L23 4l-2.05.95zM8.5 7l-.95-2.05L5.5 4l2.05-.95L8.5 1l.95 2.05L11.5 4l-2.05.95zM20 18.5l-.95-2.05L17 15.5l2.05-.95.95-2.05.95 2.05 2.05.95-2.05.95zM5.1 21.7l-2.8-2.8q-.3-.3-.3-.725t.3-.725L13.45 6.3q.3-.3.725-.3t.725.3l2.8 2.8q.3.3.3.725t-.3.725L6.55 21.7q-.3.3-.725.3a.99.99 0 0 1-.725-.3m.75-2.1L13 12.4 11.6 11l-7.2 7.15z"></path></svg>
-                                            </div>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[200px] bg-white shadow-none">
-                                            <div className="w-full border-small px-1 py-2 rounded-small border-default-200 dark:border-default-100">
-                                                <Listbox
-                                                    classNames={{
-                                                        list: "w-max-[100px] w-[150px] m-0",
-                                                        base: "m-0"
-
-                                                    }}
-                                                    aria-label="Actions"
-                                                >
-
-                                                    <ListboxItem onPress={() => aiChatassistance(message)} className='m-0' key="new">AI Chat Assistance</ListboxItem>
-                                                    <ListboxItem onPress={() => suggest(message)} className='m-0' key="copy"> Suggest Response</ListboxItem>
-                                                    <ListboxItem onPress={() => latestSum(ticketId)} className='m-0' key="edit">Latest Summary</ListboxItem>
-                                                    <ListboxItem onPress={() => completeSum(ticketId)} className='m-0' key="delete">Complete Summary</ListboxItem>
-                                                </Listbox>
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuGroup>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
                                 </div>
                             </div>
                         }

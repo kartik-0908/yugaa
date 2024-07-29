@@ -25,7 +25,6 @@ router.post('/invite', async (req, res) => {
             },
             ignoreExisting: true
         });
-        // console.log(response)
         res.json({
             "message": "ok",
         })

@@ -29,22 +29,16 @@ export async function changeOperatorAvailability(userId: string[]) {
     })
 }
 
-export async function updateOperatorAvailability(userId: string[], available: boolean) {
+export async function updateOperatorAvailability(userId: string, available: boolean) {
     console.log(`userId: ${userId}`);
-    userId.forEach(async (id) => {
-        if (id) {
-            const res = await db.user.update({
-                where: {
-                    id: id
-                },
-                data: {
-                    available: available
-                }
-            })
-            console.log(res)
+    const res = await db.user.update({
+        where: {
+            id: userId
+        },
+        data: {
+            available: available
         }
     })
-
 }
 
 export async function updateAssignee(id: string, assigneeId: string, by: string, shopDomain: string) {

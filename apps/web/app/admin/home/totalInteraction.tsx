@@ -7,7 +7,6 @@ import { useUser } from "@clerk/nextjs";
 import { SkeletonComp, fetcher } from "./peakInteraction";
 import useSWR from "swr";
 
-import { TrendingUp } from "lucide-react"
 function getWeekTimestamps(): [string, string] {
     const now = new Date(new Date().toLocaleString("en-US"));
     const startOfWeek = new Date(now);
@@ -212,8 +211,7 @@ function ChartTwo({ data }: any) {
                     ...prevOptions.yaxis,
                     min: 0,
                     decimalsInFloat: 0,
-                    stepSize: Math.floor(data.total/5),
-                    // forceNiceScale: true
+                    stepSize: Math.max(Math.floor(data.total/5),1),
                 }
             }));
 
@@ -229,7 +227,7 @@ function ChartTwo({ data }: any) {
                         Total Interaction
                     </h4>
                     <h1 className="text-3xl">
-                        {data.total}
+                        {JSON.stringify(data.total)}
                     </h1>
                 </div>
             </div>

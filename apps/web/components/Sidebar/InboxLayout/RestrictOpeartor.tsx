@@ -1,37 +1,93 @@
 import { useUser } from "@clerk/nextjs";
 import { useDisclosure } from "@nextui-org/react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
-import useSWR, { useSWRConfig } from "swr";
 import { getUsers } from "../../../actions/analytics";
-import { changeOperatorAvailability, updateOperatorAvailability } from "../../../actions/inbox";
+import { updateOperatorAvailability } from "../../../actions/inbox";
+import { Checkbox } from "../../ui/checkbox";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../../ui/form";
+import { Button } from "../../ui/button";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { useEffect, useState } from "react";
+import { useToasts } from "@geist-ui/core";
+const FormSchema = z.object({
+    selectedItems: z.array(z.string()),
+    unselectedItems: z.array(z.string())
+})
 
 export default function RestrictOperator() {
     const { user, isLoaded } = useUser()
     if (!isLoaded) {
         return null;
     }
-    const { mutate } = useSWRConfig()
-    const { onOpen } = useDisclosure();
-    const { data, isLoading, error } = useSWR(
-        `${user?.publicMetadata.shopDomain}`,
-        getUsers)
-    if (isLoading) {
-        return null
-    }
-    console.log(data)
-    if (!data) {
-        return null;
-    }
-    let currentselected: Set<string> = new Set();
-    data.map((user) => {
-        if (user.available) {
-            currentselected.add(user.id)
-        }
+    const {setToast} = useToasts()
+    const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+    const [data, setData] = useState<any[]>([]);
+    const [unselectedItems, setUnselectedItems] = useState<Set<string>>(new Set());
+    const form = useForm<z.infer<typeof FormSchema>>({
+        resolver: zodResolver(FormSchema),
+        defaultValues: {
+            selectedItems: [],
+            unselectedItems: []
+        },
     })
 
+    const handleCheckboxChange = (userId: string, checked: boolean) => {
+        setSelectedItems(prev => {
+            const newSet = new Set(prev);
+            if (checked) {
+                newSet.add(userId);
+            } else {
+                newSet.delete(userId);
+            }
+            return newSet;
+        });
+
+        setUnselectedItems(prev => {
+            const newSet = new Set(prev);
+            if (checked) {
+                newSet.delete(userId);
+            } else {
+                newSet.add(userId);
+            }
+            return newSet;
+        });
+
+        form.setValue('selectedItems', Array.from(selectedItems));
+        form.setValue('unselectedItems', Array.from(unselectedItems));
+    };
+    function onSubmit(data: z.infer<typeof FormSchema>) {
+        selectedItems.forEach(async (userId: string) => {
+            if(userId)await updateOperatorAvailability(userId, true);
+        });
+        unselectedItems.forEach(async (userId: string) => {
+            if(userId)await updateOperatorAvailability(userId, false);
+        });
+        setToast({ text: 'Changes Saved'})
+
+    }
+    const { onOpen } = useDisclosure();
+    useEffect(() => {
+        const fetchData = async () => {
+            if (user?.publicMetadata.shopDomain) {
+                const res = await getUsers(`${user.publicMetadata.shopDomain}`);
+                setData(res);
+                const initialSelected = new Set(res.filter(user => user.available).map(user => user.id));
+                const initialUnselected = new Set(res.filter(user => !user.available).map(user => user.id));
+                setSelectedItems(initialSelected);
+                setUnselectedItems(initialUnselected);
+                form.setValue('selectedItems', Array.from(initialSelected));
+                form.setValue('unselectedItems', Array.from(initialUnselected));
+            }
+        }
+
+        if (isLoaded) {
+            fetchData();
+        }
+    }, [isLoaded, user, form]);
     return (
-        <Popover showArrow placement="right"
+        <Popover placement="right"
             classNames={{
                 base: "shadow-none",
             }}
@@ -46,43 +102,39 @@ export default function RestrictOperator() {
 
             </PopoverTrigger>
             <PopoverContent className="p-1  shadow-none">
-                <div className="flex flex-col gap-3">
-                    <Table
-                        onSelectionChange={(key) => {
-                            if (key === "all") {
-                                const allIds = data.map((user) => user.id);
-                                changeOperatorAvailability(allIds)
-                            }
-                            else {
-                                const arr = Array.from(key);
-                                const userIds: string[] = arr.map((item) => item.toString())
-                                updateOperatorAvailability(userIds, true)
-                                const allIds = data.map((user) => user.id);
-                                const missingIds = allIds.filter((user) => !userIds.includes(user));
-                                updateOperatorAvailability(missingIds, false)
-                            }
-                            mutate(`${user?.publicMetadata.shopDomain}`)
-
-                        }}
-                        color="primary"
-                        className="shadow-none"
-                        selectionMode="multiple"
-                        aria-label="Example static collection table"
-                        defaultSelectedKeys={currentselected}
-                    >
-                        <TableHeader>
-                            <TableColumn>NAME</TableColumn>
-                            <TableColumn>ROLE</TableColumn>
-                        </TableHeader>
-                        <TableBody>
-                            {data?.map((user) => (
-                                <TableRow key={user.id}>
-                                    <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
-                                    <TableCell>{user.role || 'N/A'}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                <div className="flex flex-col gap-3 border border-stroke p-2 shadow text-center">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+                            <FormField
+                                control={form.control}
+                                name="selectedItems"
+                                render={() => (
+                                    <FormItem>
+                                        <div className="mb-1">
+                                        </div>
+                                        {data.map((user) => (
+                                            <FormItem
+                                                key={user.id}
+                                                className="flex flex-row items-start space-x-3 space-y-0"
+                                            >
+                                                <FormControl>
+                                                    <Checkbox
+                                                        checked={selectedItems.has(user.id)}
+                                                        onCheckedChange={(checked) => handleCheckboxChange(user.id, checked as boolean)}
+                                                    />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">
+                                                    {user.firstName} {user.lastName}
+                                                </FormLabel>
+                                            </FormItem>
+                                        ))}
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Button variant="outline" className="p-1 pt-0 pb-0 m-0 text-xs w-full max-h-[30px] " type="submit">Save</Button>
+                        </form>
+                    </Form>
                 </div>
             </PopoverContent>
         </Popover>
