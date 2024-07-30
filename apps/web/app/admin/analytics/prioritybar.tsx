@@ -1,30 +1,14 @@
 "use client"
 import { Card } from "@nextui-org/react";
 import { ApexOptions } from "apexcharts";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import ReactApexChart from "react-apexcharts";
 import useSWR from "swr";
-import { getQueriesbyPriority, getQueriesbyStatus, getUserWorkload } from "../../../actions/analytics";
+import { getQueriesbyPriority } from "../../../actions/analytics";
 import { SkeletonComp } from "../home/peakInteraction";
-
-interface ChartThreeState {
-  series: number[];
-}
-
-const colors = ["#3C50E0", "#6577F3", "#8FD0EF", "#0FADCF", "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A"];
-
-
 
 const PriorityBar = ({ start, end, users }: { start: string, end: string, users: React.Key[] }) => {
 
-  useEffect(() => {
-    console.log(start)
-    console.log(end)
-    console.log(users)
-  }, [])
-  const [state, setState] = useState<ChartThreeState>({
-    series: [65, 34, 12, 56],
-  });
   const payload = {
     type: "priorityBarGraph",
     start,
@@ -36,7 +20,6 @@ const PriorityBar = ({ start, end, users }: { start: string, end: string, users:
     getQueriesbyPriority, {
     refreshInterval: 1000 * 60 * 60,
     keepPreviousData: true
-
   }
   )
   if (isLoading) {

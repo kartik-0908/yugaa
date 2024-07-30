@@ -11,6 +11,7 @@ import { cn } from "../../../lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
 import { Button } from "../../../components/ui/button";
 import { Separator } from "../../../components/ui/separator";
+import { formatDate, timeDifference } from "../../../common/function";
 
 const DropdownNotification = () => {
   const { user, isLoaded } = useUser();
@@ -24,7 +25,7 @@ const DropdownNotification = () => {
     userId: user?.id,
     start: start.toISOString(),
   }
-  const { isLoading, error, mutate } = useSWR(
+  const { isLoading, error } = useSWR(
     JSON.stringify(payload),
     fetchNotifications,
     {
@@ -106,8 +107,9 @@ const DropdownNotification = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="relative right-2 bg-white w-[340px]">
         <Card style={{
-          maxHeight: "400px"
-        }} className={cn("w-[380px] border-none max-h-[1px] overflow-y-auto ")} >
+          maxHeight: "400px",
+          maxWidth: "380px"
+        }} className={cn("border-none overflow-y-auto ")} >
           <CardHeader className="">
             <CardTitle>Notifications</CardTitle>
           </CardHeader>
@@ -119,9 +121,14 @@ const DropdownNotification = () => {
                   className="mb-0 grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0"
                 >
                   <div className="space-y-1">
-                    <p className={`text-sm  leading-none text-muted-foreground ${notification.isRead ? "" : "font-bold"}`}>
-                      {notification.title}
-                    </p>
+                    <div className="flex justify-between items-start">
+                      <p className={`text-sm leading-none text-muted-foreground ${notification.isRead ? "" : "font-bold"}`}>
+                        {notification.title}
+                      </p>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {timeDifference(notification.createdAt)}
+                      </span>
+                    </div>
                     <p className={`text-sm text-muted-foreground ${notification.isRead ? "" : "font-bold"}`}>
                       {notification.content}
                     </p>
@@ -138,6 +145,7 @@ const DropdownNotification = () => {
                   )}
                   <Separator style={{
                     backgroundColor: "rgba(0,0,0,.1)",
+
                   }} className="mt-2" />
                 </div>
 

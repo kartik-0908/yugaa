@@ -249,3 +249,19 @@ export async function updateEscTicket(id: string, field: string, value: string, 
         console.log(error);
     }
 }
+
+
+export async function getEmail(shopDomain: string) {
+    try {
+        const resp = await db.shopifyInstalledShop.findUnique({
+            where: {
+                shop: shopDomain,
+            },
+        });
+        const emails = resp?.email
+        return emails
+    } catch (error) {
+        console.log(error)
+        return null
+    }
+}

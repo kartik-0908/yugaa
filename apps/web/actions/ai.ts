@@ -1,8 +1,6 @@
 'use server';
 import { PrismaClient } from '@repo/db';
-
 const db = new PrismaClient();
-
 import { streamText } from 'ai';
 import { azure } from '@ai-sdk/azure';
 import { createStreamableValue } from 'ai/rsc';
@@ -26,7 +24,6 @@ export async function generate(input: string) {
 
     return { output: stream.value };
 }
-
 export async function generatelatestSum(ticketId: string) {
     const stream = createStreamableValue('');
 
@@ -47,7 +44,6 @@ export async function generatelatestSum(ticketId: string) {
 
     return { output: stream.value };
 }
-
 async function combineChatAndEvents(ticketId: string, type: 'latest' | 'complete') {
     const shop = await db.ticket.findUnique({
         where: {
@@ -128,8 +124,6 @@ async function combineChatAndEvents(ticketId: string, type: 'latest' | 'complete
     `;
 
 }
-
-
 export async function generateSum(ticketId: string) {
     const stream = createStreamableValue('');
     const prompt = await combineChatAndEvents(ticketId, 'complete')
@@ -150,8 +144,6 @@ export async function generateSum(ticketId: string) {
 
     return { output: stream.value };
 }
-
-
 export async function suggestResp(message: string) {
     const stream = createStreamableValue('');
     console.log(message);

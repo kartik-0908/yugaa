@@ -10,17 +10,17 @@ import { readStreamableValue } from 'ai/rsc';
 import TextMessage from '../../../components/copy';
 import { formatDate } from '../../../common/function';
 import AssignedTo from '../../../components/AssignedTo';
-import { fetchTicket, fetchTicketEventsbyId, updateEscTicket } from '../../../actions/inbox';
+import { fetchTicket, fetchTicketEventsbyId, getEmail, updateEscTicket } from '../../../actions/inbox';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../../../components/ui/select';
 
-const RightPanelToggle = ({ id, emails }: any) => {
+const RightPanelToggle = ({ id }: { id: string }) => {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return (<div>Loading...</div>);
     const containerRef = useRef(null);
 
 
-
+    const [emails, setEmails] = useState<string[]>([]);
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(true);
     const [activeTab, setActiveTab] = useState('Tab1'); // Initialize with the first tab
     const [currentAiMessage, setCurrentAiMessage] = useState('');
@@ -34,6 +34,8 @@ const RightPanelToggle = ({ id, emails }: any) => {
     const [displayId, setDisplayId] = useState('');
     const [assigneeId, setAssigneeId] = useState('');
     const [creationTime, setCreationTime] = useState<Date>();
+
+
 
     useEffect(() => {
         if (containerRef.current) {
@@ -66,38 +68,70 @@ const RightPanelToggle = ({ id, emails }: any) => {
     };
 
     useEffect(() => {
-        async function fetchEvents() {
-            const events = await fetchTicketEventsbyId(id);
-            events.forEach((event: any) => {
-                console.log(event)
-                if (event.type === 'ESCALATED') {
-                    setSubject(event.ESCALATED.subject)
-                    setEmail(event.ESCALATED.userEmail)
+        async function fetchData() {
+            const startTime = Date.now();
+            console.log(`[${new Date().toISOString()}] Starting data fetch`);
+    
+            try {
+                // Fetch all data in parallel
+                const [events, ticket, emails] = await Promise.all([
+                    fetchTicketEventsbyId(id),
+                    fetchTicket(id),
+                    getEmail(user?.publicMetadata.shopDomain as string)
+                ]);
+    
+                console.log(`[${new Date().toISOString()}] All data fetched in ${Date.now() - startTime}ms`);
+    
+                // Process events
+                events.forEach((event: any) => {
+                    if (event.type === 'ESCALATED') {
+                        setSubject(event.ESCALATED.subject);
+                        setEmail(event.ESCALATED.userEmail);
+                    }
+                    if (event.Ticket.displayId) {
+                        setDisplayId(event.Ticket.displayId);
+                    }
+                });
+    
+                // Process ticket
+                if (ticket !== null) {
+                    if(ticket.category !== null)setCategory(ticket.category );
+                    if(ticket.status !== null)setStatus(ticket.status );
+                    if(ticket.priority !== null)setPriority(ticket.priority );
+                    if(ticket.assigneeId !== null)setAssigneeId(ticket.assigneeId );
+                    if(ticket.createdAt !== null)setCreationTime(ticket.createdAt );
                 }
-                if (event.Ticket.displayId) {
-                    setDisplayId(event.Ticket.displayId)
+    
+                // Set state
+                setEvents(events);
+                if (emails !== null && emails !== undefined) {
+                    setEmails(emails);
                 }
-            });
-            setEvents(events)
-        }
-        async function Ticket() {
-            const ticket = await fetchTicket(id);
-            if (ticket !== null) {
-                if (ticket.category !== null) { setCategory(ticket.category); }
-                if (ticket.status !== null) { setStatus(ticket.status); }
-                if (ticket.priority !== null) { setPriority(ticket.priority); }
-                if (ticket.assigneeId !== null) {
-                    setAssigneeId(ticket.assigneeId);
-                }
-                if (ticket.createdAt !== null) {
-                    setCreationTime((ticket.createdAt))
-                }
+    
+            } catch (error) {
+                console.error('Error fetching data:', error);
             }
+    
+            console.log(`[${new Date().toISOString()}] Total execution time: ${Date.now() - startTime}ms`);
         }
-        fetchEvents();
-        Ticket();
-    }, [id]);
-
+    
+        fetchData();
+    }, [id, user?.publicMetadata.shopDomain]);
+    if (events.length === 0) {
+        return <div>
+            Loading events
+        </div>
+    }
+    if (category === '') {
+        return <div>
+            Loading category
+        </div>
+    }
+    if (emails.length === 0) {
+        return <div>
+            Loading emails
+        </div>
+    }
     const renderContent = () => {
         switch (activeTab) {
             case 'Tab1':
@@ -254,7 +288,7 @@ const RightPanelToggle = ({ id, emails }: any) => {
                         message = 'Ticket reopened';
                         break;
                     case 'ESCALATED':
-                        message = `Ticket escalated by ${event.name}`;
+                        message = `Ticket escalated`;
                         break;
                     default:
                         message = `Unknown event: ${event.type}`;
@@ -263,7 +297,6 @@ const RightPanelToggle = ({ id, emails }: any) => {
                 return <EventCard event={`${message}${time}`} key={event.id} />;
         }
     };
-
     async function handleMessageSend(message: string, status: string) {
         setEvents([...events, { type: 'AI_TO_USER', AI_TO_USER: { message }, createdAt: new Date() }]);
         console.log(message)
@@ -325,11 +358,10 @@ const RightPanelToggle = ({ id, emails }: any) => {
             }
         }
     }
-
     return (
         <div className="flex h-full w-full">
             <div className={`h-full transition-all duration-1500 ease-in-out ${isRightPanelVisible ? 'w-2/3' : 'w-full'}`}>
-                <div className="h-[8%] text-2xl font-bold border-b-1 border-stroke flex justify-center items-center">
+                <div className="h-[8%] text-xl font-bold border-b-1 border-stroke flex justify-center items-center">
                     <div>
                         {subject}
                     </div>
@@ -349,9 +381,7 @@ const RightPanelToggle = ({ id, emails }: any) => {
                         suggest={suggest}
                         completeSum={completeSum}
                     />
-
                 </div>
-
             </div>
             {isRightPanelVisible && (
                 <div id="rightPanel" className={` bg-white border-r-1 border-l-1 border-stroke transition-all duration-1500 ease-in-out ${isRightPanelVisible ? 'w-1/3' : 'w-0 overflow-hidden'}`}>
@@ -361,12 +391,10 @@ const RightPanelToggle = ({ id, emails }: any) => {
                                 <div className={`cursor-pointer p-2 flex-1 text-center ${activeTab === 'Tab1' ? 'font-bold' : ''}`} onClick={() => setActiveTab('Tab1')}>MetaData</div>
                                 <div className={`cursor-pointer p-2 flex-1 text-center border-l border-storke ${activeTab === 'Tab2' ? 'font-bold' : ''}`} onClick={() => setActiveTab('Tab2')}>AI</div>
                             </div>
-
                             <div className="p-4 overflow-y-auto">
                                 {renderContent()}
                             </div>
                         </div>
-
                     }
                 </div>
             )}
@@ -381,7 +409,7 @@ const RightPanelToggle = ({ id, emails }: any) => {
     );
 };
 
-const EventCard = ({ event }: any) => {
+export const EventCard = ({ event }: any) => {
     return (
         <div className="flex justify-center my-4 rounded-2xl">
             <div className="bg-gray-400 rounded-full px-4 py-2 text-sm text-white">

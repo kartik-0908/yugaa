@@ -9,6 +9,6 @@ export default async function ticket({ params }: any) {
     })
     const emails = resp.data.emails;
     return (
-        <RightPanelToggle id={params.id}  emails={emails} />
+        <RightPanelToggle id={params.id} />
     )
 }

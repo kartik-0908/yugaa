@@ -6,6 +6,7 @@ import { today, getLocalTimeZone, now } from '@internationalized/date';
 import { useUser } from '@clerk/nextjs';
 import dynamic from "next/dynamic";
 import { Chip, DateRangePicker, Select, SelectItem } from "@nextui-org/react";
+import { Skeleton } from "../../../components/ui/skeleton";
 const Answered = dynamic(() => import("./Cards/Answered").then(mod => mod.Answered), { ssr: false });
 const UnAnswered = dynamic(() => import("./Cards/Answered").then(mod => mod.UnAnswered), { ssr: false });
 const TimeSaved = dynamic(() => import("./Cards/Answered").then(mod => mod.TimeSaved), { ssr: false });
@@ -22,7 +23,9 @@ const PriorityBar = dynamic(() => import("./prioritybar"), { ssr: false });
 
 export default function Analytics() {
   const { user, isLoaded } = useUser()
-  if (!isLoaded) return <div>Loading clerk data...</div>
+  if (!isLoaded) {
+    return null
+  }
   useEffect(() => {
     console.log(user)
   }, [user])
@@ -40,7 +43,8 @@ export default function Analytics() {
     keepPreviousData: true
   })
 
-  if (isLoading) return <div>Loading swr data...</div>
+  if (isLoading) return null
+
 
 
   function handlechange(value: any) {
@@ -76,7 +80,7 @@ export default function Analytics() {
               placeholder="Choose Member"
               selectionMode="multiple"
               className='min-w-[250px]'
-              onSelectionChange={(keys: "all" | Set<React.Key> & {anchorKey?: string; currentKey?: string} ) => {
+              onSelectionChange={(keys: "all" | Set<React.Key> & { anchorKey?: string; currentKey?: string }) => {
                 console.log(keys)
                 const selectedKeys = Array.from(keys);
                 setUsers(selectedKeys)
@@ -108,14 +112,14 @@ export default function Analytics() {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 pt-4">
-          <Answered start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day+1).toISOString()} />
-          <UnAnswered start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day+1).toISOString()} />
-          <TimeSaved start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day+1).toISOString()} />
-          <AverageSession start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day+1).toISOString()} />
-          <TransferRate start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day+1).toISOString()} users={users} />
+          <Answered start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day + 1).toISOString()} />
+          <UnAnswered start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day + 1).toISOString()} />
+          <TimeSaved start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day + 1).toISOString()} />
+          <AverageSession start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day + 1).toISOString()} />
+          <TransferRate start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day + 1).toISOString()} users={users} />
           {/* <AvgResponseTime start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day+1).toISOString()} users={users} /> */}
-          <FcrPercentage start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day+1).toISOString()} users={users} />
-          <MissedConv start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day+1).toISOString()} users={users} />
+          <FcrPercentage start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day + 1).toISOString()} users={users} />
+          <MissedConv start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day + 1).toISOString()} users={users} />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 pt-8">
           <ChartThree start={new Date(value.start.year, value.start.month - 1, value.start.day).toISOString()} end={new Date(value.end.year, value.end.month - 1, value.end.day).toISOString()} users={users} />

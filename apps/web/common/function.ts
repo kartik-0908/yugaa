@@ -21,3 +21,21 @@ export function formatDate(dateString: string): string {
     // Construct the formatted string
     return `${day}-${month}-${year} ${hoursString}:${minutes} ${ampm}`;
 }
+
+export function timeDifference(date: Date): string {
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    
+    const totalSeconds = Math.floor(diff / 1000);
+    
+    if (totalSeconds < 3600) { // Less than an hour
+        const minutes = Math.floor(totalSeconds / 60);
+        return `${minutes} m`;
+    } else if (totalSeconds < 86400) { // Less than a day
+        const hours = Math.floor(totalSeconds / 3600);
+        return `${hours} h`;
+    } else { // Days or more
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        return `${days} d`;
+    }
+}
