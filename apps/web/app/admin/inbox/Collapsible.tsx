@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import AiCard from './unassigned/[id]/AiCard';
 import UserCard from './unassigned/[id]/UserCard';
 import MessageForm from './MessageForm';
-import axios from 'axios';
 import { useUser } from '@clerk/nextjs';
 import { generate, generateSum, generatelatestSum, suggestResp } from '../../../actions/ai';
 import { readStreamableValue } from 'ai/rsc';
@@ -103,8 +102,8 @@ const RightPanelToggle = ({ id, emails }: any) => {
         switch (activeTab) {
             case 'Tab1':
                 return (
-                    <div>
-                        <table>
+                    <div className='text-sm'>
+                        <table className='text-gray-500'>
                             <thead>
                                 <tr>
                                 </tr>
@@ -112,19 +111,19 @@ const RightPanelToggle = ({ id, emails }: any) => {
                             <tbody>
                                 <tr>
                                     <td>ID</td>
-                                    <td>{displayId}</td>
+                                    <td className='pl-2'>{displayId}</td>
                                 </tr>
                                 <tr>
                                     <td>Email</td>
-                                    <td>{consumerEmail}</td>
+                                    <td className='pl-2'>{consumerEmail}</td>
                                 </tr>
                                 <tr>
                                     <td>Subject</td>
-                                    <td>{subject}</td>
+                                    <td className='pl-2'>{subject}</td>
                                 </tr>
                                 <tr>
                                     <td>Created At</td>
-                                    <td>{creationTime?.toLocaleString()}</td>
+                                    <td className='pl-2'>{creationTime?.toLocaleString()}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -267,11 +266,6 @@ const RightPanelToggle = ({ id, emails }: any) => {
 
     async function handleMessageSend(message: string, status: string) {
         setEvents([...events, { type: 'AI_TO_USER', AI_TO_USER: { message }, createdAt: new Date() }]);
-        // <AiCard
-        //     message={event.EMAIL_SENT.Email.text}
-        //     time={formatDate(event.createdAt)}
-        //     key={event.id}
-        // />
         console.log(message)
     }
     async function aiChatassistance(message: string) {
@@ -390,7 +384,7 @@ const RightPanelToggle = ({ id, emails }: any) => {
 const EventCard = ({ event }: any) => {
     return (
         <div className="flex justify-center my-4 rounded-2xl">
-            <div className="bg-gray-300 rounded-full px-4 py-2 text-sm text-white">
+            <div className="bg-gray-400 rounded-full px-4 py-2 text-sm text-white">
                 {event}
             </div>
         </div>

@@ -42,20 +42,3 @@ export function getEmbeddingsTransformer(): OpenAIEmbeddings {
     }
 }
 
-export function vectorStore(): MongoDBAtlasVectorSearch {
-    const vectorStore: MongoDBAtlasVectorSearch = new MongoDBAtlasVectorSearch(
-        new OpenAIEmbeddings(),
-        searchArgs()
-    );
-    return vectorStore
-}
-
-export function searchArgs(): MongoDBAtlasVectorSearchLibArgs {
-    const searchArgs: MongoDBAtlasVectorSearchLibArgs = {
-        collection,
-        indexName: "vector_index",
-        textKey: "text",
-        embeddingKey: "text_embedding",
-    }
-    return searchArgs;
-}
