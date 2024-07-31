@@ -3,7 +3,6 @@
 import db from "../lib/db";
 import { pushAdminNotification, pushIndividualNoti } from "../lib/pubSub";
 
-
 export async function changeOperatorAvailability(userId: string[]) {
     console.log(`userId: ${userId}`);
     userId.forEach(async (id) => {
@@ -42,44 +41,59 @@ export async function updateOperatorAvailability(userId: string, available: bool
 export async function updateAssignee(id: string, assigneeId: string, by: string, shopDomain: string) {
     let assigneeName;
     let byName;
-    await db.$transaction(async (tx) => {
-        const res = await tx.ticket.update({
-            where: {
+    if (assigneeId === "Unassigned") {
+        await db.ticket.update({
+            where:{
                 id: id
             },
-            data: {
-                assigneeId: assigneeId
+            data:{
+                assigneeId: null,
+                status:'unassigned'
             }
         })
-        const resp = await tx.user.findUnique({
-            where: {
-                id: assigneeId
-            }
-        })
-        assigneeName = resp?.firstName + " " + resp?.lastName;
-        const result = await tx.ticketEvents.create({
-            data: {
-                ticketId: id,
-                type: 'ASSIGNE_CHANGED',
-                ASSIGNE_CHANGED: {
-                    create: {
-                        newid: assigneeId,
-                        byid: by
+        console.log(`Unassigning ticket ${id}`);
+    }
+    else {
+        await db.$transaction(async (tx) => {
+            const res = await tx.ticket.update({
+                where: {
+                    id: id
+                },
+                data: {
+                    assigneeId: assigneeId
+                }
+            })
+            const resp = await tx.user.findUnique({
+                where: {
+                    id: assigneeId
+                }
+            })
+            assigneeName = resp?.firstName + " " + resp?.lastName;
+            const result = await tx.ticketEvents.create({
+                data: {
+                    ticketId: id,
+                    type: 'ASSIGNE_CHANGED',
+                    ASSIGNE_CHANGED: {
+                        create: {
+                            newid: assigneeId,
+                            byid: by
+                        }
+                    }
+                },
+                include: {
+                    ASSIGNE_CHANGED: {
+                        include: {
+                            by: true
+                        }
                     }
                 }
-            },
-            include: {
-                ASSIGNE_CHANGED: {
-                    include: {
-                        by: true
-                    }
-                }
-            }
+            })
+            byName = result.ASSIGNE_CHANGED?.by.firstName
         })
-        byName = result.ASSIGNE_CHANGED?.by.firstName
-    })
-    await pushAdminNotification(shopDomain, "Assignee Changed", `The assignee for ticket ${id} has been changed to ${assigneeName} by ${byName}`)
-    await pushIndividualNoti(assigneeId, "Assignee Changed", `You have been assigned to ticket ${id} by ${byName}`)
+        await pushAdminNotification(shopDomain, "Assignee Changed", `The assignee for ticket ${id} has been changed to ${assigneeName} by ${byName}`)
+        await pushIndividualNoti(assigneeId, "Assignee Changed", `You have been assigned to ticket ${id} by ${byName}`)
+    }
+
 }
 
 export async function fetchTicketEventsbyId(id: string) {

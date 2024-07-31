@@ -4,7 +4,7 @@ import { Textarea, Select, SelectItem, Popover, PopoverTrigger, PopoverContent, 
 import axios from 'axios';
 import { getDisplayID } from '../../../actions/inbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuTrigger } from '../../../components/ui/dropdown-menu';
-import { MoreHorizontal, User } from 'lucide-react';
+import { Loader2, MoreHorizontal, User } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 
 interface MessageFormProps {
@@ -25,7 +25,6 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
     const [message, setMessage] = useState<string>("");
     const [isSending, setIsSending] = useState<boolean>(false);
     const [displayId, setDisplayId] = useState<number>(-1);
-    const [label, setLabel] = React.useState("feature")
     const [open, setOpen] = React.useState(false)
     const buttons = [
         {
@@ -62,6 +61,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                         ticketId: ticketId,
                         status: "Resolved"
                     })
+                onMessageSend(message, "Resolved")
                 setIsSending(false)
                 setMessage("")
                 console.log("Send as Resolved")
@@ -81,7 +81,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
         <div className="h-full w-full">
             <div className='w-full gap-2 flex flex-row'>
                 <div>
-                    <label className="text-sm">Send message from:</label>
+                    <label className="text-sm pl-2">Send message from:</label>
                     <select defaultValue={currentSendEmail}
                         onChange={(e) => {
                             console.log(e.target.value)
@@ -139,14 +139,23 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                                 </div>
                                 <div>
                                     <div className="flex w-full flex-col items-start justify-between rounded-md mt-2 border sm:flex-row sm:items-center">
-                                        <Button
-                                            disabled={message === ""}
-                                            onClick={buttons[currentSendButton]?.sendFunction}
-                                            className='w-full text-black bg-white border-r-1 border-stroke rounded-none hover:bg-gray-200 '>
-                                            {buttons[currentSendButton]?.text}
-                                        </Button>
-                                        <DropdownMenu  open={open} onOpenChange={setOpen}>
-                                            <DropdownMenuTrigger  asChild>
+                                        {isSending ? (
+                                            <Button
+                                                className='w-full text-black bg-white border-r-1 border-stroke rounded-none hover:bg-gray-200 '
+                                                disabled>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Please wait
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                disabled={message === ""}
+                                                onClick={buttons[currentSendButton]?.sendFunction}
+                                                className='w-full text-black bg-white border-r-1 border-stroke rounded-none hover:bg-gray-200 '>
+                                                {buttons[currentSendButton]?.text}
+                                            </Button>
+                                        )}
+                                        <DropdownMenu open={open} onOpenChange={setOpen}>
+                                            <DropdownMenuTrigger asChild>
                                                 <Button disabled={message === ""} className='focus:outline-none' variant="ghost" size="sm">
                                                     <MoreHorizontal />
                                                 </Button>

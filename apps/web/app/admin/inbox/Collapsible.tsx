@@ -214,7 +214,7 @@ const RightPanelToggle = ({ id }: { id: string }) => {
                                 </Select >
                             </div>
                             <div>
-                                <AssignedTo id={id} assigneeId={assigneeId} shopDomain={user?.publicMetadata.shopDomain as string} />
+                                <AssignedTo userId={user?.id as string} id={id} assigneeId={assigneeId} shopDomain={user?.publicMetadata.shopDomain as string} />
                             </div>
                         </div>
                     </div>
