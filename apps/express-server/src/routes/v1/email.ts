@@ -61,10 +61,10 @@ router.post('/send-email', async (req, res) => {
             await db.ticketEvents.create({
                 data: {
                     ticketId,
-                    type: "STATUS_CHANGED",
-                    STATUS_CHANGED: {
+                    type: "DISPLAY_TAG",
+                    DISPLAY_TAG:{
                         create: {
-                            newStatus: status,
+                            message: `Status Changed to ${status}`
                         }
                     }
                 }
