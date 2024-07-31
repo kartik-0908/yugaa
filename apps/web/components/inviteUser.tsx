@@ -5,31 +5,14 @@ import { Snippet } from "@nextui-org/react";
 import { useUser } from "@clerk/nextjs";
 import { Info } from "lucide-react";
 import NextLoader from "./Loader";
+import axios from "axios";
 
-interface Member {
-    name: string;
-    role: string;
-    email: string;
-}
-
-type MembersCompType = {
-    memberLink: string,
-    adminLink: string,
-    users: {
-        firstName?: string,
-        lastName?: string,
-        role: string,
-        email: string,
-        image?: string
-    }[]
-}
-
-export default function MembersComponent({ memberLink, adminLink, users }: MembersCompType) {
+export default function MembersComponent({ member, admin, users }: any) {
     const { user, isLoaded } = useUser()
     if (!isLoaded) {
-        return <NextLoader /> 
+        return <NextLoader />
     }
-    const [members, setMembers] = useState<Member[]>([]);
+    const [members, setMembers] = useState<any[]>([]);
     const [showRemoveModal, setShowRemoveModal] = useState(false);
     const [memberToRemove, setMemberToRemove] = useState<number | null>(null);
     const [adminInviteLink, setAdminInviteLink] = useState<string>("");
@@ -40,18 +23,20 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
     useEffect(() => {
         const fetchMembers = async () => {
             console.log(user?.emailAddresses[0]?.emailAddress)
-            if (memberLink) {
-                setMemberInviteLink(`${process.env.NEXT_PUBLIC_APP_URL}/verify/invite?member=${memberLink}`)
+            if (member) {
+                setMemberInviteLink(`${process.env.NEXT_PUBLIC_APP_URL}/verify/invite?member=${member}`)
             }
-            if (adminLink) {
-                setAdminInviteLink(`${process.env.NEXT_PUBLIC_APP_URL}/verify/invite?admin=${adminLink}`)
+            if (admin) {
+                setAdminInviteLink(`${process.env.NEXT_PUBLIC_APP_URL}/verify/invite?admin=${admin}`)
             }
             if (users) {
                 let allMembers = [];
                 const len = users?.length;
                 for (let i = 0; i < len; i++) {
+                    console.log(users[i])
                     const name = users[i]?.firstName + " " + users[i]?.lastName || "";
                     allMembers.push({
+                        id: users[i]?.id,
                         name: name,
                         role: users[i]?.role || "",
                         email: users[i]?.email || "",
@@ -61,14 +46,19 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
             }
         };
         fetchMembers();
-    }, [memberLink, adminLink, users]);
+    }, [member, admin, users]);
 
-    const handleRoleChange = (index: number, newRole: string) => {
+    const handleRoleChange = async  (index: number, newRole: string,id: string) => {
+        console.log(newRole)
         const updatedMembers = [...members];
         console.log(updatedMembers[index])
         //@ts-ignore
         updatedMembers[index].role = newRole;
         setMembers(updatedMembers);
+        await axios.post('/api/clerk',{
+            id: id,
+            role: newRole
+        })
 
     };
 
@@ -148,11 +138,10 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                                 <td className="px-6 py-4">{member.name}</td>
                                 <td className="px-6 py-4">
                                     <Select
-
                                         isDisabled={member.email === user?.emailAddresses[0]?.emailAddress}
                                         defaultSelectedKeys={[member.role]}
                                         className="max-w-xs pl-4 pr-4"
-                                        onChange={(e) => handleRoleChange(index, e.target.value)}
+                                        onChange={(e) => handleRoleChange(index, e.target.value,member.id)}
                                     >
                                         <SelectItem key="admin">
                                             Admin
