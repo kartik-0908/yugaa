@@ -68,9 +68,9 @@ export async function updateAssignee(id: string, assigneeId: string, by: string,
                     }
                 }
             },
-            include:{
+            include: {
                 ASSIGNE_CHANGED: {
-                    include:{
+                    include: {
                         by: true
                     }
                 }
@@ -191,6 +191,7 @@ export async function getDisplayID(id: string) {
 
 
 export async function updateEscTicket(id: string, field: string, value: string, by: string) {
+    let byName = '';
     try {
         const resp = await db.ticket.update({
             where: {
@@ -201,7 +202,7 @@ export async function updateEscTicket(id: string, field: string, value: string, 
             },
         });
         if (field === "status") {
-            await db.ticketEvents.create({
+            const res = await db.ticketEvents.create({
                 data: {
                     ticketId: id,
                     type: "STATUS_CHANGED",
@@ -211,15 +212,25 @@ export async function updateEscTicket(id: string, field: string, value: string, 
                             newStatus: value
                         }
                     }
+                },
+                include: {
+                    STATUS_CHANGED: {
+                        include: {
+                            by: true
+                        }
+                    }
                 }
             })
-            await pushAdminNotification(resp.shopDomain, "Ticket Status", `Status of ticket ${id} has been changed to ${value} by ${by} `);
+            if (typeof res.STATUS_CHANGED?.by?.firstName !== "undefined" && res.STATUS_CHANGED?.by?.firstName !== null) {
+                byName = res?.STATUS_CHANGED?.by?.firstName
+            }
+            await pushAdminNotification(resp.shopDomain, "Ticket Status", `Status of ticket ${id} has been changed to ${value} by ${byName} `);
             if (resp.assigneeId) {
-                await pushIndividualNoti(resp.assigneeId, "Ticket Status", `Status of ticket ${id} assigned to you has been changed to ${value} by ${by} `);
+                await pushIndividualNoti(resp.assigneeId, "Ticket Status", `Status of ticket ${id} assigned to you has been changed to ${value} by ${byName} `);
             }
         }
         if (field === "priority") {
-            await db.ticketEvents.create({
+            const res = await db.ticketEvents.create({
                 data: {
                     ticketId: id,
                     type: "PRIORITY_CHANGED",
@@ -229,11 +240,21 @@ export async function updateEscTicket(id: string, field: string, value: string, 
                             newpriority: value
                         }
                     }
+                },
+                include: {
+                    PRIORITY_CHANGED: {
+                        include: {
+                            by: true
+                        }
+                    }
                 }
             })
-            await pushAdminNotification(resp.shopDomain, "Priority Changed", `The priority of ticket ${id} has been changed to ${value} by ${by} `);
+            if (typeof res.PRIORITY_CHANGED?.by?.firstName !== "undefined" && res.PRIORITY_CHANGED?.by?.firstName !== null) {
+                byName = res?.PRIORITY_CHANGED?.by?.firstName
+            }
+            await pushAdminNotification(resp.shopDomain, "Priority Changed", `The priority of ticket ${id} has been changed to ${value} by ${byName} `);
             if (resp.assigneeId) {
-                await pushIndividualNoti(resp.assigneeId, "Priority Changed", `The priority of ticket ${id} assigned to you has been changed to ${value} by ${by} `);
+                await pushIndividualNoti(resp.assigneeId, "Priority Changed", `The priority of ticket ${id} assigned to you has been changed to ${value} by ${byName} `);
             }
         }
         if (field === 'category') {
@@ -247,7 +268,7 @@ export async function updateEscTicket(id: string, field: string, value: string, 
                             newcategory: value
                         }
                     }
-                }
+                },
             })
         }
     }
