@@ -5,18 +5,18 @@ import { getUsers } from "../../../actions/analytics";
 import { today, getLocalTimeZone, now } from '@internationalized/date';
 import { useUser } from '@clerk/nextjs';
 import dynamic from "next/dynamic";
-import { Chip, DateRangePicker, Select, SelectItem } from "@nextui-org/react";
-const Answered = dynamic(() => import("./Cards/Answered").then(mod => mod.Answered), { ssr: false });
-const UnAnswered = dynamic(() => import("./Cards/Answered").then(mod => mod.UnAnswered), { ssr: false });
-const TimeSaved = dynamic(() => import("./Cards/Answered").then(mod => mod.TimeSaved), { ssr: false });
-const AverageSession = dynamic(() => import("./Cards/Answered").then(mod => mod.AverageSession), { ssr: false });
-const TransferRate = dynamic(() => import("./Cards/Answered").then(mod => mod.TransferRate), { ssr: false });
-const FcrPercentage = dynamic(() => import("./Cards/Answered").then(mod => mod.FcrPercentage), { ssr: false });
-const MissedConv = dynamic(() => import("./Cards/Answered").then(mod => mod.MissedConv), { ssr: false });
-const ChartThree = dynamic(() => import("./ChartThree"), { ssr: false });
-const WorkloadDistribution = dynamic(() => import("./workkload"), { ssr: false });
-const Statusbar = dynamic(() => import("./statusBar"), { ssr: false });
-const PriorityBar = dynamic(() => import("./prioritybar"), { ssr: false });
+import { DateRangePicker } from "@nextui-org/react";
+const Answered = dynamic(() => import("../../admin/analytics/Cards/Answered").then(mod => mod.Answered), { ssr: false });
+const UnAnswered = dynamic(() => import("../../admin/analytics/Cards/Answered").then(mod => mod.UnAnswered), { ssr: false });
+const TimeSaved = dynamic(() => import("../../admin/analytics/Cards/Answered").then(mod => mod.TimeSaved), { ssr: false });
+const AverageSession = dynamic(() => import("../../admin/analytics/Cards/Answered").then(mod => mod.AverageSession), { ssr: false });
+const TransferRate = dynamic(() => import("../../admin/analytics/Cards/Answered").then(mod => mod.TransferRate), { ssr: false });
+const FcrPercentage = dynamic(() => import("../../admin/analytics/Cards/Answered").then(mod => mod.FcrPercentage), { ssr: false });
+const MissedConv = dynamic(() => import("../../admin/analytics/Cards/Answered").then(mod => mod.MissedConv), { ssr: false });
+const ChartThree = dynamic(() => import("../../admin/analytics/ChartThree"), { ssr: false });
+const WorkloadDistribution = dynamic(() => import("../../admin/analytics/workkload"), { ssr: false });
+const Statusbar = dynamic(() => import("../../admin/analytics/statusBar"), { ssr: false });
+const PriorityBar = dynamic(() => import("../../admin/analytics/prioritybar"), { ssr: false });
 
 
 export default function Analytics() {
