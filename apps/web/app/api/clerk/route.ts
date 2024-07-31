@@ -9,12 +9,12 @@ export default async function POST(req: NextRequest){
             role
         }
     })
-    await db.user.update({
-        where: {
-            id
-        },
-        data: {
-            role
-        }
-    })
+    // await db.user.update({
+    //     where: {
+    //         id
+    //     },
+    //     data: {
+    //         role
+    //     }
+    // })
 }

@@ -1,5 +1,4 @@
 import { auth } from "@clerk/nextjs/server";
-import axios from "axios";
 import MembersComponent from "../../../components/inviteUser";
 import { getUsers } from "../../../actions/analytics";
 import { getCodes } from "../../../actions/invite";
