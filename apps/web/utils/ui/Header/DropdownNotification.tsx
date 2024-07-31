@@ -2,16 +2,15 @@
 import { useState } from "react";
 import { Badge } from "@nextui-org/react";
 import { useUser } from "@clerk/nextjs";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { fetchNotifications } from "../../../actions/analytics";
 import { markNotificationAsRead } from "../../../actions/header";
-import { Bell, BellRing, Check, Eye } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { cn } from "../../../lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
 import { Button } from "../../../components/ui/button";
 import { Separator } from "../../../components/ui/separator";
-import { formatDate, timeDifference } from "../../../common/function";
+import { timeDifference } from "../../../common/function";
 
 const DropdownNotification = () => {
   const { user, isLoaded } = useUser();
@@ -29,7 +28,7 @@ const DropdownNotification = () => {
     JSON.stringify(payload),
     fetchNotifications,
     {
-      refreshInterval: 1000 * 100000,
+      refreshInterval: 1000,
       onSuccess: (data) => {
         setNotifications(data);
         setBadgeValue(data.filter(noti => !noti.isRead).length);
@@ -38,17 +37,15 @@ const DropdownNotification = () => {
   );
 
   if (isLoading) {
-    return <div>Loading</div>
+    return null;
   }
 
   if (error) {
-    return <div>Error</div>
+    return null;
   }
   const handleMarkAsRead = async (notificationId: string) => {
     try {
       await markNotificationAsRead(notificationId);
-
-      // Update the local state
       setNotifications((prevNotifications: any[]) =>
         prevNotifications.map(notification =>
           notification.id === notificationId

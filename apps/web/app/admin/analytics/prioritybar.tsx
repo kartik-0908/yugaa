@@ -86,7 +86,7 @@ const PriorityBar = ({ start, end, users }: { start: string, end: string, users:
   };
 
   const latestseries = [{
-    name: 'Tickets Assigned',
+    name: 'Tickets',
     data: data.map((item: any) => item)
   }];
 

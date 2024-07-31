@@ -101,13 +101,13 @@ export async function getQueriesbyCategory(data: string): Promise<number[]> {
     console.log(data);
 
     const categories = [
-        "Product inquiry",
-        "Order issue",
-        "Technical support",
-        "Account query",
-        "Billing issue",
-        "Policy query",
-        "Compliance inquiry"
+        "product_inquiry",
+        "order_issue",
+        "technical_support",
+        "account_query",
+        "billing_issue",
+        "policy_query",
+        "compliance_inquiry"
     ];
 
     const count = await db.ticket.groupBy({

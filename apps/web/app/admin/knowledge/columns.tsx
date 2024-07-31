@@ -65,7 +65,7 @@ export const columns: ColumnDef<KbTable>[] = [
                 <>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button disabled={currRow.status === "processing" || currRow.status === "deleting"} className=" bg-transparent hover:bg-transparent" >
+                            <Button disabled={currRow.status === "processing" || currRow.status === "deleting" || currRow.status === "deleted"} className=" bg-transparent hover:bg-transparent" >
                                 <Trash2 className="text-black mr-2 h-4 w-4" />
                             </Button>
                         </AlertDialogTrigger>

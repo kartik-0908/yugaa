@@ -8,9 +8,6 @@ import useSWR from "swr";
 import { getQueriesbyCategory } from "../../../actions/analytics";
 import { SkeletonComp } from "../home/peakInteraction";
 
-interface ChartThreeState {
-  series: number[];
-}
 const categories = [
   "Product inquiry",
   "Order issue",
@@ -22,9 +19,6 @@ const categories = [
   "Others"
 ];
 const colors = ["#3C50E0", "#6577F3", "#8FD0EF", "#0FADCF", "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A"];
-
-
-
 const options: ApexOptions = {
   chart: {
     fontFamily: "Satoshi, sans-serif",
@@ -67,17 +61,7 @@ const options: ApexOptions = {
     },
   ],
 };
-
 const ChartThree = ({ start, end, users }: { start: string, end: string, users: React.Key[] }) => {
-
-  useEffect(() => {
-    console.log(start)
-    console.log(end)
-    console.log(users)
-  }, [])
-  const [state, setState] = useState<ChartThreeState>({
-    series: [65, 34, 12, 56],
-  });
   const payload = {
     start,
     end,
@@ -96,14 +80,9 @@ const ChartThree = ({ start, end, users }: { start: string, end: string, users: 
       <SkeletonComp />
     )
   }
-  console.log(`chart the data is ${data}`)
-  
   if (error) {
-    return <div>Error from SWR...</div>
+    return <div>Please Refresh</div>
   }
-  // if(data){
-  //   setState({series: data})
-  // }
   const allZero = data?.every(value => value === 0);
 
   return (

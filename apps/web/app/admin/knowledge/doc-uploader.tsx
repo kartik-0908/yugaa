@@ -33,15 +33,13 @@ const FileSvgDraw = () => {
     );
 };
 
-const FileUploaderTest = () => {
-    const { user, isLoaded } = useUser()
-    if (!isLoaded) return null;
-    const [files, setFiles] = useState<File[] | null>(null);
+const FileUploaderTest = ({shopDomain}: {shopDomain: string}) => {
+    const [files] = useState<File[] | null>(null);
     function handleChange(files: File[] | null) {
         files?.map((file: File) => {
             const form = new FormData();
             form.append('file', file, file.name);
-            uploadDoc(form, user?.publicMetadata.shopDomain)
+            uploadDoc(form, shopDomain)
             console.log(file.name);
             console.log(file.type);
         });

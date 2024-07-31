@@ -7,24 +7,7 @@ import useSWR from "swr";
 import { getUserWorkload } from "../../../actions/analytics";
 import { SkeletonComp } from "../home/peakInteraction";
 
-interface ChartThreeState {
-  series: number[];
-}
-
-const colors = ["#3C50E0", "#6577F3", "#8FD0EF", "#0FADCF", "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A"];
-
-
-
 const WorkloadDistribution = ({ start, end, users }: { start: string, end: string, users: React.Key[] }) => {
-
-  useEffect(() => {
-    console.log(start)
-    console.log(end)
-    console.log(users)
-  }, [])
-  const [state, setState] = useState<ChartThreeState>({
-    series: [65, 34, 12, 56],
-  });
   const payload = {
     type: "userWorkloadDistribution",
     start,
@@ -102,7 +85,7 @@ const WorkloadDistribution = ({ start, end, users }: { start: string, end: strin
   };
 
   const latestseries = [{
-    name: 'Tickets Assigned',
+    name: 'Tickets',
     data: data.map((item: any) => item.workload)
   }];
 
