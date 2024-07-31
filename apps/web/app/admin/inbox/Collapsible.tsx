@@ -13,6 +13,7 @@ import AssignedTo from '../../../components/AssignedTo';
 import { fetchTicket, fetchTicketEventsbyId, getEmail, updateEscTicket } from '../../../actions/inbox';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../../../components/ui/select';
+import EmailRecCard from './unassigned/[id]/EmailRecCard';
 
 const RightPanelToggle = ({ id }: { id: string }) => {
     const { user, isLoaded } = useUser();
@@ -242,7 +243,7 @@ const RightPanelToggle = ({ id }: { id: string }) => {
                 )
             case 'EMAIL_RECEIVED':
                 return (
-                    <UserCard
+                    <EmailRecCard
                         message={event.EMAIL_RECEIVED.Email.text}
                         time={formatDate(event.createdAt)}
                         key={event.id}
