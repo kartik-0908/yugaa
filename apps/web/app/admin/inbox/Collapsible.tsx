@@ -14,6 +14,7 @@ import { fetchTicket, fetchTicketEventsbyId, getEmail, updateEscTicket } from '.
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../../../components/ui/select';
 import EmailRecCard from './unassigned/[id]/EmailRecCard';
+import { Spinner } from '@nextui-org/react';
 
 const RightPanelToggle = ({ id }: { id: string }) => {
     const { user, isLoaded } = useUser();
@@ -119,8 +120,8 @@ const RightPanelToggle = ({ id }: { id: string }) => {
         fetchData();
     }, [id, user?.publicMetadata.shopDomain]);
     if (events.length === 0) {
-        return <div>
-            Loading events
+        return <div className='h-full w-full flex justify-center items-center'>
+              <Spinner label="Loading..." color="warning" />
         </div>
     }
     if (category === '') {

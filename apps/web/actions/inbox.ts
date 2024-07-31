@@ -1,8 +1,6 @@
 "use server"
-
 import db from "../lib/db";
 import { pushAdminNotification, pushIndividualNoti } from "../lib/pubSub";
-
 export async function changeOperatorAvailability(userId: string[]) {
     console.log(`userId: ${userId}`);
     userId.forEach(async (id) => {
@@ -25,7 +23,6 @@ export async function changeOperatorAvailability(userId: string[]) {
         console.log(res)
     })
 }
-
 export async function updateOperatorAvailability(userId: string, available: boolean) {
     console.log(`userId: ${userId}`);
     const res = await db.user.update({
@@ -37,7 +34,6 @@ export async function updateOperatorAvailability(userId: string, available: bool
         }
     })
 }
-
 export async function updateAssignee(id: string, assigneeId: string, by: string, shopDomain: string) {
     let assigneeName;
     let byName;
@@ -95,7 +91,6 @@ export async function updateAssignee(id: string, assigneeId: string, by: string,
     }
 
 }
-
 export async function fetchTicketEventsbyId(id: string) {
     const ticketEvents = await db.ticketEvents.findMany({
         where: {
@@ -133,7 +128,6 @@ export async function fetchTicketEventsbyId(id: string) {
     })
     return ticketEvents;
 }
-
 export async function fetchTicket(id: string) {
     return await db.ticket.findUnique({
         where: {
@@ -250,8 +244,6 @@ export async function getDisplayID(id: string) {
     return ticket?.displayId
 
 }
-
-
 export async function updateEscTicket(id: string, field: string, value: string, by: string) {
     let byName = '';
     try {
@@ -338,8 +330,6 @@ export async function updateEscTicket(id: string, field: string, value: string, 
         console.log(error);
     }
 }
-
-
 export async function getEmail(shopDomain: string) {
     try {
         const resp = await db.shopifyInstalledShop.findUnique({
