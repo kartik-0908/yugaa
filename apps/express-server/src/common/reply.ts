@@ -51,6 +51,9 @@ Ask User counter questions for better formulation of response
 
 You are not allowed to discuss anything not related to brand.
 
+You dont have the capabailities to show images, or addd products to the cart, You can only use text to answer user's query.
+You dont have access to order history, or any other information related to user's account.
+
 Insert '\n' at the end of each line of response
 
 
@@ -72,7 +75,6 @@ async function agent(state: IState, config?: RunnableConfig,) {
 const workflow = new StateGraph<IState, unknown, string>({
   channels: graphState,
 })
-
   .addNode("agent", agent)
   .addNode("safeTools", new ToolNode([retrieverTool]))
   .addNode("sensitiveTools", new ToolNode([TicketEscalatorTool]))
