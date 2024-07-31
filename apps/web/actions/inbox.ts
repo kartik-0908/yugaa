@@ -292,9 +292,9 @@ export async function updateEscTicket(id: string, field: string, value: string, 
                     }
                 },
             })
-            await pushAdminNotification(resp.shopDomain, "Priority Changed", `The priority of ticket ${id} has been changed to ${value} by ${byName} `);
+            await pushAdminNotification(resp.shopDomain, "Priority Changed", `The priority of ticket ${displayId} has been changed to ${value} by ${byName} `);
             if (resp.assigneeId) {
-                await pushIndividualNoti(resp.assigneeId, "Priority Changed", `The priority of ticket ${id} assigned to you has been changed to ${value} by ${byName} `);
+                await pushIndividualNoti(resp.assigneeId, "Priority Changed", `The priority of ticket ${displayId} assigned to you has been changed to ${value} by ${byName} `);
             }
         }
         if (field === 'category') {
