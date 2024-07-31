@@ -370,3 +370,51 @@ export async function handleSubmit(state: any, formdata: FormData) {
     }
     return { status: "hey" }
 }
+
+export async function getUnansweredAiMessagesCount(
+    { shopDomain, start, end }:
+        {
+            shopDomain: string,
+            start: string,
+            end: string
+        }
+): Promise<number> {
+    const count = await db.aI_TO_USER.count({
+        where: {
+            unanswered: true,
+            createdAt: {
+                gte: start,
+                lte: end,
+            },
+            event: {
+                Ticket: {
+                    shopDomain: shopDomain
+                }
+            }
+        },
+    });
+    return count;
+}
+export async function getansweredAiMessagesCount({ shopDomain, start, end }:
+    {
+        shopDomain: string,
+        start: string,
+        end: string
+    }
+): Promise<number> {
+    const count = await db.aI_TO_USER.count({
+        where: {
+            unanswered: false,
+            createdAt: {
+                gte: start,
+                lte: end,
+            },
+            event: {
+                Ticket: {
+                    shopDomain: shopDomain
+                }
+            }
+        },
+    });
+    return count;
+}

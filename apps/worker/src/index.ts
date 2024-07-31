@@ -350,11 +350,20 @@ async function handleCreateEvent(data: any) {
                 pushIndividualNoti(assigneeId, "New Ticket Raised by AI", `A new ticket has been raised by AI and assigned to you`)
             }
             else {
+                await db.ticket.update({
+                    where: {
+                        id: id
+                    },
+                    data: {
+                        assigneeId: assigneeId,
+                        status: 'Unassigned',
+                    }
+                })
                 pushAdminNotification(shop?.shopDomain as string, "New Ticket Raised by AI", `A new ticket has been raised by AI. Please assign it to an operator`)
             }
             await prisma.$executeRaw`SELECT pg_advisory_xact_lock(1);`;
         }, {
-            isolationLevel: 'Serializable', // Ensuring the highest isolation level
+            isolationLevel: 'Serializable',
         });
     }
 }

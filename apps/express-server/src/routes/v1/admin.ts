@@ -244,7 +244,7 @@ router.get('/answered', async (req, res) => {
                         type: 'AI_TO_USER',
                         'AI_TO_USER': {
                             NOT: {
-                                unanswered: true
+                                unanswered: false
                             }
                         }
                     }
@@ -612,6 +612,9 @@ router.post('/completeChat', async (req, res) => {
                 AI_TO_USER: true,
                 USER_TO_AI: true,
                 createdAt: true
+            },
+            orderBy:{
+                createdAt: 'asc'
             }
         })
         res.json({

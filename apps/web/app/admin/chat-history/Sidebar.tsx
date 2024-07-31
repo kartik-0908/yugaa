@@ -5,6 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import Card from './Card';
 import { Pagination, Skeleton } from "@nextui-org/react";
 import Link from 'next/link';
+import { getChats } from '../../../actions/chat-history';
 
 type ChatsType = {
     id: string,
@@ -60,16 +61,17 @@ export default function ChatList() {
     }, [page, filter]);
 
     async function fetchChats() {
-        // console.log(user)
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/v1/admin/chat`, {
-            shopDomain: user?.publicMetadata.shopDomain,
+        const res = await getChats({
+            shopDomain: user?.publicMetadata.shopDomain as string,
             offset: (page - 1) * totalInSingle,
-            count: totalInSingle
+            count: totalInSingle,
+            filter: filter
         })
-        const { retcount } = res.data;
-        const { tickets } = res.data;
-        setTotal(retcount)
-        setChats(tickets)
+        const retcount = res?.retcount;
+        const tickets = res?.tickets;
+        if (retcount !== undefined) setTotal(retcount)
+        //@ts-ignore
+        if (tickets !== undefined) setChats(tickets)
         console.log(tickets)
 
     }
@@ -80,13 +82,13 @@ export default function ChatList() {
                 <div className="text-4xl font-semibold ml-8 ">
                     Tickets
                 </div>
-                <select
+                {/* <select onChange={(e) => setFilter(e.target.value)}
                     className="border border-gray-300 rounded px-2 py-1"
                 >
                     <option value="all">All</option>
                     <option value="unanswered">Unanswered</option>
                     <option value="answered">Answered</option>
-                </select>
+                </select> */}
             </div>
             <div className="content  mb-6 h-[80%] overflow-y-auto">
                 <div className="overflow-y-auto">
