@@ -1,19 +1,15 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { Tooltip } from "@nextui-org/react";
 import Element from "./Card";
 import { menuItems } from "./items";
 
 const MemberSidebar = () => {
-  const pathname = usePathname();
 
   return (
     <>
-      <div className="no-scrollbar flex flex-col p-2  overflow-y-auto flex-grow">
+      <div className="no-scrollbar flex flex-col p-2  overflow-y-auto flex-grow w-full">
         <nav className="mt-5">
           <div>
             <ul className="mb-6 flex flex-col gap-1.5">

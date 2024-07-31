@@ -1,12 +1,11 @@
 import React, { } from "react";
-import { usePathname } from "next/navigation";
-import { menuItems } from "./items";
+import { menuItems } from "./memitems";
 import Element from "./Card";
 
 const MemberinboxSidebar = () => {
   return (
     <>
-      <div className="no-scrollbar flex flex-col p-2 overflow-y-auto flex-grow">
+      <div className="no-scrollbar flex flex-col p-2 overflow-y-auto flex-grow min-w-[180px]">
         <nav className="mt-5">
           <div>
             <ul className="flex flex-col gap-1.5">
@@ -18,9 +17,6 @@ const MemberinboxSidebar = () => {
                 </li>
               ))}
             </ul>
-            <p className="text-[#636E7B] font-bold text-xs mt-4 mb-2">
-              Operator Restrictions
-            </p>
           </div>
         </nav>
       </div>
