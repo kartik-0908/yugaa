@@ -5,7 +5,7 @@ import AiCard from './unassigned/[id]/AiCard';
 import UserCard from './unassigned/[id]/UserCard';
 import MessageForm from './MessageForm';
 import { useUser } from '@clerk/nextjs';
-import { generate, generateSum, generatelatestSum, suggestResp } from '../../../actions/ai';
+import { generate, generateSum, generatelatestSum } from '../../../actions/ai';
 import { readStreamableValue } from 'ai/rsc';
 import TextMessage from '../../../components/copy';
 import { formatDate } from '../../../common/function';
@@ -72,7 +72,7 @@ const RightPanelToggle = ({ id }: { id: string }) => {
         async function fetchData() {
             const startTime = Date.now();
             console.log(`[${new Date().toISOString()}] Starting data fetch`);
-    
+
             try {
                 // Fetch all data in parallel
                 const [events, ticket, emails] = await Promise.all([
@@ -80,9 +80,9 @@ const RightPanelToggle = ({ id }: { id: string }) => {
                     fetchTicket(id),
                     getEmail(user?.publicMetadata.shopDomain as string)
                 ]);
-    
+
                 console.log(`[${new Date().toISOString()}] All data fetched in ${Date.now() - startTime}ms`);
-    
+
                 // Process events
                 events.forEach((event: any) => {
                     if (event.type === 'ESCALATED') {
@@ -93,29 +93,29 @@ const RightPanelToggle = ({ id }: { id: string }) => {
                         setDisplayId(event.Ticket.displayId);
                     }
                 });
-    
+
                 // Process ticket
                 if (ticket !== null) {
-                    if(ticket.category !== null)setCategory(ticket.category );
-                    if(ticket.status !== null)setStatus(ticket.status );
-                    if(ticket.priority !== null)setPriority(ticket.priority );
-                    if(ticket.assigneeId !== null)setAssigneeId(ticket.assigneeId );
-                    if(ticket.createdAt !== null)setCreationTime(ticket.createdAt );
+                    if (ticket.category !== null) setCategory(ticket.category);
+                    if (ticket.status !== null) setStatus(ticket.status);
+                    if (ticket.priority !== null) setPriority(ticket.priority);
+                    if (ticket.assigneeId !== null) setAssigneeId(ticket.assigneeId);
+                    if (ticket.createdAt !== null) setCreationTime(ticket.createdAt);
                 }
-    
+
                 // Set state
                 setEvents(events);
                 if (emails !== null && emails !== undefined) {
                     setEmails(emails);
                 }
-    
+
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
-    
+
             console.log(`[${new Date().toISOString()}] Total execution time: ${Date.now() - startTime}ms`);
         }
-    
+
         fetchData();
     }, [id, user?.publicMetadata.shopDomain]);
     if (events.length === 0) {
@@ -331,19 +331,13 @@ const RightPanelToggle = ({ id }: { id: string }) => {
         }
     }
 
-    async function suggest(message: string) {
-        setIsRightPanelVisible(true)
-        setActiveTab('Tab2')
-        setCurrentAiHeading('Suggested Response')
-        setCurrentAiMessage('')
-        if (message) {
-            const { output } = await suggestResp(message)
-            for await (const delta of readStreamableValue(output)) {
-                console.log(delta)
-                setCurrentAiMessage(curr => `${curr}${delta}`);
-            }
-        }
-    }
+    // async function suggest() {
+    //     setIsRightPanelVisible(true)
+    //     setActiveTab('Tab2')
+    //     setCurrentAiHeading('Suggested Response')
+    //     setCurrentAiMessage('')
+    //     await suggestResp(id, user?.publicMetadata.shopDomain as string)
+    // }
 
     async function completeSum(ticketId: string) {
         // console.log(key)
@@ -379,7 +373,6 @@ const RightPanelToggle = ({ id }: { id: string }) => {
                         onMessageSend={handleMessageSend}
                         aiChatassistance={aiChatassistance}
                         latestSum={latestSum}
-                        suggest={suggest}
                         completeSum={completeSum}
                     />
                 </div>

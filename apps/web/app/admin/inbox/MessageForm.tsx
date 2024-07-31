@@ -14,12 +14,11 @@ interface MessageFormProps {
     subject: string;
     onMessageSend: (message: string, status: string) => void;
     aiChatassistance: (message: string) => void;
-    suggest: (message: string) => void;
     latestSum: (ticketId: string) => void;
     completeSum: (ticketId: string) => void;
 }
 
-const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticketId, subject, onMessageSend, aiChatassistance, latestSum, suggest, completeSum }) => {
+const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticketId, subject, onMessageSend, aiChatassistance, latestSum, completeSum }) => {
     const [currentSendButton, setSendButton] = useState<number>(0);
     const [currentSendEmail, setSendEmail] = useState<string>(emails[0] || "ugu");
     const [message, setMessage] = useState<string>("");
@@ -131,7 +130,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent className='bg-white'>
                                             <DropdownMenuItem onClick={() => aiChatassistance(message)} className='m-0' key="new">AI Chat Assistance</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => suggest(message)} className='m-0' key="copy"> Suggest Response</DropdownMenuItem>
+                                            {/* <DropdownMenuItem onClick={() => suggest(message)} className='m-0' key="copy"> Suggest Response</DropdownMenuItem> */}
                                             <DropdownMenuItem onClick={() => latestSum(ticketId)} className='m-0' key="edit">Latest Summary</DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => completeSum(ticketId)} className='m-0' key="delete">Complete Summary</DropdownMenuItem>
                                         </DropdownMenuContent>
