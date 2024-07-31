@@ -39,3 +39,15 @@ export function timeDifference(date: Date): string {
         return `${days} d`;
     }
 }
+
+export function formatDuration(seconds: number): string {
+    if (seconds < 60) {
+      return `${Math.ceil(seconds)}s`;
+    } else if (seconds < 3600) {
+      const minutes = Math.floor(seconds / 60);
+      return `${minutes}m`;
+    } else {
+      const hours = Math.floor(seconds / 3600);
+      return `${hours}h`;
+    }
+  }

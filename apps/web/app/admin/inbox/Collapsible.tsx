@@ -81,35 +81,27 @@ const RightPanelToggle = ({ id }: { id: string }) => {
                     fetchTicket(id),
                     getEmail(user?.publicMetadata.shopDomain as string)
                 ]);
-
                 console.log(`[${new Date().toISOString()}] All data fetched in ${Date.now() - startTime}ms`);
 
                 // Process events
                 events.forEach((event: any) => {
-                    if (event.type === 'ESCALATED') {
-                        setSubject(event.ESCALATED.subject);
-                        setEmail(event.ESCALATED.userEmail);
-                    }
                     if (event.Ticket.displayId) {
                         setDisplayId(event.Ticket.displayId);
                     }
                 });
-
-                // Process ticket
                 if (ticket !== null) {
                     if (ticket.category !== null) setCategory(ticket.category);
                     if (ticket.status !== null) setStatus(ticket.status);
                     if (ticket.priority !== null) setPriority(ticket.priority);
                     if (ticket.assigneeId !== null) setAssigneeId(ticket.assigneeId);
                     if (ticket.createdAt !== null) setCreationTime(ticket.createdAt);
+                    if (ticket.subject !== null) setSubject(ticket.subject);
+                    if(ticket.userEmail !== null) setEmail(ticket.userEmail);
                 }
-
-                // Set state
                 setEvents(events);
                 if (emails !== null && emails !== undefined) {
                     setEmails(emails);
                 }
-
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -121,7 +113,7 @@ const RightPanelToggle = ({ id }: { id: string }) => {
     }, [id, user?.publicMetadata.shopDomain]);
     if (events.length === 0) {
         return <div className='h-full w-full flex justify-center items-center'>
-              <Spinner label="Loading..." color="warning" />
+            <Spinner label="Loading..." color="warning" />
         </div>
     }
     if (category === '') {
@@ -271,7 +263,7 @@ const RightPanelToggle = ({ id }: { id: string }) => {
                 let time = ` at ${formatDate(event.createdAt)}`;
                 switch (event.type) {
                     case 'DISPLAY_TAG':
-                        message = event.DISPLAY_TAG.message;
+                        message = event.DISPLAY_TAG[0].message;
                         break;
                     default:
                         message = `Unknown event: ${event.type}`;

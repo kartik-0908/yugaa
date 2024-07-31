@@ -39,33 +39,18 @@ export default function ChatList({ status }: { status: string }) {
         }
     };
     const getLatestEventInfo = (chat: any) => {
-        // console.log('chat', chat);
         if (!chat.events || chat.events.length === 0) {
-            // console.log('No events found for chat', chat);
-            return { message: 'No events', time: chat.createdAt, name: chat.customerEmail };
+            return { message: 'No events' };
         }
-
         const latestEvent = chat.events[0];
         let message = latestEvent.type;
-        let time = latestEvent.createdAt || chat.createdAt;
-        let name = chat.customerEmail;
-
-        chat.events.map((event: any) => {
-            if (event.type === 'ESCALATED') {
-                message = 'Ticket Escalated';
-                name = event.ESCALATED?.name;
-            }
-        });
-
-        if (latestEvent.type === 'ESCALATED' && latestEvent.ESCALATED) {
-            // console.log('ESCALATED EVENT FOUND', latestEvent.ESCALATED);
-            message = 'Ticket Escalated';
+        if (latestEvent.type === 'DISPLAY_TAG' && latestEvent.DISPLAY_TAG) {
+            message = latestEvent.DISPLAY_TAG[0].message;
         }
-        else {
-            message = latestEvent?.Email?.text || ""
+        if (latestEvent.type === 'AI_TO_USER') {
+            message = latestEvent.AI_TO_USER.message;
         }
-
-        return { message, time, name };
+        return message;
     };
     const totalInSingle = 10;
 
@@ -94,10 +79,11 @@ export default function ChatList({ status }: { status: string }) {
                 <div className="w-full h-[90%] rounded-sm  pt-0 flex flex-col">
                     <div className=" overflow-y-auto">
                         {chats?.map((chat: any) => {
-                            const { message, time, name } = getLatestEventInfo(chat);
+                            console.log(chat)
+                            const message  = getLatestEventInfo(chat);
                             return (
                                 <Link key={chat.id} className='text-black' href={`/admin/inbox/${getStatusPath(status)}/${chat.id}`}>
-                                    <Card id={chat.id} messages={message} time={time} name={name} />
+                                    <Card id={chat.id} messages={message} time={chat.events[0].createdAt} name={chat.userName} />
                                 </Link>
                             );
                         })}

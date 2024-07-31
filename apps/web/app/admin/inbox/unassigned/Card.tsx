@@ -18,23 +18,16 @@ function formatTimeDifference(timestamp: string): string {
         return `${days}d`;
     }
 }
-function toPascalCase(str: string): string {
-    return str
-        .toLowerCase()
-        .replace(new RegExp(/[-_]+/, 'g'), ' ')
-        .replace(new RegExp(/[^\w\s]/, 'g'), '')
-        .replace(
-            new RegExp(/\s+(.)(\w*)/, 'g'),
-            ($1, $2, $3) => `${$2.toUpperCase() + $3}`
-        )
-        .replace(new RegExp(/\w/), s => s.toUpperCase());
-}
 
 function truncateString(str: string, numWords: number = 5): string {
-    // Split the string into words
+    if(str === null || str === undefined) {
+        return "";
+    }
+    if(str.length <= numWords) {
+        return str;
+    }
     const words = str.split(/\s+/);
 
-    // If the string has fewer words than the limit, return the whole string
     if (words.length <= numWords) {
         return str;
     }

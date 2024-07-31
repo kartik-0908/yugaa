@@ -81,11 +81,7 @@ export default function Analytics() {
               }}
               renderValue={(items: any) => {
                 return (
-                  <div className="flex flex-wrap gap-2">
-                    {items.map((item: any) => (
-                      <Chip key={item.key}>{item.textValue}</Chip>
-                    ))}
-                  </div>
+                  <ItemList items={items} />
                 );
               }}
             >
@@ -125,3 +121,18 @@ export default function Analytics() {
   )
 };
 
+
+const ItemList = ({ items }: any) => {
+  const maxVisibleItems = 2;
+  const visibleItems = items.slice(0, maxVisibleItems);
+  const hasMoreItems = items.length > maxVisibleItems;
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {visibleItems.map((item: any) => (
+        <Chip key={item.key}>{item.textValue}</Chip>
+      ))}
+      {hasMoreItems && <span>...</span>}
+    </div>
+  );
+};

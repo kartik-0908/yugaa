@@ -2,7 +2,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import db from "../../../../lib/db";
 
-export async function post(req: Request) {
+export async function POST(req: Request) {
     const body = await req.json()
     const { id } = body
     try {

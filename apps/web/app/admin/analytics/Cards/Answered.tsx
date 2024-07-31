@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { Card, CardHeader, CardBody, Skeleton } from "@nextui-org/react";
 import { getFcrPercentage, getMissed, getTransferRate, getUnansweredAiMessagesCount, getansweredAiMessagesCount } from "../../../../actions/analytics";
 import React from "react";
+import { formatDuration } from "../../../../common/function";
 
 function SkeletonComp() {
     return (
@@ -170,7 +171,7 @@ export function TimeSaved({ start, end }: { start: string, end: string }) {
                     </svg>
                 </div>
                 <div>
-                    <p className="text-3xl text-default-500 font-bold">{data.count}</p>
+                    <p className="text-3xl text-default-500 font-bold">{formatDuration(data.count)}</p>
                 </div>
             </CardHeader>
             <CardBody>
@@ -205,18 +206,6 @@ export function AverageSession({ start, end }: { start: string, end: string }) {
     if (error) {
         return <div>Error from SWR...</div>
     }
-    let finalAnswer = data.avgSession;
-    let unit;
-    if (finalAnswer >= 3600) {
-        finalAnswer = finalAnswer / 3600;
-        unit = 'hr'
-    }
-    else if (finalAnswer >= 60) {
-        finalAnswer = finalAnswer / 60;
-        unit = "min";
-    }
-    finalAnswer = Math.floor(finalAnswer)
-
     return (
         <Card className="">
             <CardHeader className="flex justify-between items-center">
@@ -246,7 +235,7 @@ export function AverageSession({ start, end }: { start: string, end: string }) {
                     </svg>
                 </div>
                 <div>
-                    <p className="text-3xl text-default-500 font-bold">{finalAnswer} {unit}</p>
+                    <p className="text-3xl text-default-500 font-bold">{formatDuration(data.avgSession)} </p>
                 </div>
             </CardHeader>
             <CardBody>
