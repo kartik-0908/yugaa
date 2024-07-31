@@ -37,6 +37,18 @@ export async function updateOperatorAvailability(userId: string, available: bool
 export async function updateAssignee(id: string, assigneeId: string, by: string, shopDomain: string) {
     let assigneeName;
     let byName;
+    const user = await db.user.findUnique({
+        where: {
+            id: assigneeId
+        }
+    })
+    const user2 = await db.user.findUnique({
+        where: {
+            id: by
+        }
+    })
+    assigneeName = user?.firstName
+    byName = user2?.firstName
     if (assigneeId === "Unassigned") {
         await db.ticket.update({
             where: {
@@ -65,26 +77,17 @@ export async function updateAssignee(id: string, assigneeId: string, by: string,
                 }
             })
             assigneeName = resp?.firstName + " " + resp?.lastName;
-            const result = await tx.ticketEvents.create({
+            await tx.ticketEvents.create({
                 data: {
                     ticketId: id,
-                    type: 'ASSIGNE_CHANGED',
-                    ASSIGNE_CHANGED: {
+                    type: 'DISPLAY_TAG',
+                    DISPLAY_TAG: {
                         create: {
-                            newid: assigneeId,
-                            byid: by
+                            message: `Assigned to ${assigneeName} by ${byName}`,
                         }
                     }
                 },
-                include: {
-                    ASSIGNE_CHANGED: {
-                        include: {
-                            by: true
-                        }
-                    }
-                }
             })
-            byName = result.ASSIGNE_CHANGED?.by.firstName
         })
         await pushAdminNotification(shopDomain, "Assignee Changed", `The assignee for ticket ${id} has been changed to ${assigneeName} by ${byName}`)
         await pushIndividualNoti(assigneeId, "Assignee Changed", `You have been assigned to ticket ${id} by ${byName}`)
@@ -107,7 +110,6 @@ export async function fetchTicketEventsbyId(id: string) {
                 }
             },
             createdAt: true,
-            ESCALATED: true,
             AI_TO_USER: true,
             USER_TO_AI: true,
             EMAIL_RECEIVED: {
@@ -120,10 +122,7 @@ export async function fetchTicketEventsbyId(id: string) {
                     Email: true
                 }
             },
-            ASSIGNE_CHANGED: true,
-            CATEGORY_CHANGED: true,
-            PRIORITY_CHANGED: true,
-            STATUS_CHANGED: true,
+            DISPLAY_TAG: true
         }
     })
     return ticketEvents;
@@ -154,7 +153,6 @@ export async function getEscTicketWithStatus(shopDomain: string, status: string,
                 select: {
                     type: true,
                     createdAt: true,
-                    ESCALATED: true,
                     EMAIL_RECEIVED: {
                         select: {
                             Email: true
@@ -173,11 +171,6 @@ export async function getEscTicketWithStatus(shopDomain: string, status: string,
         where: {
             shopDomain: shopDomain,
             status: status,
-            events: {
-                some: {
-                    type: 'ESCALATED'
-                }
-            }
         }
     })
     return { total: total, currentTickets: escalatedTicket }
@@ -202,7 +195,6 @@ export async function getEscTicketWithStatusandId(shopDomain: string, status: st
                 select: {
                     type: true,
                     createdAt: true,
-                    ESCALATED: true,
                     EMAIL_RECEIVED: {
                         select: {
                             Email: true
@@ -222,11 +214,6 @@ export async function getEscTicketWithStatusandId(shopDomain: string, status: st
             shopDomain: shopDomain,
             status: status,
             assigneeId: userId,
-            events: {
-                some: {
-                    type: 'ESCALATED'
-                }
-            }
         }
     })
     return { total: total, currentTickets: escalatedTicket }
@@ -246,6 +233,15 @@ export async function getDisplayID(id: string) {
 }
 export async function updateEscTicket(id: string, field: string, value: string, by: string) {
     let byName = '';
+    const displayId = await getDisplayID(id);
+    const user = await db.user.findUnique({
+        where: {
+            id: by
+        }
+    })
+    if (user !== null && user.firstName !== null) {
+        byName = user?.firstName;
+    }
     try {
         const resp = await db.ticket.update({
             where: {
@@ -259,53 +255,31 @@ export async function updateEscTicket(id: string, field: string, value: string, 
             const res = await db.ticketEvents.create({
                 data: {
                     ticketId: id,
-                    type: "STATUS_CHANGED",
-                    STATUS_CHANGED: {
+                    type: "DISPLAY_TAG",
+                    DISPLAY_TAG: {
                         create: {
-                            byid: by,
-                            newStatus: value
+                            message: `Status  has been changed to ${value} by ${byName} `,
                         }
                     }
                 },
-                include: {
-                    STATUS_CHANGED: {
-                        include: {
-                            by: true
-                        }
-                    }
-                }
             })
-            if (typeof res.STATUS_CHANGED?.by?.firstName !== "undefined" && res.STATUS_CHANGED?.by?.firstName !== null) {
-                byName = res?.STATUS_CHANGED?.by?.firstName
-            }
-            await pushAdminNotification(resp.shopDomain, "Ticket Status", `Status of ticket ${id} has been changed to ${value} by ${byName} `);
+            await pushAdminNotification(resp.shopDomain, "Ticket Status", `Status of ticket ${displayId} has been changed to ${value} by ${byName} `);
             if (resp.assigneeId) {
-                await pushIndividualNoti(resp.assigneeId, "Ticket Status", `Status of ticket ${id} assigned to you has been changed to ${value} by ${byName} `);
+                await pushIndividualNoti(resp.assigneeId, "Ticket Status", `Status of ticket ${displayId} assigned to you has been changed to ${value} by ${byName} `);
             }
         }
         if (field === "priority") {
             const res = await db.ticketEvents.create({
                 data: {
                     ticketId: id,
-                    type: "PRIORITY_CHANGED",
-                    PRIORITY_CHANGED: {
+                    type: "DISPLAY_TAG",
+                    DISPLAY_TAG: {
                         create: {
-                            byid: by,
-                            newpriority: value
+                            message: `Priority has been changed to ${value} by ${byName} `,
                         }
                     }
                 },
-                include: {
-                    PRIORITY_CHANGED: {
-                        include: {
-                            by: true
-                        }
-                    }
-                }
             })
-            if (typeof res.PRIORITY_CHANGED?.by?.firstName !== "undefined" && res.PRIORITY_CHANGED?.by?.firstName !== null) {
-                byName = res?.PRIORITY_CHANGED?.by?.firstName
-            }
             await pushAdminNotification(resp.shopDomain, "Priority Changed", `The priority of ticket ${id} has been changed to ${value} by ${byName} `);
             if (resp.assigneeId) {
                 await pushIndividualNoti(resp.assigneeId, "Priority Changed", `The priority of ticket ${id} assigned to you has been changed to ${value} by ${byName} `);
@@ -315,11 +289,10 @@ export async function updateEscTicket(id: string, field: string, value: string, 
             await db.ticketEvents.create({
                 data: {
                     ticketId: id,
-                    type: "CATEGORY_CHANGED",
-                    CATEGORY_CHANGED: {
+                    type: "DISPLAY_TAG",
+                    DISPLAY_TAG: {
                         create: {
-                            byid: by,
-                            newcategory: value
+                            message: `Category has been changed to ${value} by ${byName} `,
                         }
                     }
                 },

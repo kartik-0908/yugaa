@@ -11,8 +11,6 @@ import { pushAdminNotification, pushIndividualNoti } from "./common/pubsubPublis
 import { addDocs, deletDocs } from "./fetchDocs";
 import { addLinks, deleteLinks } from "./fetchLinks";
 const { LLMChain } = require("langchain/chains");
-
-
 const pubSubClient = new PubSub({
     projectId: "yugaa-424705",
     credentials: {
@@ -21,10 +19,7 @@ const pubSubClient = new PubSub({
     },
 });
 
-
-
 async function startWorker() {
-
     try {
         console.log("Worker connected to Pub/Sub.");
         const subscriptions = [
@@ -36,7 +31,6 @@ async function startWorker() {
             { name: 'process-doc-sub', handler: handleProcessDoc },
             { name: 'process-url-sub', handler: handleProcessUrl },
         ];
-
         console.log(`Waiting for messages in subscriptions: ${subscriptions.map(sub => sub.name).join(', ')}...`);
         subscriptions.forEach(sub => {
             const subscription = pubSubClient.subscription(sub.name);
@@ -50,12 +44,10 @@ async function startWorker() {
                     message.nack();
                 }
             });
-
             subscription.on('error', error => {
                 console.error(`Error in subscription ${sub.name}:`, error);
             });
         });
-
     }
     catch (error) {
         console.error("Failed to connect to Pub/Sub", error);
@@ -306,14 +298,10 @@ async function handleCreateEvent(data: any) {
             await db.ticketEvents.create({
                 data: {
                     ticketId: id,
-                    type: 'ESCALATED',
-                    'ESCALATED': {
-                        create: {
-                            userEmail: meta.userEmail,
-                            createdAt: new Date(),
-                            name: meta.name,
-                            category: meta.category,
-                            subject: subject,
+                    type: 'DISPLAY_TAG',
+                    DISPLAY_TAG:{
+                        create:{
+                            message: 'Ticket Escalated',
                         }
                     }
                 }
@@ -324,6 +312,9 @@ async function handleCreateEvent(data: any) {
                 },
                 data: {
                     category: meta.category,
+                    userEmail: meta.userEmail,
+                    userName: meta.name,
+                    subject: subject,
                 }
             })
             if (assigneeId) {

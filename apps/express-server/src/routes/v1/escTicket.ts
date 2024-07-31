@@ -1,23 +1,11 @@
 import { Router } from 'express';
 import { db } from '../../common/db';
-import { pushAdminNotification, pushIndividualNoti } from '../../common/pubsubPublisher';
-const sgMail = require('@sendgrid/mail');
 const express = require('express');
 const router = Router();
 
 router.use(express.json())
 
-// router.post('/update', async (req, res) => {
-//    
-//         res.status(200).json({ message: 'Email sent successfully' });
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error sending email' });
-//     }
-// })
-
 router.post('/get-members', async (req, res) => {
-    const { body } = req
-    const { shopDomain } = body
     console.log(req.body)
     res.json({
         "message": "ok",

@@ -62,7 +62,7 @@ export const getPreviousMessages = async (ticketId: string) => {
             where: {
                 ticketId,
                 type:{
-                    in:["AI_TO_USER","USER_TO_AI","DISPLAY_INPUT","DISPLAY_PROD"]
+                    in:["AI_TO_USER","USER_TO_AI"]
                 }
             },
             orderBy: {

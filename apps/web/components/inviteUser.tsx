@@ -4,6 +4,7 @@ import { Button, Input, Select, SelectItem, Tooltip } from "@nextui-org/react";
 import { Snippet } from "@nextui-org/react";
 import { useUser } from "@clerk/nextjs";
 import { Info } from "lucide-react";
+import NextLoader from "./Loader";
 
 interface Member {
     name: string;
@@ -26,7 +27,7 @@ type MembersCompType = {
 export default function MembersComponent({ memberLink, adminLink, users }: MembersCompType) {
     const { user, isLoaded } = useUser()
     if (!isLoaded) {
-        return <div>Loading...</div>
+        return <NextLoader /> 
     }
     const [members, setMembers] = useState<Member[]>([]);
     const [showRemoveModal, setShowRemoveModal] = useState(false);
@@ -38,13 +39,7 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
 
     useEffect(() => {
         const fetchMembers = async () => {
-            // console.log(memberLink)
-            // console.log(adminLink)
-            // console.log(users)
-
             console.log(user?.emailAddresses[0]?.emailAddress)
-
-
             if (memberLink) {
                 setMemberInviteLink(`${process.env.NEXT_PUBLIC_APP_URL}/verify/invite?member=${memberLink}`)
             }
@@ -62,7 +57,6 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                         email: users[i]?.email || "",
                     });
                 }
-                // console.log(allMembers)
                 setMembers(allMembers);
             }
         };
@@ -71,6 +65,7 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
 
     const handleRoleChange = (index: number, newRole: string) => {
         const updatedMembers = [...members];
+        console.log(updatedMembers[index])
         //@ts-ignore
         updatedMembers[index].role = newRole;
         setMembers(updatedMembers);
@@ -134,7 +129,7 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                                     <div>
                                         <Tooltip
                                             classNames={{
-                                                base:"max-w-[150px]"
+                                                base: "max-w-[150px]"
                                             }}
                                             placement="right-end"
                                             content="You can’t remove an admin directly. You need to make them member first"
@@ -153,6 +148,7 @@ export default function MembersComponent({ memberLink, adminLink, users }: Membe
                                 <td className="px-6 py-4">{member.name}</td>
                                 <td className="px-6 py-4">
                                     <Select
+
                                         isDisabled={member.email === user?.emailAddresses[0]?.emailAddress}
                                         defaultSelectedKeys={[member.role]}
                                         className="max-w-xs pl-4 pr-4"

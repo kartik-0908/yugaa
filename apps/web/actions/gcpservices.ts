@@ -1,9 +1,6 @@
 "use server"
 import { Storage } from "@google-cloud/storage";
 import db from "../lib/db";
-import { StreamTextResult } from "ai";
-
-
 
 export async function uploadLogo(formData: FormData, shopDomain: any): Promise<string> {
     const file = formData.get("file") as File;

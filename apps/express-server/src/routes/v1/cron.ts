@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { db } from '../../common/db';
 import { pubslishDoc, pubslishUrl } from '../../common/pubsubPublisher';
-const sgMail = require('@sendgrid/mail');
 const express = require('express');
 const router = Router();
 

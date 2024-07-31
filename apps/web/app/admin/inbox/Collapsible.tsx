@@ -269,28 +269,9 @@ const RightPanelToggle = ({ id }: { id: string }) => {
             default:
                 let message = '';
                 let time = ` at ${formatDate(event.createdAt)}`;
-
                 switch (event.type) {
-                    case 'AI_TICKET_CREATED':
-                        message = 'AI Ticket created';
-                        break;
-                    case 'STATUS_CHANGED':
-                        message = `Status changed to ${event.STATUS_CHANGED.newStatus}`;
-                        break;
-                    case 'PRIORITY_CHANGED':
-                        message = `Priority changed to ${event.PRIORITY_CHANGED.newpriority}`;
-                        break;
-                    case 'CATEGORY_CHANGED':
-                        message = `Category changed to ${event.CATEGORY_CHANGED.newcategory}`;
-                        break;
-                    case 'ASSIGNE_CHANGED':
-                        message = `Assigned to ${event.ASSIGNE_CHANGED.newId}`;
-                        break;
-                    case 'REOPENED':
-                        message = 'Ticket reopened';
-                        break;
-                    case 'ESCALATED':
-                        message = `Ticket escalated`;
+                    case 'DISPLAY_TAG':
+                        message = event.DISPLAY_TAG.message;
                         break;
                     default:
                         message = `Unknown event: ${event.type}`;
@@ -331,14 +312,6 @@ const RightPanelToggle = ({ id }: { id: string }) => {
             }
         }
     }
-
-    // async function suggest() {
-    //     setIsRightPanelVisible(true)
-    //     setActiveTab('Tab2')
-    //     setCurrentAiHeading('Suggested Response')
-    //     setCurrentAiMessage('')
-    //     await suggestResp(id, user?.publicMetadata.shopDomain as string)
-    // }
 
     async function completeSum(ticketId: string) {
         // console.log(key)

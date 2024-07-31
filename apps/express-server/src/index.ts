@@ -69,21 +69,20 @@ io.on('connection', (socket) => {
         const { ticketId } = data;
         console.log(`Fetching previous messages for ticket ID: ${ticketId}`);
         const events = await db.ticketEvents.findMany({
-            where:{
-                ticketId:ticketId
+            where: {
+                ticketId: ticketId
             },
-            orderBy:{
-                createdAt:'asc'
+            orderBy: {
+                createdAt: 'asc'
             },
-            select:{
-                type:true,
-                AI_TO_USER:true,
-                USER_TO_AI:true,
-                ESCALATED: true,
-                createdAt:true
+            select: {
+                type: true,
+                AI_TO_USER: true,
+                USER_TO_AI: true,
+                createdAt: true
             }
         })
-       
+
         socket.emit('previousMessages', { events });
     });
     socket.on('create-ticket', async (data) => {
@@ -103,10 +102,10 @@ io.on('connection', (socket) => {
                     shopDomain: shopDomain,
                     events: {
                         create: {
-                            type: 'AI_TICKET_CREATED',
-                            AI_TICKET_CREATED: {
+                            type: 'DISPLAY_TAG',
+                            DISPLAY_TAG: {
                                 create: {
-                                    ticketId,
+                                    message: "Ticket Created",
                                 }
                             }
                         }

@@ -1,13 +1,7 @@
 import { Router } from 'express';
 import { db } from '../../common/db';
-import { of } from 'svix/dist/openapi/rxjsStub';
-import { all } from 'axios';
 const express = require('express');
 const router = Router();
-const multer = require('multer');
-const upload = multer({
-    storage: multer.memoryStorage(),
-});
 
 router.use(express.json())
 router.post('/verify', async (req, res) => {

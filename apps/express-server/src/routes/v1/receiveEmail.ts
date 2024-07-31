@@ -1,45 +1,40 @@
-import { Storage } from "@google-cloud/storage";
-import { randomUUID } from "crypto";
 import { Router } from "express";
 import { db } from "../../common/db";
-const multipart = require('parse-multipart-data');
-const bodyParser = require('body-parser');
-const { simpleParser } = require('mailparser');
 const multer = require('multer')
 const upload = multer()
 
 const router = Router();
 
-async function uploadFileToGCS(filename: string, bytes: any) {
-    const storage = new Storage({
-        projectId: process.env.PROJECT_ID,
-        credentials: {
-            client_email: process.env.CLIENT_EMAIL,
-            private_key: process.env.PRIVATE_KEY,
-        },
-    });
-    const bucket = storage.bucket(process.env.EMAIL_BUCKET_NAME || "");
-    const blob = bucket.file(filename);
-    const buffer = Buffer.from(bytes);
+// async function uploadFileToGCS(filename: string, bytes: any) {
+//     const storage = new Storage({
+//         projectId: process.env.PROJECT_ID,
+//         credentials: {
+//             client_email: process.env.CLIENT_EMAIL,
+//             private_key: process.env.PRIVATE_KEY,
+//         },
+//     });
+//     const bucket = storage.bucket(process.env.EMAIL_BUCKET_NAME || "");
+//     const blob = bucket.file(filename);
+//     const buffer = Buffer.from(bytes);
 
-    try {
-        await new Promise((resolve, reject) => {
-            const blobStream = blob.createWriteStream({
-                resumable: false,
-                metadata: {
-                    cacheControl: 'no-cache',
-                },
-            });
-            blobStream
-                .on("error", (err) => reject(err))
-                .on("finish", () => resolve(true));
-            blobStream.end(buffer);
-        });
-        console.log(`${filename} uploaded`);
-    } catch (error) {
-        console.error(`Failed to upload ${filename}:`, error);
-    }
-}
+//     try {
+//         await new Promise((resolve, reject) => {
+//             const blobStream = blob.createWriteStream({
+//                 resumable: false,
+//                 metadata: {
+//                     cacheControl: 'no-cache',
+//                 },
+//             });
+//             blobStream
+//                 .on("error", (err) => reject(err))
+//                 .on("finish", () => resolve(true));
+//             blobStream.end(buffer);
+//         });
+//         console.log(`${filename} uploaded`);
+//     } catch (error) {
+//         console.error(`Failed to upload ${filename}:`, error);
+//     }
+// }
 
 router.post('/', upload.any(), async (req: any, res: any) => {
     const body = req.body

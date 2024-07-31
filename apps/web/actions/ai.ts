@@ -1,27 +1,21 @@
 'use server';
 import { PrismaClient } from '@repo/db';
 const db = new PrismaClient();
-import { generateText, streamText, tool } from 'ai';
+import { streamText, } from 'ai';
 import { azure } from '@ai-sdk/azure';
 import { createStreamableValue } from 'ai/rsc';
 require('dotenv').config();
-import { RunnableConfig } from "@langchain/core/runnables";
-import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
-import { retrieverTool } from "./tools/retriever";
-import { ChatOpenAI } from "@langchain/openai";
-import { z } from 'zod';
-import { BaseMessage } from '@langchain/core/messages';
+// import { ChatOpenAI } from "@langchain/openai";
 
-const chatModel = new ChatOpenAI(
-
-    {
-        azureOpenAIApiDeploymentName: process.env.AZURE_OPENAI_API_CHAT_DEPLOYMENT_NAME,
-        azureOpenAIApiInstanceName: process.env.AZURE_OPENAI_API_INSTANCE_NAME,
-        azureOpenAIApiKey: process.env.AZURE_OPENAI_API_KEY,
-        azureOpenAIApiVersion: process.env.AZURE_OPENAI_API_CHAT_VERSION,
-        model: "gpt-4o"
-    }
-);
+// const chatModel = new ChatOpenAI(
+//     {
+//         azureOpenAIApiDeploymentName: process.env.AZURE_OPENAI_API_CHAT_DEPLOYMENT_NAME,
+//         azureOpenAIApiInstanceName: process.env.AZURE_OPENAI_API_INSTANCE_NAME,
+//         azureOpenAIApiKey: process.env.AZURE_OPENAI_API_KEY,
+//         azureOpenAIApiVersion: process.env.AZURE_OPENAI_API_CHAT_VERSION,
+//         model: "gpt-4o"
+//     }
+// );
 
 
 export async function generate(input: string) {
@@ -116,11 +110,8 @@ async function combineChatAndEvents(ticketId: string, type: 'latest' | 'complete
                 if (event.type === 'USER_TO_AI') {
                     result += `event: User to AI  message: ${event.USER_TO_AI?.message}\n ######### \n`;
                 }
-                if (event.type === 'ESCALATED') {
-                    result += `event: Ticket Escalated to Human Operator }\n ######### \n`;
-                }
+                result += `event: Ticket Escalated to Human Operator }\n ######### \n`;
             }
-
         }
     }
 
