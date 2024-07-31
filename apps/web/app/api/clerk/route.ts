@@ -1,5 +1,5 @@
 import { clerkClient } from "@clerk/nextjs/server"
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import db from "../../../lib/db"
 
 export default async function POST(req: NextRequest){
@@ -17,4 +17,5 @@ export default async function POST(req: NextRequest){
     //         role
     //     }
     // })
+    return NextResponse.json({message: "success"})
 }
