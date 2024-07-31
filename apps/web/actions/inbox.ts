@@ -43,12 +43,12 @@ export async function updateAssignee(id: string, assigneeId: string, by: string,
     let byName;
     if (assigneeId === "Unassigned") {
         await db.ticket.update({
-            where:{
+            where: {
                 id: id
             },
-            data:{
+            data: {
                 assigneeId: null,
-                status:'unassigned'
+                status: 'unassigned'
             }
         })
         console.log(`Unassigning ticket ${id}`);
@@ -188,7 +188,55 @@ export async function getEscTicketWithStatus(shopDomain: string, status: string,
     })
     return { total: total, currentTickets: escalatedTicket }
 }
-
+export async function getEscTicketWithStatusandId(shopDomain: string, status: string, offset: number, count: number, userId: string) {
+    console.log(`getEscTicketWithStatus: ${shopDomain} ${status} ${offset} ${count}`);
+    const escalatedTicket = await db.ticket.findMany({
+        where: {
+            shopDomain: shopDomain,
+            status: status,
+            assigneeId: userId
+        },
+        skip: offset,
+        take: count,
+        orderBy: {
+            createdAt: 'desc',
+        },
+        select: {
+            id: true,
+            events: {
+                orderBy: { createdAt: 'desc' },
+                select: {
+                    type: true,
+                    createdAt: true,
+                    ESCALATED: true,
+                    EMAIL_RECEIVED: {
+                        select: {
+                            Email: true
+                        }
+                    },
+                    EMAIL_SENT: {
+                        select: {
+                            Email: true
+                        }
+                    },
+                },
+            }
+        }
+    });
+    const total = await db.ticket.count({
+        where: {
+            shopDomain: shopDomain,
+            status: status,
+            assigneeId: userId,
+            events: {
+                some: {
+                    type: 'ESCALATED'
+                }
+            }
+        }
+    })
+    return { total: total, currentTickets: escalatedTicket }
+}
 export async function getDisplayID(id: string) {
 
     const ticket = await db.ticket.findUnique({

@@ -5,7 +5,7 @@ import { Pagination, Skeleton } from "@nextui-org/react";
 import Link from 'next/link';
 import Card from './Card';
 import { useRouter } from 'next/navigation';
-import { getEscTicketWithStatus } from '../../../../actions/inbox';
+import { getEscTicketWithStatus, getEscTicketWithStatusandId } from '../../../../actions/inbox';
 
 export default function ChatList({ status }: { status: string }) {
     const { user, isLoaded } = useUser();
@@ -76,10 +76,16 @@ export default function ChatList({ status }: { status: string }) {
     useEffect(() => {
         const fetchChats = async () => {
             console.log("will call function after")
-            const { total, currentTickets } = await getEscTicketWithStatus(user?.publicMetadata.shopDomain as string, status, (page - 1) * totalInSingle, totalInSingle)
-            setTotal(total)
-            setChats(currentTickets)
-            console.log(currentTickets)
+            if (status === 'Unassigned') {
+                const { total, currentTickets } = await getEscTicketWithStatus(user?.publicMetadata.shopDomain as string, status, (page - 1) * totalInSingle, totalInSingle)
+                setTotal(total)
+                setChats(currentTickets)
+            }
+            else {
+                const { total, currentTickets } = await getEscTicketWithStatusandId(user?.publicMetadata.shopDomain as string, status, (page - 1) * totalInSingle, totalInSingle, user?.id as string)
+                setTotal(total)
+                setChats(currentTickets)
+            }
         }
         fetchChats();
     }, [page, status]);
