@@ -9,14 +9,25 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../components/ui/select"
+import { useState } from "react"
+import { useUser } from "@clerk/nextjs"
 
 export default function AssignedTo({ id, assigneeId, shopDomain }: { id: string, shopDomain: string, assigneeId: string }) {
+    const {user,isLoaded} = useUser()
+    if(!isLoaded) return null
+    const [currassigneeId,setAssigneeId] = useState('')
+    const handleChange = (value: string) => {
+        console.log(`value: ${value}`)
+        setAssigneeId(value)
+        updateAssignee(id, value, user?.id as string, shopDomain)
+    }
     const { data, isLoading } = useSWR(
         `${shopDomain}`,
         getUsers)
     if (isLoading) {
         return null
     }
+    
     console.log(`assigneeId: ${assigneeId}`)
     const modifiedData = [{ title: "Unassigned", key: "Unassigned", disabled: false }]
     console.log(data)
@@ -26,8 +37,9 @@ export default function AssignedTo({ id, assigneeId, shopDomain }: { id: string,
         modifiedData.push({ title: `${user.firstName} ${user.lastName}`, key: user.id, disabled: !user.available })
     })
     console.log(modifiedData)
+   
     return (
-        <Select value={assigneeId}>
+        <Select onValueChange={handleChange} value={currassigneeId || assigneeId}>
             <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Assignee" />
             </SelectTrigger>

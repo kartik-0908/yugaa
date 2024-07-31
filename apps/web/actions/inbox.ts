@@ -1,9 +1,7 @@
 "use server"
 
 import db from "../lib/db";
-import { randomUUID } from "crypto";
 import { pushAdminNotification, pushIndividualNoti } from "../lib/pubSub";
-import { string } from "zod";
 
 
 export async function changeOperatorAvailability(userId: string[]) {
@@ -43,6 +41,7 @@ export async function updateOperatorAvailability(userId: string, available: bool
 
 export async function updateAssignee(id: string, assigneeId: string, by: string, shopDomain: string) {
     let assigneeName;
+    let byName;
     await db.$transaction(async (tx) => {
         const res = await tx.ticket.update({
             where: {
@@ -58,7 +57,7 @@ export async function updateAssignee(id: string, assigneeId: string, by: string,
             }
         })
         assigneeName = resp?.firstName + " " + resp?.lastName;
-        await tx.ticketEvents.create({
+        const result = await tx.ticketEvents.create({
             data: {
                 ticketId: id,
                 type: 'ASSIGNE_CHANGED',
@@ -68,12 +67,19 @@ export async function updateAssignee(id: string, assigneeId: string, by: string,
                         byid: by
                     }
                 }
-
+            },
+            include:{
+                ASSIGNE_CHANGED: {
+                    include:{
+                        by: true
+                    }
+                }
             }
         })
+        byName = result.ASSIGNE_CHANGED?.by.firstName
     })
-    await pushAdminNotification(shopDomain, "Assignee Changed", `The assignee for ticket ${id} has been changed to ${assigneeName} by ${by}`)
-    await pushIndividualNoti(assigneeId, "Assignee Changed", `You have been assigned to ticket ${id} by ${by}`)
+    await pushAdminNotification(shopDomain, "Assignee Changed", `The assignee for ticket ${id} has been changed to ${assigneeName} by ${byName}`)
+    await pushIndividualNoti(assigneeId, "Assignee Changed", `You have been assigned to ticket ${id} by ${byName}`)
 }
 
 export async function fetchTicketEventsbyId(id: string) {
