@@ -15,6 +15,7 @@ export default function MembersComponent({ member, admin, users }: any) {
     const [members, setMembers] = useState<any[]>([]);
     const [showRemoveModal, setShowRemoveModal] = useState(false);
     const [memberToRemove, setMemberToRemove] = useState<number | null>(null);
+    const [memberToRemove2, setMemberToRemove2] = useState<string>('');
     const [adminInviteLink, setAdminInviteLink] = useState<string>("");
     const [memberInviteLink, setMemberInviteLink] = useState<string>("");
 
@@ -62,14 +63,19 @@ export default function MembersComponent({ member, admin, users }: any) {
 
     };
 
-    const handleRemoveMember = (index: number) => {
+    const handleRemoveMember = (index: number,id: string) => {
         setMemberToRemove(index);
+        setMemberToRemove2(id)
         setShowRemoveModal(true);
     };
 
-    const confirmRemoveMember = () => {
+    const confirmRemoveMember = async () => {
         if (memberToRemove !== null) {
             const updatedMembers = members.filter((_, i) => i !== memberToRemove);
+            console.log(memberToRemove2)
+            await axios.post('/api/clerk/delete-user',{
+                id: memberToRemove2
+            })
             setMembers(updatedMembers);
             setShowRemoveModal(false);
             setMemberToRemove(null);
@@ -158,7 +164,7 @@ export default function MembersComponent({ member, admin, users }: any) {
                                         color={member.role === "admin" ? "default" : "danger"}
                                         className={`px-4 py-2 ${member.role === "admin" ? "text-black" : "text-white hover:bg-red-700"}`}
                                         disabled={member.role === "Admin"}
-                                        onClick={() => handleRemoveMember(index)}
+                                        onClick={() => handleRemoveMember(index, member.id)}
                                     >
                                         Remove
                                     </Button>
