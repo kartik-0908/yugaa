@@ -53,7 +53,7 @@ router.post('/', upload.any(), async (req: any, res: any) => {
         const newEmail = await db.email.create({
             data: {
                 subject: body.subject,
-                text: body.text,
+                text: body.html,
                 from: body.from,
                 to: body.to,
             }
