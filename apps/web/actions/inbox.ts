@@ -37,6 +37,16 @@ export async function updateOperatorAvailability(userId: string, available: bool
 export async function updateAssignee(id: string, assigneeId: string, by: string, shopDomain: string) {
     let assigneeName;
     let byName;
+    let displayId;
+    const ticket = await db.ticket.findUnique({
+        where: {
+            id: id
+        },
+        select: {
+            displayId: true
+        }
+    })
+    displayId = ticket?.displayId
     const user = await db.user.findUnique({
         where: {
             id: assigneeId
@@ -89,8 +99,8 @@ export async function updateAssignee(id: string, assigneeId: string, by: string,
                 },
             })
         })
-        await pushAdminNotification(shopDomain, "Assignee Changed", `The assignee for ticket ${id} has been changed to ${assigneeName} by ${byName}`)
-        await pushIndividualNoti(assigneeId, "Assignee Changed", `You have been assigned to ticket ${id} by ${byName}`)
+        await pushAdminNotification(shopDomain, "Assignee Changed", `The assignee for ticket ${displayId} has been changed to ${assigneeName} by ${byName}`)
+        await pushIndividualNoti(assigneeId, "Assignee Changed", `You have been assigned to ticket ${displayId} by ${byName}`)
     }
 
 }
