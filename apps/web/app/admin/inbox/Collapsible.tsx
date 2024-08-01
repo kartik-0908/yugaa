@@ -15,6 +15,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../../../components/ui/select';
 import EmailRecCard from './unassigned/[id]/EmailRecCard';
 import { Spinner } from '@nextui-org/react';
+import AiCard2 from './unassigned/[id]/AiCard2';
 
 const RightPanelToggle = ({ id }: { id: string }) => {
     const { user, isLoaded } = useUser();
@@ -252,7 +253,7 @@ const RightPanelToggle = ({ id }: { id: string }) => {
                 )
             case 'EMAIL_SENT':
                 return (
-                    <UserCard
+                    <AiCard2
                         message={event.EMAIL_SENT.Email.text}
                         time={formatDate(event.createdAt)}
                         key={event.id}
@@ -273,7 +274,8 @@ const RightPanelToggle = ({ id }: { id: string }) => {
         }
     };
     async function handleMessageSend(message: string, status: string) {
-        setEvents([...events, { type: 'AI_TO_USER', AI_TO_USER: { message }, createdAt: new Date() }]);
+        console.log(message)
+        setEvents([...events, { type: 'EMAIL_SENT', EMAIL_SENT: { Email:{text: message} }, createdAt: new Date() }]);
         console.log(message)
     }
     async function aiChatassistance(message: string) {
