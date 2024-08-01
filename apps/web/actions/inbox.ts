@@ -212,6 +212,11 @@ export async function getEscTicketWithStatusandId(shopDomain: string, status: st
         },
         select: {
             id: true,
+            displayId: true,
+            status: true,
+            subject: true,
+            userEmail: true,
+            userName: true,
             events: {
                 orderBy: { createdAt: 'desc' },
                 select: {
