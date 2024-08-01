@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Pagination, Skeleton } from "@nextui-org/react";
 import Link from 'next/link';
-import Card from './Card';
 import { useRouter } from 'next/navigation';
 import { getEscTicketWithStatus, getEscTicketWithStatusandId } from '../../../../actions/inbox';
+import Card from '../../../admin/inbox/unassigned/Card';
 
 export default function ChatList({ status }: { status: string }) {
     const { user, isLoaded } = useUser();

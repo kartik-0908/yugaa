@@ -27,7 +27,7 @@ export function Answered({ start, end }: { start: string, end: string }) {
     const { data, isLoading, error } = useSWR(
         { shopDomain: user?.publicMetadata.shopDomain, start, end, type: "answered" },
         getansweredAiMessagesCount, {
-        refreshInterval: 1000 * 60 * 10,
+        refreshInterval: 1000 * 2,
         keepPreviousData: true
 
     }
@@ -74,7 +74,7 @@ export function UnAnswered({ start, end }: { start: string, end: string }) {
     const { data, isLoading, error } = useSWR(
         { shopDomain: user?.publicMetadata.shopDomain, start, end, type: "unanswered" },
         getUnansweredAiMessagesCount, {
-        refreshInterval: 1000 * 60 * 10,
+        refreshInterval: 1000 * 2,
         keepPreviousData: true
 
     }
@@ -115,7 +115,7 @@ export function TimeSaved({ start, end }: { start: string, end: string }) {
     const { data, isLoading, error } = useSWR(
         `${process.env.NEXT_PUBLIC_API_URL}/v1/admin/count-ai-tickets?shop=${user?.publicMetadata.shopDomain}&start=${start}&end=${end}`,
         fetcher, {
-        refreshInterval: 1000 * 60 * 10,
+        refreshInterval: 1000 * 2,
         keepPreviousData: true
 
     }
@@ -192,7 +192,7 @@ export function AverageSession({ start, end }: { start: string, end: string }) {
     const { data, isLoading, error } = useSWR(
         `${process.env.NEXT_PUBLIC_API_URL}/v1/admin/avg-session?shop=${user?.publicMetadata.shopDomain}&start=${start}&end=${end}`,
         fetcher, {
-        refreshInterval: 1000 * 60 * 10,
+        refreshInterval: 1000 * 2,
         keepPreviousData: true
 
     }
@@ -262,7 +262,7 @@ export function TransferRate({ start, end, users }: { start: string, end: string
     const { data, isLoading, error } = useSWR(
         JSON.stringify(payload),
         getTransferRate, {
-        refreshInterval: 1000 * 60 * 10,
+        refreshInterval: 1000 * 2,
         keepPreviousData: true
 
     }
@@ -280,7 +280,7 @@ export function TransferRate({ start, end, users }: { start: string, end: string
         <Card className="">
             <CardHeader className="flex justify-between items-center">
                 <div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="30"
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30"
                         height="32" viewBox="0 0 24 24"><title>account-arrow-left-outline</title><path d="M17 18H21V16H17V14L14 17L17 20V18M11 4C8.8 4 7 5.8 7 8S8.8 12 11 12 15 10.2 15 8 13.2 4 11 4M11 6C12.1 6 13 6.9 13 8S12.1 10 11 10 9 9.1 9 8 9.9 6 11 6M11 13C8.3 13 3 14.3 3 17V20H12.5C12.2 19.4 12.1 18.8 12 18.1H4.9V17C4.9 16.4 8 14.9 11 14.9C11.5 14.9 12 15 12.5 15C12.8 14.4 13.1 13.8 13.6 13.3C12.6 13.1 11.7 13 11 13" /></svg>
                 </div>
                 <div>
@@ -302,7 +302,7 @@ export function FcrPercentage({ start, end, users }: { start: string, end: strin
         end: end,
         users: users
     }
-    const { data, isLoading, error } = useSWR(JSON.stringify(payload), getFcrPercentage, { refreshInterval: 1000 * 60 * 10, keepPreviousData: true })
+    const { data, isLoading, error } = useSWR(JSON.stringify(payload), getFcrPercentage, { refreshInterval: 1000 * 2, keepPreviousData: true })
     if (isLoading) {
         return (
             <SkeletonComp />
@@ -316,7 +316,7 @@ export function FcrPercentage({ start, end, users }: { start: string, end: strin
         <Card className="">
             <CardHeader className="flex justify-between items-center">
                 <div>
-                    <svg xmlns="http://www.w3.org/2000/svg"  width="30"
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30"
                         height="32" viewBox="0 0 24 24"><title>bullseye-arrow</title><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,10.84 21.79,9.69 21.39,8.61L19.79,10.21C19.93,10.8 20,11.4 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.6,4 13.2,4.07 13.79,4.21L15.4,2.6C14.31,2.21 13.16,2 12,2M19,2L15,6V7.5L12.45,10.05C12.3,10 12.15,10 12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12C14,11.85 14,11.7 13.95,11.55L16.5,9H18L22,5H19V2M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12H16A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8V6Z" /></svg>
                 </div>
                 <div>
@@ -338,7 +338,7 @@ export function MissedConv({ start, end, users }: { start: string, end: string, 
         end: end,
         users: users
     }
-    const { data, isLoading, error } = useSWR(JSON.stringify(payload), getMissed, { refreshInterval: 1000 * 60 * 10, keepPreviousData: true })
+    const { data, isLoading, error } = useSWR(JSON.stringify(payload), getMissed, { refreshInterval: 1000 * 2, keepPreviousData: true })
     if (isLoading) {
         return (
             <SkeletonComp />
