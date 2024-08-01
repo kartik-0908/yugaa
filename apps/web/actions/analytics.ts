@@ -154,7 +154,7 @@ export async function getQueriesbyCategory(data: string): Promise<number[]> {
 
 export async function getUserWorkload(data: string) {
     const { users, start, end } = JSON.parse(data);
-
+    console.log(start, end)
     const workloadData = await db.ticket.groupBy({
         by: ['assigneeId'],
         _count: {
@@ -170,6 +170,8 @@ export async function getUserWorkload(data: string) {
             }
         }
     });
+
+    console.log(workloadData)
 
     const userDetails = await db.user.findMany({
         where: {
@@ -204,6 +206,7 @@ export async function getUserWorkload(data: string) {
             });
         }
     });
+
 
     return result;
 }

@@ -17,7 +17,7 @@ const WorkloadDistribution = ({ start, end, users }: { start: string, end: strin
   const { data, isLoading, error } = useSWR(
     JSON.stringify(payload),
     getUserWorkload, {
-    refreshInterval: 1000 * 60 * 60,
+    refreshInterval: 1000,
     keepPreviousData: true
 
   }
