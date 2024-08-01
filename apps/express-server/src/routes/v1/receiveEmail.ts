@@ -56,6 +56,10 @@ router.post('/', upload.any(), async (req: any, res: any) => {
         const ticket = await db.ticket.findUnique({
             where: {
                 displayId: parseInt(displayId)
+            },
+            select:{
+                status: true,
+                id: true,
             }
         })
         if (ticket && ticket.id) {
@@ -71,6 +75,17 @@ router.post('/', upload.any(), async (req: any, res: any) => {
                 }
             })
         }
+        if(ticket?.status === 'Resolved'){
+            await db.ticket.update({
+                where: {
+                    displayId: parseInt(displayId)
+                },
+                data: {
+                    status: 'In Progress'
+                }
+            })
+        }
+        
         // console.log("attachments: ", body.attachments);
         // console.log("attachment-info: ", body['attachment-info']);
         // console.log("content-ids: ", body['content-ids']);
