@@ -73,8 +73,8 @@ export default function RestrictOperator() {
             if (user?.publicMetadata.shopDomain) {
                 const res = await getUsers(`${user.publicMetadata.shopDomain}`);
                 setData(res);
-                const initialSelected = new Set(res.filter(user => user.available).map(user => user.id));
-                const initialUnselected = new Set(res.filter(user => !user.available).map(user => user.id));
+                const initialSelected = new Set(res.filter(user => !user.available).map(user => user.id));
+                const initialUnselected = new Set(res.filter(user => user.available).map(user => user.id));
                 setSelectedItems(initialSelected);
                 setUnselectedItems(initialUnselected);
                 form.setValue('selectedItems', Array.from(initialSelected));
