@@ -252,7 +252,7 @@ const RightPanelToggle = ({ id }: { id: string }) => {
                 )
             case 'EMAIL_SENT':
                 return (
-                    <AiCard
+                    <UserCard
                         message={event.EMAIL_SENT.Email.text}
                         time={formatDate(event.createdAt)}
                         key={event.id}
