@@ -31,7 +31,7 @@ export default function AssignedTo({ id, assigneeId, shopDomain, userId }: { id:
 
     data?.map((user: any) => {
         console.log(`user.available: ${user.available}`)
-        modifiedData.push({ title: `${user.firstName} ${user.lastName}`, key: user.id, disabled: !user.available })
+        modifiedData.push({ title: `${user.firstName} ${user.lastName}`, key: user.id, disabled: user.available })
     })
     console.log(modifiedData)
 

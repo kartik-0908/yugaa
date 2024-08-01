@@ -28,7 +28,7 @@ const DropdownNotification = () => {
     JSON.stringify(payload),
     fetchNotifications,
     {
-      refreshInterval: 1000,
+      refreshInterval: 1000*10,
       onSuccess: (data) => {
         setNotifications(data);
         setBadgeValue(data.filter(noti => !noti.isRead).length);
@@ -45,7 +45,6 @@ const DropdownNotification = () => {
   }
   const handleMarkAsRead = async (notificationId: string) => {
     try {
-      await markNotificationAsRead(notificationId);
       setNotifications((prevNotifications: any[]) =>
         prevNotifications.map(notification =>
           notification.id === notificationId
@@ -54,6 +53,8 @@ const DropdownNotification = () => {
         )
       );
       setBadgeValue(prevValue => Math.max(0, prevValue - 1));
+      await markNotificationAsRead(notificationId);
+
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }

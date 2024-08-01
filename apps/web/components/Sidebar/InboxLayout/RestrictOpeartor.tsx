@@ -59,10 +59,10 @@ export default function RestrictOperator() {
     };
     function onSubmit(data: z.infer<typeof FormSchema>) {
         selectedItems.forEach(async (userId: string) => {
-            if(userId)await updateOperatorAvailability(userId, true);
+            if(userId)await updateOperatorAvailability(userId, false);
         });
         unselectedItems.forEach(async (userId: string) => {
-            if(userId)await updateOperatorAvailability(userId, false);
+            if(userId)await updateOperatorAvailability(userId, true);
         });
         setToast({ text: 'Changes Saved'})
 
