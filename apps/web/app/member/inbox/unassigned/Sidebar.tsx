@@ -40,7 +40,7 @@ export default function ChatList({ status }: { status: string }) {
     };
     const getLatestEventInfo = (chat: any) => {
         if (!chat.events || chat.events.length === 0) {
-            return { message: 'No events' };
+            return   'No events' ;
         }
         const latestEvent = chat.events[0];
         let message = latestEvent.type;

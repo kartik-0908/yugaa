@@ -217,6 +217,11 @@ export async function getEscTicketWithStatusandId(shopDomain: string, status: st
                 select: {
                     type: true,
                     createdAt: true,
+                    DISPLAY_TAG: {
+                        select: {
+                            message: true,
+                        }
+                    },
                     EMAIL_RECEIVED: {
                         select: {
                             Email: true
@@ -227,6 +232,8 @@ export async function getEscTicketWithStatusandId(shopDomain: string, status: st
                             Email: true
                         }
                     },
+                    AI_TO_USER: true,
+                    USER_TO_AI: true,
                 },
             }
         }
