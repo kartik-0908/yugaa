@@ -78,7 +78,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
     }, [])
     return (
         <div className="h-full w-full">
-            <div className='w-full gap-2 flex flex-row'>
+            {/* <div className='w-full gap-2 flex flex-row'>
                 <div>
                     <label className="text-sm pl-2">Send message from:</label>
                     <select defaultValue={currentSendEmail}
@@ -99,7 +99,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ emails, customerEmail, ticket
                     {customerEmail}
                 </div>
 
-            </div>
+            </div> */}
             <div className="flex w-full mt-2">
                 <div className="w-full">
                     <Textarea
