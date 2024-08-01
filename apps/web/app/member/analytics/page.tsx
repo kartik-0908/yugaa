@@ -32,7 +32,7 @@ export default function Analytics() {
     end: today(getLocalTimeZone()),
   });
   console.log(value)
-  const [users, setUsers] = useState<React.Key[]>([user?.id as string]);
+  const [users] = useState<React.Key[]>([user?.id as string]);
 
   const { data, isLoading } = useSWR(
     `${user?.publicMetadata.shopDomain}`,

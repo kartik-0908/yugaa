@@ -18,7 +18,7 @@ const PriorityBar = ({ start, end, users }: { start: string, end: string, users:
   const { data, isLoading, error } = useSWR(
     JSON.stringify(payload),
     getQueriesbyPriority, {
-    refreshInterval: 1000 * 60 * 60,
+    refreshInterval: 1000 * 2,
     keepPreviousData: true
   }
   )
