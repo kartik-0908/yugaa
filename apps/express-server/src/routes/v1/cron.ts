@@ -1,3 +1,6 @@
+require("dotenv").config();
+import { MongoClient } from "mongodb";
+const client = new MongoClient(process.env.MONGODB_ATLAS_URI || "");
 import { Router } from 'express';
 import { db } from '../../common/db';
 import { pubslishDoc, pubslishUrl } from '../../common/pubsubPublisher';
@@ -7,9 +10,7 @@ const router = Router();
 router.use(express.json())
 
 router.get('/kb', async (req, res) => {
-
     console.log("inside cron route")
-
     const pendingURLS = await db.url.findMany({
         where: {
             status: "pending",
@@ -107,6 +108,52 @@ router.get('/delete-tickets', async (req, res) => {
 
 
     return res.json({ "message": "ok" });
+})
+
+router.get('/clean-mongo', async (req, res) => {
+    try {
+        await client.connect();
+        const collection = client.db(process.env.MONGO_DB_NAME).collection(process.env.MONGO_DB_COLLECTION || "");
+
+        // Find documents with duplicate embeddings
+        const duplicates = await collection.aggregate([
+            {
+                $group: {
+                    _id: '$embedding',
+                    count: { $sum: 1 },
+                    docs: { $push: '$_id' }
+                }
+            },
+            {
+                $match: {
+                    count: { $gt: 1 }
+                }
+            }
+        ]).toArray();
+
+        let deletedCount = 0;
+
+        for (const group of duplicates) {
+            const [keep, ...remove] = group.docs;
+            const result = await collection.deleteMany({
+                _id: { $in: remove }
+            });
+            deletedCount += result.deletedCount;
+        }
+
+        res.json({
+            success: true,
+            message: `Deleted ${deletedCount} duplicate documents.`
+        });
+    } catch (error) {
+        console.error('Error deleting duplicates:', error);
+        res.status(500).json({
+            success: false,
+            message: 'An error occurred while deleting duplicates.'
+        });
+    } finally {
+        await client.close();
+    }
 })
 
 
