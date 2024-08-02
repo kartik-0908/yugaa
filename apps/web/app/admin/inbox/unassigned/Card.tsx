@@ -22,10 +22,10 @@ function formatTimeDifference(timestamp: string): string {
 }
 
 function truncateString(str: string, numWords: number = 5): string {
-    if(str === null || str === undefined) {
+    if (str === null || str === undefined) {
         return "";
     }
-    if(str.length <= numWords) {
+    if (str.length <= numWords) {
         return str;
     }
     const words = str.split(/\s+/);
@@ -40,7 +40,7 @@ function truncateString(str: string, numWords: number = 5): string {
 
 
 export default function Card({ id, time, name, messages }: { id: string, messages: string, time: string, name: string }) {
-    const  pathname = usePathname()
+    const pathname = usePathname()
     return (
         <div className={`flex flex-col p-4 border-b-[1px] border-b-[#D3D3D3] ${pathname.includes(id) ? "bg-gray-100" : ""}`}>
             <div className="flex justify-between gap-2">
