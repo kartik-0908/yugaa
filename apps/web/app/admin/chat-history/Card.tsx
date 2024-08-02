@@ -1,5 +1,6 @@
 import { Avatar } from "@nextui-org/react";
 import { time } from "console";
+import { usePathname } from "next/navigation";
 
 function formatTimeDifference(timestamp: string): string {
     const now: Date = new Date();
@@ -48,9 +49,9 @@ function truncateString(str: string, numWords: number = 5): string {
 
 
 export default function Card({ id, messages, sender, timestamp }: any) {
-    console.log(messages)
+    const pathname = usePathname();
     return (
-        <div className="flex flex-col p-4 border-b-[1px] border-b-[#D3D3D3]">
+        <div className={`flex flex-col p-4 border-b-[1px] border-b-[#D3D3D3] hover:bg-gray-100 ${pathname.includes(id) ? "bg-gray-200 hover:bg-gray-200" : ""}`}>
             <div className="flex justify-between">
                 <div className="flex items-center">
                     <Avatar color="warning" showFallback src='https://images.unsplash.com/broken' />
