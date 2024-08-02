@@ -113,13 +113,12 @@ export function TimeSaved({ start, end }: { start: string, end: string }) {
         )
     }
     const { data, isLoading, error } = useSWR(
-        `${process.env.NEXT_PUBLIC_API_URL}/v1/admin/count-ai-tickets?shop=${user?.publicMetadata.shopDomain}&start=${start}&end=${end}`,
-        fetcher, {
+        { shopDomain: user?.publicMetadata.shopDomain, start, end, type: "answered" },
+        getansweredAiMessagesCount, {
         refreshInterval: 1000 * 2,
         keepPreviousData: true
 
-    }
-    )
+    })
     if (isLoading) {
         return (
             <SkeletonComp />
@@ -171,7 +170,7 @@ export function TimeSaved({ start, end }: { start: string, end: string }) {
                     </svg>
                 </div>
                 <div>
-                    <p className="text-3xl text-default-500 font-bold">{formatDuration(data.count)}</p>
+                    <p className="text-3xl text-default-500 font-bold">{data === undefined ? formatDuration(0): formatDuration(data * 60 )}</p>
                 </div>
             </CardHeader>
             <CardBody>
