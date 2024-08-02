@@ -45,6 +45,7 @@ router.post('/', async function (req, res) {
         console.log(evt.data)
         const { id } = evt.data;
         const { ...attributes } = evt.data;
+        console.log(attributes)
         // Handle the webhooks
         const eventType = evt.type;
         if (eventType === 'user.updated' || eventType === 'user.created') {
