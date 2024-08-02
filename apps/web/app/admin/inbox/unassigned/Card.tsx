@@ -1,3 +1,5 @@
+import { usePathname } from "next/navigation";
+
 function formatTimeDifference(timestamp: string): string {
     const now: Date = new Date();
     const messageTime: Date = new Date(timestamp);
@@ -38,8 +40,9 @@ function truncateString(str: string, numWords: number = 5): string {
 
 
 export default function Card({ id, time, name, messages }: { id: string, messages: string, time: string, name: string }) {
+    const  pathname = usePathname()
     return (
-        <div className="flex flex-col p-4 border-b-[1px] border-b-[#D3D3D3]">
+        <div className={`flex flex-col p-4 border-b-[1px] border-b-[#D3D3D3] ${pathname.includes(id) ? "bg-gray-100" : ""}`}>
             <div className="flex justify-between gap-2">
                 <div className="flex items-center">
                     <div className="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-red rounded-full dark:bg-gray-600">
