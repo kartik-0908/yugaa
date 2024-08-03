@@ -5,8 +5,10 @@ import { Webhook, WebhookRequiredHeaders } from 'svix';
 import { IncomingHttpHeaders } from 'http';
 import { db } from '../../common/db';
 import { pushAdminNotification } from '../../common/pubsubPublisher';
+const sgMail = require('@sendgrid/mail');
 
-type EventType = "user.created" | "user.updated" | "*";
+
+type EventType = "user.created" | "user.updated" | "email.created" | "*";
 
 type Event = {
     data: {
@@ -37,17 +39,41 @@ router.use(bodyParser.raw({ type: 'application/json' }))
 router.post('/', async function (req, res) {
     try {
         const payloadString = req.body.toString();
-        console.log(payloadString)
+        // console.log(payloadString)
         const svixHeaders = req.headers;
         console.log(process.env.CLERK_WEBHOOK_SECRET_KEY)
         const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET_KEY || "");
-        const evt: Event | null = wh.verify(payloadString, svixHeaders as IncomingHttpHeaders & WebhookRequiredHeaders) as Event;
+        const evt: any = wh.verify(payloadString, svixHeaders as IncomingHttpHeaders & WebhookRequiredHeaders) as Event;
         console.log(evt.data)
         const { id } = evt.data;
         const { ...attributes } = evt.data;
-        console.log(attributes)
-        // Handle the webhooks
+        // console.log(attributes)
         const eventType = evt.type;
+        if (eventType === 'email.created') {
+            sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+            const { body } = attributes;
+            const { body_plain } = attributes;
+            const { to_email_address } = attributes;
+            console.log(to_email_address)
+            const updatedBody = replaceInvitationText(body);
+            const updatedBodyPlain = replaceInvitationText(body_plain);
+            console.log(updatedBody)
+            console.log(updatedBodyPlain)
+            const msg = {
+                to: to_email_address,
+                from: "invite@yugaa.tech",
+                subject: "Invitation From Yugaa",
+                text: updatedBodyPlain,
+                html: updatedBody
+            };
+
+            try {
+                await sgMail.send(msg);
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        // Handle the webhooks
         if (eventType === 'user.updated' || eventType === 'user.created') {
             console.log(`User ${id} was ${eventType}`);
             const userData = {
@@ -87,8 +113,8 @@ router.post('/', async function (req, res) {
                         emailVerified: userData.emailVerified,
                     },
                 });
-                if(newUser.role === "member"){
-                    await pushAdminNotification(userData.shopDomain || "","New Operator Joined",`${newUser.firstName} ${newUser.lastName} has joined the app upon your invitation`)
+                if (newUser.role === "member") {
+                    await pushAdminNotification(userData.shopDomain || "", "New Operator Joined", `${newUser.firstName} ${newUser.lastName} has joined the app upon your invitation`)
                 }
                 console.log('User stored:', newUser);
             }
@@ -106,5 +132,11 @@ router.post('/', async function (req, res) {
 }
 );
 
+function replaceInvitationText(inputString: string): string {
+    const oldText: string = "Kartik Agarwal has invited you to join them on yugaa.";
+    const newText: string = "You have been invited to join Yugaa";
+
+    return inputString.replace(oldText, newText);
+}
 
 module.exports = router;
