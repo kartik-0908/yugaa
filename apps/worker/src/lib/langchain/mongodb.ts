@@ -21,6 +21,7 @@ export async function deleteContent(id: string) {
     if (document) {
         console.log(document);
         const result = await collection.deleteOne(query);
+        console.log(`Deleted ${result.deletedCount} document(s)`);
     }
 }
 
