@@ -18,14 +18,14 @@ export async function addContent(id: string, shopDomain: string, pageContent: st
 export async function deleteContent(id: string) {
     const collection = client.db(process.env.MONGO_DB_NAME).collection(process.env.MONGO_DB_COLLECTION || "");
     console.log(id)
-    const query = { [id]: id };
-    const document = await collection.findOne(query)
+    // const query = { [id]: id };
+    const document = await collection.deleteMany({id: id});
     console.log(document);
-    if (document) {
-        console.log(document);
-        const result = await collection.deleteOne(query);
-        console.log(`Deleted ${result.deletedCount} document(s)`);
-    }
+    // if (document) {
+    //     console.log(document);
+    //     const result = await collection.deleteOne(query);
+    //     console.log(`Deleted ${result.deletedCount} document(s)`);
+    // }
 }
 
 
